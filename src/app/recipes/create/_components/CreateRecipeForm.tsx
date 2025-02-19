@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useForm, SubmitHandler, Controller, useFieldArray } from 'react-hook-form';
 
 import { FileUpload } from '@/_components/ui/FileUpload';
@@ -15,7 +15,6 @@ import {
   DIFFICULTY_LEVELS,
   DifficultyLevel,
   DEFAULT_INGREDIENTS,
-  SUBCATEGORY_INGREDIENTS,
   Ingredient,
   MEASUREMENT_UNITS,
   ALL_INGREDIENTS,
@@ -67,13 +66,14 @@ export const CreateRecipeForm = () => {
     name: 'ingredients',
   });
 
-  const loadTemplateIngredients = (category: RecipeCategory, subcategory?: RecipeSubcategory) => {
-    if (subcategory && SUBCATEGORY_INGREDIENTS[subcategory]) {
-      setValue('ingredients', SUBCATEGORY_INGREDIENTS[subcategory]!);
-    } else {
-      setValue('ingredients', DEFAULT_INGREDIENTS[category]);
-    }
-  };
+  const loadTemplateIngredients = useCallback(
+    (category: RecipeCategory, subcategory?: RecipeSubcategory) => {
+      if (subcategory && DEFAULT_INGREDIENTS[category]) {
+        setValue('ingredients', DEFAULT_INGREDIENTS[category]!);
+      }
+    },
+    [setValue]
+  );
 
   const onSubmit: SubmitHandler<Inputs> = async data => {
     console.log(data);
@@ -118,7 +118,6 @@ export const CreateRecipeForm = () => {
   };
 
   const watchCategory = watch('category');
-  const watchSubcategory = watch('subcategory');
 
   useEffect(() => {
     if (watchCategory) {
@@ -127,16 +126,11 @@ export const CreateRecipeForm = () => {
       setValue('subcategory', defaultSubcategory);
       loadTemplateIngredients(watchCategory, defaultSubcategory);
     }
-  }, [watchCategory, setValue]);
-
-  useEffect(() => {
-    if (watchCategory && watchSubcategory) {
-      loadTemplateIngredients(watchCategory, watchSubcategory);
-    }
-  }, [watchSubcategory, watchCategory]);
+  }, [watchCategory, setValue, loadTemplateIngredients]);
 
   const handleIngredientSearch = (index: number, value: string) => {
     setSearchTerms(prev => ({ ...prev, [index]: value }));
+    setValue(`ingredients.${index}.name`, value);
     setOpenDropdown(index);
   };
 
@@ -156,7 +150,7 @@ export const CreateRecipeForm = () => {
         <input
           type="text"
           {...register('name', { required: true })}
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
           placeholder="Enter recipe name"
         />
         {errors.name && <p className="mt-2 text-sm text-red-600">Recipe name is required</p>}
@@ -169,7 +163,7 @@ export const CreateRecipeForm = () => {
         </label>
         <select
           {...register('category', { required: true })}
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
         >
           <option value="">Select category</option>
           {CATEGORY_OPTIONS.map(option => (
@@ -188,7 +182,7 @@ export const CreateRecipeForm = () => {
         </label>
         <select
           {...register('subcategory', { required: true })}
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
         >
           <option value="">Select subcategory</option>
           {SUBCATEGORY_OPTIONS[selectedCategory]?.map(option => (
@@ -208,7 +202,7 @@ export const CreateRecipeForm = () => {
         <textarea
           {...register('description')}
           rows={4}
-          className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500"
+          className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-base-500 focus:border-base-500"
           placeholder="Write your recipe description here..."
         />
       </div>
@@ -222,7 +216,7 @@ export const CreateRecipeForm = () => {
           <button
             type="button"
             onClick={() => append({ name: '', weight: '', unit: 'g' })}
-            className="inline-flex items-center px-3 py-1 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700"
+            className="inline-flex items-center px-3 py-1 text-sm font-medium text-white bg-base-600 rounded-lg hover:bg-base-700"
           >
             <Plus className="w-4 h-4 mr-1" />
             Add Ingredient
@@ -242,19 +236,19 @@ export const CreateRecipeForm = () => {
                 <div className="flex-1 relative">
                   <div className="flex items-center">
                     <input
-                      value={searchTerm}
+                      value={watch(`ingredients.${index}.name`) || searchTerm}
                       onChange={e => handleIngredientSearch(index, e.target.value)}
                       onFocus={() => setOpenDropdown(index)}
                       placeholder="Search ingredient..."
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
                     />
                     <Search className="w-4 h-4 absolute right-3 text-gray-400" />
                   </div>
                   {isDropdownOpen && searchTerm && (
                     <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
-                      {filteredIngredients.map(ingredient => (
+                      {filteredIngredients.map((ingredient, i) => (
                         <button
-                          key={ingredient}
+                          key={`${ingredient}-${i}`}
                           type="button"
                           className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm"
                           onClick={() => handleIngredientSelect(index, ingredient)}
@@ -274,20 +268,38 @@ export const CreateRecipeForm = () => {
                     {...register(`ingredients.${index}.weight` as const, { required: true })}
                     placeholder="Amount"
                     type="number"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
                   />
                 </div>
                 <div className="w-32">
-                  <select
-                    {...register(`ingredients.${index}.unit` as const, { required: true })}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                  >
-                    {Object.entries(MEASUREMENT_UNITS).map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
+                  <div className="inline-flex rounded-md shadow-sm">
+                    {Object.entries(MEASUREMENT_UNITS).map(([value, label], idx, arr) => (
+                      <label
+                        key={value}
+                        className={`
+                          relative inline-flex items-center cursor-pointer justify-center px-2.5 py-2 text-sm font-medium
+                          ${idx === 0 ? 'rounded-l-lg' : ''} 
+                          ${idx === arr.length - 1 ? 'rounded-r-lg' : ''}
+                          ${idx !== arr.length - 1 ? 'border-r' : ''}
+                          border border-gray-200
+                          ${
+                            watch(`ingredients.${index}.unit`) === value
+                              ? 'bg-base-600 text-white hover:bg-base-700 z-10'
+                              : 'bg-white text-gray-900 hover:bg-gray-50'
+                          }
+                          focus:z-10
+                        `}
+                      >
+                        <input
+                          type="radio"
+                          {...register(`ingredients.${index}.unit` as const, { required: true })}
+                          value={value}
+                          className="sr-only"
+                        />
+                        <span>{label}</span>
+                      </label>
                     ))}
-                  </select>
+                  </div>
                 </div>
                 <button
                   type="button"
@@ -316,7 +328,7 @@ export const CreateRecipeForm = () => {
             setValueAs: v => v.split('\n').filter(Boolean),
           })}
           rows={4}
-          className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500"
+          className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-base-500 focus:border-base-500"
           placeholder="Enter instructions, one step per line..."
         />
         {errors.instructions && (
@@ -333,7 +345,7 @@ export const CreateRecipeForm = () => {
           <input
             type="number"
             {...register('prep_time', { required: true, min: 0 })}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
           />
           {errors.prep_time && (
             <p className="mt-2 text-sm text-red-600">Valid prep time is required</p>
@@ -347,7 +359,7 @@ export const CreateRecipeForm = () => {
           <input
             type="number"
             {...register('cook_time', { required: true, min: 0 })}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
           />
           {errors.cook_time && (
             <p className="mt-2 text-sm text-red-600">Valid cook time is required</p>
@@ -361,7 +373,7 @@ export const CreateRecipeForm = () => {
           <input
             type="number"
             {...register('servings', { required: true, min: 1 })}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
           />
           {errors.servings && (
             <p className="mt-2 text-sm text-red-600">Valid number of servings is required</p>
@@ -376,7 +388,7 @@ export const CreateRecipeForm = () => {
         </label>
         <select
           {...register('difficulty', { required: true })}
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
         >
           <option value="">Select difficulty</option>
           {Object.entries(DIFFICULTY_LEVELS).map(([value, label]) => (
@@ -440,7 +452,7 @@ export const CreateRecipeForm = () => {
       <button
         type="submit"
         disabled={isLoading}
-        className="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800"
+        className="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-base-700 rounded-lg focus:ring-4 focus:ring-base-200 dark:focus:ring-base-900 hover:bg-base-800"
       >
         {isLoading ? (
           <>

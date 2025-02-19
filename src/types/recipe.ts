@@ -85,21 +85,11 @@ export type CategorySubcategoryMap = {
 // Measurement units
 export const MEASUREMENT_UNITS = {
   // Weight
-  g: 'grams',
-  kg: 'kilograms',
-  mg: 'milligrams',
-  oz: 'ounces',
-  lb: 'pounds',
+  g: 'g',
+  mg: 'mg',
   // Volume
-  ml: 'milliliters',
-  l: 'liters',
-  tsp: 'teaspoons',
-  tbsp: 'tablespoons',
-  cup: 'cups',
-  fl_oz: 'fluid ounces',
-  // Count
-  pcs: 'pieces',
-  whole: 'whole',
+  ml: 'ml',
+  l: 'l',
 } as const;
 
 export type MeasurementUnit = keyof typeof MEASUREMENT_UNITS;
@@ -170,35 +160,6 @@ export interface Recipe {
   metadata?: Record<string, unknown>;
 }
 
-// Default ingredient templates by subcategory
-export const SUBCATEGORY_INGREDIENTS: Partial<Record<RecipeSubcategory, Ingredient[]>> = {
-  sourdough: [
-    { name: 'Bread Flour', weight: '500', unit: 'g' },
-    { name: 'Active Sourdough Starter', weight: '150', unit: 'g' },
-    { name: 'Water', weight: '350', unit: 'ml' },
-    { name: 'Salt', weight: '10', unit: 'g' },
-  ],
-  'sweet.breads': [
-    { name: 'Bread Flour', weight: '500', unit: 'g' },
-    { name: 'Active Dry Yeast', weight: '7', unit: 'g' },
-    { name: 'Granulated Sugar', weight: '50', unit: 'g' },
-    { name: 'Butter', weight: '60', unit: 'g' },
-    { name: 'Whole Eggs', weight: '1', unit: 'whole' },
-    { name: 'Milk', weight: '240', unit: 'ml' },
-    { name: 'Salt', weight: '8', unit: 'g' },
-  ],
-  cookies: [
-    { name: 'All-Purpose Flour', weight: '250', unit: 'g' },
-    { name: 'Butter', weight: '115', unit: 'g' },
-    { name: 'Granulated Sugar', weight: '100', unit: 'g' },
-    { name: 'Brown Sugar', weight: '100', unit: 'g' },
-    { name: 'Whole Eggs', weight: '1', unit: 'whole' },
-    { name: 'Vanilla Extract', weight: '1', unit: 'tsp' },
-    { name: 'Baking Soda', weight: '1', unit: 'tsp' },
-    { name: 'Salt', weight: '1/4', unit: 'tsp' },
-  ],
-} as const;
-
 // Default ingredient templates by category (fallback if no subcategory template exists)
 export const DEFAULT_INGREDIENTS: Record<RecipeCategory, Ingredient[]> = {
   breads: [
@@ -212,7 +173,7 @@ export const DEFAULT_INGREDIENTS: Record<RecipeCategory, Ingredient[]> = {
     { name: 'All-Purpose Flour', weight: '250', unit: 'g' },
     { name: 'Granulated Sugar', weight: '200', unit: 'g' },
     { name: 'Butter', weight: '115', unit: 'g' },
-    { name: 'Whole Eggs', weight: '2', unit: 'whole' },
-    { name: 'Vanilla Extract', weight: '1', unit: 'tsp' },
+    { name: 'Whole Eggs', weight: '50', unit: 'g' },
+    { name: 'Vanilla Extract', weight: '1', unit: 'g' },
   ],
 } as const;
