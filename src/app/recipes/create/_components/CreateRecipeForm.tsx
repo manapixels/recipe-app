@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useForm, SubmitHandler, Controller } from 'react-hook-form';
+import { useForm, SubmitHandler, Controller, useFieldArray } from 'react-hook-form';
 
 import { FileUpload } from '@/_components/ui/FileUpload';
 import { useToast } from '@/_components/ui/Toasts/useToast';
@@ -14,16 +14,22 @@ import {
   SUBCATEGORY_OPTIONS,
   DIFFICULTY_LEVELS,
   DifficultyLevel,
+  DEFAULT_INGREDIENTS,
+  SUBCATEGORY_INGREDIENTS,
+  Ingredient,
+  MEASUREMENT_UNITS,
+  ALL_INGREDIENTS,
 } from '@/types/recipe';
 import Spinner from '@/_components/ui/Spinner';
 import { useRouter } from 'next/navigation';
+import { Plus, Trash2, Search } from 'lucide-react';
 
 type Inputs = {
   name: string;
   category: RecipeCategory;
   subcategory: RecipeSubcategory;
   description: string;
-  ingredients: string[];
+  ingredients: Ingredient[];
   instructions: string[];
   prep_time: number;
   cook_time: number;
@@ -40,6 +46,8 @@ export const CreateRecipeForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showErrorSummary, setShowErrorSummary] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<RecipeCategory>('sweets');
+  const [searchTerms, setSearchTerms] = useState<Record<number, string>>({});
+  const [openDropdown, setOpenDropdown] = useState<number | null>(null);
 
   const {
     register,
@@ -48,7 +56,24 @@ export const CreateRecipeForm = () => {
     watch,
     setValue,
     formState: { errors },
-  } = useForm<Inputs>();
+  } = useForm<Inputs>({
+    defaultValues: {
+      ingredients: [],
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'ingredients',
+  });
+
+  const loadTemplateIngredients = (category: RecipeCategory, subcategory?: RecipeSubcategory) => {
+    if (subcategory && SUBCATEGORY_INGREDIENTS[subcategory]) {
+      setValue('ingredients', SUBCATEGORY_INGREDIENTS[subcategory]!);
+    } else {
+      setValue('ingredients', DEFAULT_INGREDIENTS[category]);
+    }
+  };
 
   const onSubmit: SubmitHandler<Inputs> = async data => {
     console.log(data);
@@ -93,14 +118,33 @@ export const CreateRecipeForm = () => {
   };
 
   const watchCategory = watch('category');
+  const watchSubcategory = watch('subcategory');
 
   useEffect(() => {
     if (watchCategory) {
       setSelectedCategory(watchCategory);
-      // Reset subcategory when category changes
-      setValue('subcategory', SUBCATEGORY_OPTIONS[watchCategory][0].value as RecipeSubcategory);
+      const defaultSubcategory = SUBCATEGORY_OPTIONS[watchCategory][0].value as RecipeSubcategory;
+      setValue('subcategory', defaultSubcategory);
+      loadTemplateIngredients(watchCategory, defaultSubcategory);
     }
   }, [watchCategory, setValue]);
+
+  useEffect(() => {
+    if (watchCategory && watchSubcategory) {
+      loadTemplateIngredients(watchCategory, watchSubcategory);
+    }
+  }, [watchSubcategory, watchCategory]);
+
+  const handleIngredientSearch = (index: number, value: string) => {
+    setSearchTerms(prev => ({ ...prev, [index]: value }));
+    setOpenDropdown(index);
+  };
+
+  const handleIngredientSelect = (index: number, ingredient: string) => {
+    setValue(`ingredients.${index}.name`, ingredient);
+    setSearchTerms(prev => ({ ...prev, [index]: ingredient }));
+    setOpenDropdown(null);
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -170,21 +214,94 @@ export const CreateRecipeForm = () => {
       </div>
 
       {/* Ingredients */}
-      <div>
-        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-          Ingredients (one per line)
-        </label>
-        <textarea
-          {...register('ingredients', {
-            required: true,
-            setValueAs: v => v.split('\n').filter(Boolean),
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <label className="block text-sm font-medium text-gray-900 dark:text-white">
+            Ingredients
+          </label>
+          <button
+            type="button"
+            onClick={() => append({ name: '', weight: '', unit: 'g' })}
+            className="inline-flex items-center px-3 py-1 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700"
+          >
+            <Plus className="w-4 h-4 mr-1" />
+            Add Ingredient
+          </button>
+        </div>
+
+        <div className="space-y-2">
+          {fields.map((field, index) => {
+            const searchTerm = searchTerms[index] || '';
+            const isDropdownOpen = openDropdown === index;
+            const filteredIngredients = ALL_INGREDIENTS.filter(ing =>
+              ing.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            return (
+              <div key={field.id} className="flex gap-2 items-start">
+                <div className="flex-1 relative">
+                  <div className="flex items-center">
+                    <input
+                      value={searchTerm}
+                      onChange={e => handleIngredientSearch(index, e.target.value)}
+                      onFocus={() => setOpenDropdown(index)}
+                      placeholder="Search ingredient..."
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                    />
+                    <Search className="w-4 h-4 absolute right-3 text-gray-400" />
+                  </div>
+                  {isDropdownOpen && searchTerm && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
+                      {filteredIngredients.map(ingredient => (
+                        <button
+                          key={ingredient}
+                          type="button"
+                          className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm"
+                          onClick={() => handleIngredientSelect(index, ingredient)}
+                        >
+                          {ingredient}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <input
+                    type="hidden"
+                    {...register(`ingredients.${index}.name` as const, { required: true })}
+                  />
+                </div>
+                <div className="w-32">
+                  <input
+                    {...register(`ingredients.${index}.weight` as const, { required: true })}
+                    placeholder="Amount"
+                    type="number"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                  />
+                </div>
+                <div className="w-32">
+                  <select
+                    {...register(`ingredients.${index}.unit` as const, { required: true })}
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                  >
+                    {Object.entries(MEASUREMENT_UNITS).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => remove(index)}
+                  className="p-2.5 text-gray-500 hover:text-red-500"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              </div>
+            );
           })}
-          rows={4}
-          className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500"
-          placeholder="Enter ingredients, one per line..."
-        />
+        </div>
         {errors.ingredients && (
-          <p className="mt-2 text-sm text-red-600">At least one ingredient is required</p>
+          <p className="mt-2 text-sm text-red-600">All ingredient fields are required</p>
         )}
       </div>
 

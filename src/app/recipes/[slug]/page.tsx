@@ -114,7 +114,7 @@ export default async function RecipeDetailsPage({
             <ul className="list-disc list-inside space-y-2">
               {recipe.ingredients.map((ingredient, index) => (
                 <li key={index} className="text-gray-600">
-                  {ingredient}
+                  {ingredient.name}
                 </li>
               ))}
             </ul>

@@ -65,7 +65,18 @@ create table public.recipes (
   description text,
   category recipe_categories not null default 'sweets',
   subcategory recipe_subcategories not null,
-  ingredients jsonb not null default '[]',
+  ingredients jsonb not null default '[]'::jsonb check (
+    jsonb_typeof(ingredients) = 'array'
+    and (
+      select
+        bool_and(
+          jsonb_typeof(value ->> 'name') = 'string'
+          and jsonb_typeof(value ->> 'weight') = 'string'
+        )
+      from
+        jsonb_array_elements(ingredients)
+    )
+  ),
   instructions jsonb not null default '[]',
   prep_time integer not null default 0,
   cook_time integer not null default 0,
@@ -75,7 +86,6 @@ create table public.recipes (
   image_banner_url varchar(255),
   created_by uuid references public.profiles (id) on delete set null not null,
   created_at timestamp with time zone default timezone ('utc'::text, now()) not null,
-  -- Additional information about the recipe in JSON
   metadata jsonb
 );
 
