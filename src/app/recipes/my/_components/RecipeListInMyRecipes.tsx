@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { useUser } from '@/_contexts/UserContext';
 import RecipeListItemInMyRecipes from './RecipeListItemInMyRecipes';
