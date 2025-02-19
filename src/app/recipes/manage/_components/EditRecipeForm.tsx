@@ -369,6 +369,9 @@ export const EditRecipeForm = ({ recipe, onSuccess, closeModal }: EditRecipeForm
           )}
         </button>
       </div>
+      {showErrorSummary && (
+        <div className="mt-2 text-sm text-red-600">Please fix the errors before updating.</div>
+      )}
     </form>
   );
 };

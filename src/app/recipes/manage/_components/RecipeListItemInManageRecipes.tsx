@@ -52,7 +52,7 @@ export const RecipeListItemInManageRecipes = ({
     if (status !== recipe.status) {
       updateStatus();
     }
-  }, [status]);
+  }, [status, recipe.status, toast, recipe.id]);
 
   const handleEditClick = () => {
     const modalContent = (

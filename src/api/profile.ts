@@ -1,7 +1,7 @@
 'use server';
 
 import { createClient } from '@/utils/supabase/server';
-import { Profile, ProfileWithRoles, ProfileWithRecipes } from '@/types/profile';
+import { Profile, ProfileWithRecipes } from '@/types/profile';
 
 /**
  * Fetches a single user profile by user ID.
@@ -11,9 +11,9 @@ import { Profile, ProfileWithRoles, ProfileWithRecipes } from '@/types/profile';
 export const fetchUserProfile = async userId => {
   const supabase = createClient();
   try {
-    let { data } = await supabase.from('profiles_with_roles').select(`*`).eq('id', userId).single();
+    let { data } = await supabase.from('profiles').select(`*`).eq('id', userId).single();
 
-    return data as ProfileWithRoles;
+    return data as Profile;
   } catch (error) {
     console.log('error', error);
     return error;
@@ -37,8 +37,7 @@ export const fetchUserProfileWithRecipes = async ({
   try {
     let query = supabase.from('profiles').select(`
         *,
-        recipes_created:recipes(*),
-        user_roles:user_roles(role)
+        recipes_created:recipes(*)
       `);
 
     if (username) {
@@ -53,13 +52,7 @@ export const fetchUserProfileWithRecipes = async ({
 
     if (error) throw new Error('Error fetching profile with recipes');
 
-    // Transform user_roles array to match the expected format
-    const transformedData = {
-      ...data,
-      user_roles: data.user_roles?.map((r: { role: string }) => r.role),
-    };
-
-    return transformedData as ProfileWithRecipes;
+    return data as ProfileWithRecipes;
   } catch (error) {
     console.error('error', error);
     return null;
@@ -81,23 +74,6 @@ export const updateUserProfile = async (user: Profile) => {
     const { data } = await supabase.auth.updateUser({
       data: user,
     });
-    return data;
-  } catch (error) {
-    console.log('error', error);
-    return error;
-  }
-};
-
-/**
- * Fetches all roles for the current user.
- * @param {function} setState - Optionally pass in a hook or callback to set the state.
- * @returns The roles data or error.
- */
-export const fetchUserRoles = async setState => {
-  const supabase = createClient();
-  try {
-    let { data } = await supabase.from('user_roles').select(`*`);
-    if (setState) setState(data);
     return data;
   } catch (error) {
     console.log('error', error);

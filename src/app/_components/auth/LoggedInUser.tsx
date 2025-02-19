@@ -11,18 +11,18 @@ import { useUser } from '@/_contexts/UserContext';
 import { signOut } from '@/api/auth';
 import { BUCKET_URL } from '@/constants';
 import { useRouter } from 'next/navigation';
-import { ProfileWithRoles } from '@/types/profile';
+import { Profile } from '@/types/profile';
 import { User } from '@supabase/supabase-js';
 
 export default function LoggedInUser({
   profile,
   user,
 }: {
-  profile: ProfileWithRoles;
+  profile: Profile;
   user: User | undefined;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const { isHost, setUser } = useUser();
+  const { setUser } = useUser();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -112,56 +112,6 @@ export default function LoggedInUser({
                 </svg>
                 My Account
               </Link>
-              {isHost && (
-                <Link
-                  href="/recipes/manage"
-                  className="text-gray-700 px-4 py-2 text-sm flex gap-1 hover:bg-gray-50"
-                  tabIndex={-1}
-                  onClick={() => setIsOpen(false)}
-                >
-                  <svg
-                    className="mr-2"
-                    width="1.1rem"
-                    height="1.1rem"
-                    strokeWidth="1.5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    color="#000000"
-                  >
-                    <path
-                      d="M15 4V2M15 4V6M15 4H10.5M3 10V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V10H3Z"
-                      stroke="#000000"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    ></path>
-                    <path
-                      d="M3 10V6C3 4.89543 3.89543 4 5 4H7"
-                      stroke="#000000"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    ></path>
-                    <path
-                      d="M7 2V6"
-                      stroke="#000000"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    ></path>
-                    <path
-                      d="M21 10V6C21 4.89543 20.1046 4 19 4H18.5"
-                      stroke="#000000"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    ></path>
-                  </svg>
-                  Manage my recipes
-                </Link>
-              )}
-
               <Link
                 href="/recipes/my"
                 className="text-gray-700 px-4 py-2 text-sm flex gap-1 hover:bg-gray-50"

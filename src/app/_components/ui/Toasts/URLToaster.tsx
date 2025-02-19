@@ -43,7 +43,7 @@ const URLToaster: React.FC = () => {
 
     // Ensure the URL is updated without reloading the page
     window.history.replaceState(null, '', url.toString());
-  }, [searchParams]);
+  }, [searchParams, toast]);
 
   return null;
 };

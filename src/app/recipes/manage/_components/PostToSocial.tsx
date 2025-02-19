@@ -19,20 +19,15 @@ export default function PostToSocial({ recipe }: { recipe: Recipe }) {
   useOnClickOutside(ref, () => setIsOpen(false));
 
   const handleConfirm = async () => {
-    if (recipe?.id && profile?.id) {
+    if (recipe?.id && profile) {
       try {
         setIsLoading(true);
         // Create a Profile object with required fields
         const profileData: Profile = {
           id: profile.id,
-          name: profile.name || '',
-          username: profile.username || '',
-          avatar_url: profile.avatar_url || null,
-          birthmonth: profile.birthmonth || null,
-          birthyear: profile.birthyear || null,
-          stripe_customer_id: null,
-          billing_address: null,
-          payment_method: null,
+          name: profile.name,
+          username: profile.username,
+          avatar_url: profile.avatar_url,
         };
         await postRecipeToSocial(recipe.id, profileData);
         toast({

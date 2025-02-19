@@ -5,7 +5,6 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 
 import Spinner from '@/_components/ui/Spinner';
 import { fetchUserProfile, updateUserProfile } from '@/api/profile';
-import { calculateAge } from '@/helpers/date';
 import { Profile } from '@/types/profile';
 import { useToast } from '@/_components/ui/Toasts/useToast';
 
@@ -20,30 +19,6 @@ export default function ProfileForm({ userId }: { userId: string | undefined }) 
   const [loading, setLoading] = useState(true);
   const [currProfile, setCurrProfile] = useState<Profile | null>(null);
   const { toast } = useToast();
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      setLoading(true);
-      try {
-        const profile = await fetchUserProfile(userId);
-        console.log(profile);
-        setCurrProfile(profile as Profile);
-        reset(profile as AuthFormInput);
-      } catch (error) {
-        toast({
-          title: 'Error!',
-          description: 'Error loading user data!',
-          className: 'bg-red-700 text-white border-transparent',
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (userId) {
-      fetchProfile();
-    }
-  }, [userId]);
 
   async function updateProfile(user: Profile) {
     try {
@@ -76,6 +51,30 @@ export default function ProfileForm({ userId }: { userId: string | undefined }) 
     await updateProfile({ ...currProfile, ...data } as Profile);
   };
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setLoading(true);
+      try {
+        const profile = await fetchUserProfile(userId);
+        console.log(profile);
+        setCurrProfile(profile as Profile);
+        reset(profile as AuthFormInput);
+      } catch (error) {
+        toast({
+          title: 'Error!',
+          description: 'Error loading user data!',
+          className: 'bg-red-700 text-white border-transparent',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userId) {
+      fetchProfile();
+    }
+  }, [userId, reset, toast]);
+
   return (
     <form
       className="p-5 md:p-10 border border-gray-300 rounded-lg bg-gray-50"
@@ -99,64 +98,6 @@ export default function ProfileForm({ userId }: { userId: string | undefined }) 
         />
         {errors.name?.type === 'required' && <p role="alert">Please enter your name</p>}
         {errors.name?.type === 'pattern' && <p role="alert">Please enter a valid name</p>}
-      </div>
-
-      <div className="mb-2">
-        <label className="text-gray-500 text-sm md:text-xs">Age</label>
-        <input
-          type="text"
-          id="name"
-          value={calculateAge(currProfile?.birthyear, currProfile?.birthmonth)}
-          className={`bg-gray-100 border border-gray-300 text-gray-900text-md md:text-sm rounded-lg block w-full p-2.5 focus:outline-none ${loading ? 'animate-pulse bg-gray-200' : ''}`}
-          readOnly
-        />
-      </div>
-
-      <div className="w-full flex">
-        <div className="flex items-center">
-          <label className="text-gray-500 text-sm md:text-xs mr-2">Date of Birth</label>
-          <select
-            {...register('birthyear', {
-              required: true,
-            })}
-            className={`text-gray-900text-md md:text-sm p-1 rounded-md mr-2 border border-gray-300 ${loading ? 'animate-pulse bg-gray-200' : ''}`}
-            required
-          >
-            {Array.from(
-              { length: new Date().getFullYear() - 1970 - 20 + 1 },
-              (_, i) => 1970 + i
-            ).map(year => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
-          {errors.birthyear?.type === 'required' && <p role="alert">Please enter your birthyear</p>}
-
-          <select
-            {...register('birthmonth', {
-              required: true,
-            })}
-            className={`text-gray-900text-md md:text-sm p-1 rounded-md border border-gray-300 ${loading ? 'animate-pulse bg-gray-200' : ''}`}
-            required
-          >
-            <option value="1">Jan</option>
-            <option value="2">Feb</option>
-            <option value="3">Mar</option>
-            <option value="4">Apr</option>
-            <option value="5">May</option>
-            <option value="6">Jun</option>
-            <option value="7">Jul</option>
-            <option value="8">Aug</option>
-            <option value="9">Sep</option>
-            <option value="10">Oct</option>
-            <option value="11">Nov</option>
-            <option value="12">Dec</option>
-          </select>
-          {errors.birthmonth?.type === 'required' && (
-            <p role="alert">Please enter your birthmonth</p>
-          )}
-        </div>
       </div>
 
       <div className="mb-4"></div>

@@ -3,20 +3,18 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { fetchUserProfile } from '@/api/profile';
-import { ProfileWithRoles } from '@/types/profile';
+import { Profile } from '@/types/profile';
 import { createClient } from '@/utils/supabase/client';
 
 const supabase = createClient();
 const UserContext = createContext<{
   user: User | undefined;
-  isHost: boolean;
   session: Session | null;
-  profile: ProfileWithRoles | undefined;
+  profile: Profile | undefined;
   setUser: (user: User | undefined) => void;
   loading: boolean;
 }>({
   user: undefined,
-  isHost: false,
   session: null,
   profile: undefined,
   setUser: () => {},
@@ -25,9 +23,8 @@ const UserContext = createContext<{
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User>();
-  const [isHost, setIsHost] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<ProfileWithRoles>();
+  const [profile, setProfile] = useState<Profile>();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -63,7 +60,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const callAndSetProfile = async (userId: string) => {
     const profile = await fetchUserProfile(userId);
     if (profile) {
-      setProfile(profile as ProfileWithRoles);
+      setProfile(profile as Profile);
     }
   };
 
@@ -75,16 +72,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (profile?.roles?.includes('host')) {
-      if (isHost === false) setIsHost(true);
-    } else {
-      if (isHost === true) setIsHost(false);
-    }
-  }, [profile]);
-
   return (
-    <UserContext.Provider value={{ user, isHost, session, profile, setUser, loading }}>
+    <UserContext.Provider value={{ user, session, profile, setUser, loading }}>
       {children}
     </UserContext.Provider>
   );

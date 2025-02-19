@@ -257,6 +257,7 @@ export const postRecipeToSocial = async (recipe_id: string, profile: Profile) =>
   try {
     // TODO: Implement actual social media sharing logic
     // This is a placeholder that simulates a successful share
+    console.log('Recipe shared successfully', recipe_id, profile);
     return { success: true };
   } catch (error) {
     console.error('Error sharing recipe:', error);

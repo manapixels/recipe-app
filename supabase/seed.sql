@@ -35,9 +35,6 @@ BEGIN
       now()
     );
 
-    -- Assign 'participant' role to each user
-    INSERT INTO public.user_roles (user_id, role) VALUES (user_id, 'participant');
-  
   END LOOP;
 
   user_id := 'b02e2f4a-94ed-45ad-a745-435d986db886';
@@ -59,19 +56,15 @@ BEGIN
       '00000000-0000-0000-0000-000000000000',
       'authenticated',
       'authenticated',
-      'shirley@recipe-app.fam',
+      'admin@recipe.app',
       crypt('password123', gen_salt('bf')),
       now(),
       NULL, '', NULL, '', NULL, '', '', NULL, NULL,
       '{"provider":"email","providers":["email"]}'::jsonb,
-      ('{"name":"Shirley Chen","avatar_url":"' || user_id || '.png","birthmonth":7, "birthyear":1993}')::jsonb,
+      ('{"name":"Admin","avatar_url":"' || user_id || '.png"}')::jsonb,
       now(),
       now()
     );
-
-  -- Assign 'host' roles to Shirley
-  INSERT INTO public.user_roles (user_id, role) VALUES (user_id, 'host');
-
 
   -- Insert events
   INSERT INTO events (
@@ -234,13 +227,13 @@ DECLARE
   event_record RECORD;
   reservation_id uuid;
   user_ids uuid[];
-  shirley_id uuid;
+  admin_id uuid;
   event_counter integer := 0;
   random_decision integer;
   sign_up_result text;
 BEGIN
-  -- Fetch Shirley's user ID to exclude her from the event sign-up process
-  SELECT id INTO shirley_id FROM auth.users WHERE email = 'shirley@recipe-app.fam';
+  -- Fetch Admin's user ID to exclude her from the event sign-up process
+  SELECT id INTO admin_id FROM auth.users WHERE email = 'admin@recipe.app';
 
   -- Fetch all event IDs and their slots
   FOR event_record IN SELECT id, slots, price, price_currency FROM public.events LOOP
@@ -253,7 +246,7 @@ BEGIN
     END IF;
 
     -- Fetch user IDs from the auth.users table, limited by the number of slots for the event
-    SELECT array_agg(id) INTO user_ids FROM profiles WHERE id <> shirley_id LIMIT event_record.slots;
+    SELECT array_agg(id) INTO user_ids FROM profiles WHERE id <> admin_id LIMIT event_record.slots;
 
     -- Loop through the user IDs and sign up each user for the current event
     FOR i IN 1..event_record.slots LOOP
@@ -278,4 +271,3 @@ END $$;
 
 -- Commit the transaction
 COMMIT;
-

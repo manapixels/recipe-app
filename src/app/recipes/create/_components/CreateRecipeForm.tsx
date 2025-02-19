@@ -8,7 +8,6 @@ import { useToast } from '@/_components/ui/Toasts/useToast';
 import { useUser } from '@/_contexts/UserContext';
 import { addRecipe } from '@/api/recipe';
 import {
-  Recipe,
   RecipeCategory,
   RecipeSubcategory,
   CATEGORY_OPTIONS,
@@ -335,6 +334,9 @@ export const CreateRecipeForm = () => {
           'Create Recipe'
         )}
       </button>
+      {showErrorSummary && (
+        <div className="mt-2 text-sm text-red-600">Please fix the errors before creating.</div>
+      )}
     </form>
   );
 };

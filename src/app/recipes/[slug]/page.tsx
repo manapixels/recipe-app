@@ -3,6 +3,7 @@ import { fetchRecipe } from '@/api/recipe';
 import { BUCKET_URL } from '@/constants';
 import { Recipe } from '@/types/recipe';
 import { Profile } from '@/types/profile';
+import Image from 'next/image';
 
 export const metadata: Metadata = {
   title: 'recipe-app | Recipe Details',
@@ -65,7 +66,7 @@ export default async function RecipeDetailsPage({
           <div className="border border-gray-200 px-5 py-3 mb-4 rounded-2xl md:rounded-lg flex items-center font-medium text-sm">
             Created by{' '}
             {recipe.created_by?.avatar_url ? (
-              <img
+              <Image
                 className="h-10 w-10 rounded-full mx-2"
                 src={`${BUCKET_URL}/avatars/${recipe.created_by.avatar_url}`}
                 alt=""

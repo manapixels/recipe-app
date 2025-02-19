@@ -6,7 +6,7 @@ import { Modal } from '@/_components/ui/Modal';
 import { useUser } from '@/_contexts/UserContext';
 import { fetchUserRecipes } from '@/api/recipe';
 import { Recipe } from '@/types/recipe';
-import RecipeListItemInManageRecipes from './RecipeListItemInManageRecipes';
+import { RecipeListItemInManageRecipes } from './RecipeListItemInManageRecipes';
 import RecipeListItemSkeleton from '@/_components/ui/Skeletons/RecipeListItemSkeleton';
 
 export default function RecipeListInManageRecipes() {

@@ -12,12 +12,6 @@ interface EmailFormInput {
 export default function EmailForm({ currEmail }: { currEmail: string | undefined }) {
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (currEmail) {
-      reset({ email: currEmail });
-    }
-  }, [currEmail]);
-
   const {
     register,
     reset,
@@ -31,6 +25,12 @@ export default function EmailForm({ currEmail }: { currEmail: string | undefined
     await updateEmail(data.email);
     setLoading(false);
   };
+
+  useEffect(() => {
+    if (currEmail) {
+      reset({ email: currEmail });
+    }
+  }, [currEmail, reset]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
