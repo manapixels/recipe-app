@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler, Controller, useFieldArray } from 'react-hook-form';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 import { FileUpload } from '@/_components/ui/FileUpload';
 import { useToast } from '@/_components/ui/Toasts/useToast';
@@ -28,7 +29,7 @@ type Inputs = {
   subcategory: RecipeSubcategory;
   description: string;
   ingredients: Ingredient[];
-  instructions: string[];
+  instructions: { step: number; content: string }[];
   prep_time: number;
   cook_time: number;
   servings: number;
@@ -64,21 +65,36 @@ export const EditRecipeForm = ({ recipe, onSuccess, closeModal }: EditRecipeForm
       name: recipe.name,
       category: recipe.category,
       subcategory: recipe.subcategory,
-      description: recipe.description,
+      description: recipe.description ?? undefined,
       ingredients: recipe.ingredients,
-      instructions: recipe.instructions,
+      instructions: Array.isArray(recipe.instructions)
+        ? recipe.instructions.map((instruction, index) => ({
+            step: index + 1,
+            content: typeof instruction === 'string' ? instruction : instruction.content,
+          }))
+        : [],
       prep_time: recipe.prep_time,
       cook_time: recipe.cook_time,
       servings: recipe.servings,
-      difficulty: recipe.difficulty,
-      image_thumbnail_url: recipe.image_thumbnail_url,
-      image_banner_url: recipe.image_banner_url,
+      difficulty: recipe.difficulty as DifficultyLevel,
+      image_thumbnail_url: recipe.image_thumbnail_url ?? undefined,
+      image_banner_url: recipe.image_banner_url ?? undefined,
     },
   });
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'ingredients',
+  });
+
+  const {
+    fields: instructionFields,
+    append: appendInstruction,
+    remove: removeInstruction,
+    move: moveInstruction,
+  } = useFieldArray({
+    control,
+    name: 'instructions',
   });
 
   const handleIngredientSearch = (index: number, value: string) => {
@@ -145,6 +161,21 @@ export const EditRecipeForm = ({ recipe, onSuccess, closeModal }: EditRecipeForm
       setValue('subcategory', SUBCATEGORY_OPTIONS[watchCategory][0].value as RecipeSubcategory);
     }
   }, [watchCategory, setValue]);
+
+  const onDragEnd = (result: any) => {
+    if (!result.destination) return;
+
+    const sourceIndex = result.source.index;
+    const destinationIndex = result.destination.index;
+
+    moveInstruction(sourceIndex, destinationIndex);
+
+    // Update step numbers after reordering
+    const instructions = watch('instructions');
+    instructions.forEach((_, index) => {
+      setValue(`instructions.${index}.step`, index + 1);
+    });
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -309,21 +340,66 @@ export const EditRecipeForm = ({ recipe, onSuccess, closeModal }: EditRecipeForm
 
       {/* Instructions */}
       <div>
-        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-          Instructions (one step per line)
-        </label>
-        <textarea
-          {...register('instructions', {
-            required: true,
-            setValueAs: v => v.split('\n').filter(Boolean),
-          })}
-          defaultValue={recipe.instructions.join('\n')}
-          rows={4}
-          className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500"
-          placeholder="Enter instructions, one step per line..."
-        />
+        <div className="flex justify-between items-center mb-2">
+          <label className="block text-sm font-medium text-gray-900 dark:text-white">
+            Instructions
+          </label>
+          <button
+            type="button"
+            onClick={() => appendInstruction({ step: instructionFields.length + 1, content: '' })}
+            className="inline-flex items-center px-3 py-1 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700"
+          >
+            <Plus className="w-4 h-4 mr-1" />
+            Add Step
+          </button>
+        </div>
+
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="instructions">
+            {provided => (
+              <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
+                {instructionFields.map((field, index) => (
+                  <Draggable key={field.id} draggableId={field.id} index={index}>
+                    {provided => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className="flex gap-2 items-start bg-white p-3 rounded-lg border border-gray-200"
+                      >
+                        <div
+                          {...provided.dragHandleProps}
+                          className="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-lg cursor-move"
+                        >
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <textarea
+                            {...register(`instructions.${index}.content` as const, {
+                              required: true,
+                            })}
+                            rows={2}
+                            className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500"
+                            placeholder={`Step ${index + 1} instructions...`}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeInstruction(index)}
+                          className="p-2 text-gray-500 hover:text-red-500"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
         {errors.instructions && (
-          <p className="mt-2 text-sm text-red-600">At least one instruction step is required</p>
+          <p className="mt-2 text-sm text-red-600">All instruction steps are required</p>
         )}
       </div>
 

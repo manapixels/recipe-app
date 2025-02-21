@@ -125,7 +125,7 @@ export default async function RecipeDetailsPage({
             <ol className="list-decimal list-inside space-y-4">
               {recipe.instructions.map((instruction, index) => (
                 <li key={index} className="text-gray-600">
-                  {instruction}
+                  {instruction.content}
                 </li>
               ))}
             </ol>

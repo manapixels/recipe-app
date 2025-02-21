@@ -87,7 +87,10 @@ export const CreateRecipeForm = () => {
         category: data.category,
         subcategory: data.subcategory,
         ingredients: data.ingredients,
-        instructions: data.instructions,
+        instructions: data.instructions.map((content, index) => ({
+          step: index + 1,
+          content,
+        })),
         prep_time: data.prep_time,
         cook_time: data.cook_time,
         servings: data.servings,

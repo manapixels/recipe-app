@@ -67,17 +67,12 @@ create table public.recipes (
   subcategory recipe_subcategories not null,
   ingredients jsonb not null default '[]'::jsonb check (
     jsonb_typeof(ingredients) = 'array'
-    and (
-      select
-        bool_and(
-          jsonb_typeof(value ->> 'name') = 'string'
-          and jsonb_typeof(value ->> 'weight') = 'string'
-        )
-      from
-        jsonb_array_elements(ingredients)
-    )
+    and jsonb_array_length(ingredients) >= 0
   ),
-  instructions jsonb not null default '[]',
+  instructions jsonb not null default '[]'::jsonb check (
+    jsonb_typeof(instructions) = 'array'
+    and jsonb_array_length(instructions) >= 0
+  ),
   prep_time integer not null default 0,
   cook_time integer not null default 0,
   servings integer not null default 1,
@@ -108,6 +103,32 @@ create policy "Can delete own recipes." on recipes for delete using (auth.uid ()
 create policy "Can insert recipes." on recipes for insert
 with
   check (auth.uid () = created_by);
+
+-- Function to generate a unique slug using a text input
+create extension if not exists "unaccent";
+
+create or replace function slugify ("value" text) returns text as $$
+  with "unaccented" as (
+    select unaccent("value") as "value"
+  ),
+  "lowercase" as (
+    select lower("value") as "value"
+    from "unaccented"
+  ),
+  "removed_quotes" as (
+    select regexp_replace("value", '[''"]+', '', 'gi') as "value"
+    from "lowercase"
+  ),
+  "hyphenated" as (
+    select regexp_replace("value", '[^a-z0-9\\-_]+', '-', 'gi') as "value"
+    from "removed_quotes"
+  ),
+  "trimmed" as (
+    select regexp_replace(regexp_replace("value", '\-+$', ''), '^\-', '') as "value"
+    from "hyphenated"
+  )
+  select "value" from "trimmed";
+$$ language sql strict immutable;
 
 -- Create a function to generate and set a unique slug from the recipe name
 create or replace function public.set_recipe_slug () returns trigger as $$

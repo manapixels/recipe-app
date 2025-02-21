@@ -1,3 +1,5 @@
+import { Tables } from './definitions';
+
 // Recipe status type from SQL enum
 export type RecipeStatus = 'draft' | 'published' | 'archived';
 
@@ -131,34 +133,24 @@ export const COMMON_INGREDIENTS = {
 // Flatten ingredients for easy search
 export const ALL_INGREDIENTS = Object.values(COMMON_INGREDIENTS).flat();
 
+// Instruction type
+export type Instruction = {
+  step: number;
+  content: string;
+};
+
 // Ingredient type
-export interface Ingredient {
+export type Ingredient = {
   name: string;
   weight: string;
   unit: MeasurementUnit;
-}
+};
 
 // Recipe interface matching the database schema
-export interface Recipe {
-  id: string;
-  created_at: string;
-  name: string;
-  slug: string;
-  description: string;
-  category: RecipeCategory;
-  subcategory: RecipeSubcategory;
+export type Recipe = Tables<'recipes'> & {
   ingredients: Ingredient[];
-  instructions: string[];
-  prep_time: number;
-  cook_time: number;
-  servings: number;
-  difficulty: DifficultyLevel;
-  status: RecipeStatus;
-  created_by: string;
-  image_thumbnail_url?: string;
-  image_banner_url?: string;
-  metadata?: Record<string, unknown>;
-}
+  instructions: Instruction[];
+};
 
 // Default ingredient templates by category (fallback if no subcategory template exists)
 export const DEFAULT_INGREDIENTS: Record<RecipeCategory, Ingredient[]> = {
