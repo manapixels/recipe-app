@@ -183,7 +183,7 @@ export default function LoggedInUser({
                   await signOut();
                   setUser(undefined);
                   toast({
-                    title: 'Successfuly logged out',
+                    title: 'Successfully logged out',
                     description: 'Hope to see you again soon!',
                     className: 'bg-green-700 text-white border-transparent',
                   });
