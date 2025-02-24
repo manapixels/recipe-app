@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useForm, SubmitHandler, Controller, useFieldArray } from 'react-hook-form';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 import { FileUpload } from '@/_components/ui/FileUpload';
 import { useToast } from '@/_components/ui/Toasts/useToast';
@@ -21,7 +22,8 @@ import {
 } from '@/types/recipe';
 import Spinner from '@/_components/ui/Spinner';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Search } from 'lucide-react';
+import { Plus, Trash2, Search, GripVertical } from 'lucide-react';
+import { CustomSelect } from '@/_components/ui/Select';
 
 type Inputs = {
   name: string;
@@ -29,7 +31,7 @@ type Inputs = {
   subcategory: RecipeSubcategory;
   description: string;
   ingredients: Ingredient[];
-  instructions: string[];
+  instructions: { step: number; content: string }[];
   prep_time: number;
   cook_time: number;
   servings: number;
@@ -84,11 +86,11 @@ export const CreateRecipeForm = () => {
         },
       ],
       instructions: [
-        'Mix flour and water, let rest for 30 minutes',
-        'Add starter and salt, knead until smooth',
-        'Bulk ferment for 4-6 hours',
-        'Shape and proof overnight',
-        'Bake in Dutch oven at 450°F',
+        { step: 1, content: 'Mix flour and water, let rest for 30 minutes' },
+        { step: 2, content: 'Add starter and salt, knead until smooth' },
+        { step: 3, content: 'Bulk ferment for 4-6 hours' },
+        { step: 4, content: 'Shape and proof overnight' },
+        { step: 5, content: 'Bake in Dutch oven at 450°F' },
       ],
       prep_time: 60,
       cook_time: 45,
@@ -102,6 +104,16 @@ export const CreateRecipeForm = () => {
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'ingredients',
+  });
+
+  const {
+    fields: instructionFields,
+    append: appendInstruction,
+    remove: removeInstruction,
+    move: moveInstruction,
+  } = useFieldArray<Inputs>({
+    control,
+    name: 'instructions',
   });
 
   const loadTemplateIngredients = useCallback(
@@ -125,9 +137,9 @@ export const CreateRecipeForm = () => {
         category: data.category,
         subcategory: data.subcategory,
         ingredients: data.ingredients,
-        instructions: data.instructions.map((content, index) => ({
+        instructions: data.instructions.map((instruction, index) => ({
           step: index + 1,
-          content,
+          content: instruction.content,
         })),
         prep_time: data.prep_time,
         cook_time: data.cook_time,
@@ -181,6 +193,21 @@ export const CreateRecipeForm = () => {
     setOpenDropdown(null);
   };
 
+  const onDragEnd = (result: any) => {
+    if (!result.destination) return;
+
+    const sourceIndex = result.source.index;
+    const destinationIndex = result.destination.index;
+
+    moveInstruction(sourceIndex, destinationIndex);
+
+    // Update step numbers after reordering
+    const instructions = watch('instructions');
+    instructions.forEach((_, index) => {
+      setValue(`instructions.${index}.step`, index + 1);
+    });
+  };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Name */}
@@ -202,17 +229,20 @@ export const CreateRecipeForm = () => {
         <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
           Category
         </label>
-        <select
-          {...register('category', { required: true })}
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
-        >
-          <option value="">Select category</option>
-          {CATEGORY_OPTIONS.map(option => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        <Controller
+          control={control}
+          name="category"
+          rules={{ required: true }}
+          render={({ field }) => (
+            <CustomSelect
+              options={[...CATEGORY_OPTIONS]}
+              value={field.value}
+              onChange={field.onChange}
+              error={!!errors.category}
+              placeholder="Select category"
+            />
+          )}
+        />
         {errors.category && <p className="mt-2 text-sm text-red-600">Category is required</p>}
       </div>
 
@@ -221,18 +251,20 @@ export const CreateRecipeForm = () => {
         <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
           Subcategory
         </label>
-        <select
-          {...register('subcategory', { required: true })}
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
-        >
-          <option value="">Select subcategory</option>
-          {SUBCATEGORY_OPTIONS[selectedCategory]?.map(option => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        {errors.subcategory && <p className="mt-2 text-sm text-red-600">Subcategory is required</p>}
+        <Controller
+          control={control}
+          name="subcategory"
+          rules={{ required: true }}
+          render={({ field }) => (
+            <CustomSelect
+              options={[...SUBCATEGORY_OPTIONS[selectedCategory]]}
+              value={field.value}
+              onChange={field.onChange}
+              error={!!errors.subcategory}
+              placeholder="Select subcategory"
+            />
+          )}
+        />
       </div>
 
       {/* Description */}
@@ -344,16 +376,24 @@ export const CreateRecipeForm = () => {
                   </div>
 
                   {/* For mobile screens */}
-                  <select
-                    {...register(`ingredients.${index}.unit` as const, { required: true })}
-                    className="sm:hidden w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block p-2.5"
-                  >
-                    {Object.entries(MEASUREMENT_UNITS).map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
+                  <Controller
+                    name={`ingredients.${index}.unit` as const}
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field }) => (
+                      <div className="sm:hidden">
+                        <CustomSelect
+                          options={Object.entries(MEASUREMENT_UNITS).map(([value, label]) => ({
+                            value,
+                            label,
+                          }))}
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Select unit"
+                        />
+                      </div>
+                    )}
+                  />
                 </div>
                 <button
                   type="button"
@@ -373,20 +413,70 @@ export const CreateRecipeForm = () => {
 
       {/* Instructions */}
       <div>
-        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-          Instructions (one step per line)
-        </label>
-        <textarea
-          {...register('instructions', {
-            required: true,
-            setValueAs: v => (Array.isArray(v) ? v : v ? v.split('\n').filter(Boolean) : []),
-          })}
-          rows={4}
-          className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-base-500 focus:border-base-500"
-          placeholder="Enter instructions, one step per line..."
-        />
+        <div className="flex justify-between items-center mb-2">
+          <label className="block text-sm font-medium text-gray-900 dark:text-white">
+            Instructions
+          </label>
+          <button
+            type="button"
+            onClick={() => appendInstruction({ step: instructionFields.length + 1, content: '' })}
+            className="inline-flex items-center px-3 py-1 text-sm font-medium text-white bg-base-600 rounded-lg hover:bg-base-700"
+          >
+            <Plus className="w-4 h-4 mr-1" />
+            Add Step
+          </button>
+        </div>
+
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="instructions">
+            {provided => (
+              <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
+                {instructionFields.map((field, index) => (
+                  <Draggable key={field.id} draggableId={field.id} index={index}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className={`flex gap-2 items-start bg-white p-3 rounded-lg border ${
+                          snapshot.isDragging ? 'border-base-500 shadow-lg' : 'border-gray-200'
+                        }`}
+                      >
+                        <div
+                          {...provided.dragHandleProps}
+                          className="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-lg cursor-move"
+                        >
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <textarea
+                            {...register(`instructions.${index}.content` as const, {
+                              required: true,
+                            })}
+                            rows={2}
+                            className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-base-500 focus:border-base-500"
+                            placeholder={`Step ${index + 1} instructions...`}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeInstruction(index)}
+                          className="p-2 text-gray-500 hover:text-red-500"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                        <GripVertical className="w-5 h-5 text-gray-400" />
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
+
         {errors.instructions && (
-          <p className="mt-2 text-sm text-red-600">At least one instruction step is required</p>
+          <p className="mt-2 text-sm text-red-600">All instruction steps are required</p>
         )}
       </div>
 
