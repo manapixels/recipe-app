@@ -57,7 +57,45 @@ export const CreateRecipeForm = () => {
     formState: { errors },
   } = useForm<Inputs>({
     defaultValues: {
-      ingredients: [],
+      name: 'Rustic Sourdough Bread',
+      category: 'breads',
+      subcategory: 'sourdough',
+      description: 'A classic artisanal sourdough bread with a crispy crust and chewy interior',
+      ingredients: [
+        {
+          name: 'Bread flour',
+          weight: '500',
+          unit: 'g',
+        },
+        {
+          name: 'Water',
+          weight: '350',
+          unit: 'ml',
+        },
+        {
+          name: 'Sourdough starter',
+          weight: '150',
+          unit: 'g',
+        },
+        {
+          name: 'Salt',
+          weight: '10',
+          unit: 'g',
+        },
+      ],
+      instructions: [
+        'Mix flour and water, let rest for 30 minutes',
+        'Add starter and salt, knead until smooth',
+        'Bulk ferment for 4-6 hours',
+        'Shape and proof overnight',
+        'Bake in Dutch oven at 450°F',
+      ],
+      prep_time: 60,
+      cook_time: 45,
+      servings: 8,
+      difficulty: 3,
+      image_thumbnail_url: '',
+      image_banner_url: '',
     },
   });
 
@@ -222,7 +260,7 @@ export const CreateRecipeForm = () => {
             className="inline-flex items-center px-3 py-1 text-sm font-medium text-white bg-base-600 rounded-lg hover:bg-base-700"
           >
             <Plus className="w-4 h-4 mr-1" />
-            Add Ingredient
+            Add
           </button>
         </div>
 
@@ -266,7 +304,7 @@ export const CreateRecipeForm = () => {
                     {...register(`ingredients.${index}.name` as const, { required: true })}
                   />
                 </div>
-                <div className="w-32">
+                <div className="w-12 sm:w-32">
                   <input
                     {...register(`ingredients.${index}.weight` as const, { required: true })}
                     placeholder="Amount"
@@ -274,24 +312,25 @@ export const CreateRecipeForm = () => {
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
                   />
                 </div>
-                <div className="w-32">
-                  <div className="inline-flex rounded-md shadow-sm">
+                <div className="w-14 sm:w-32">
+                  {/* For larger screens */}
+                  <div className="hidden sm:inline-flex rounded-md shadow-sm">
                     {Object.entries(MEASUREMENT_UNITS).map(([value, label], idx, arr) => (
                       <label
                         key={value}
                         className={`
-                          relative inline-flex items-center cursor-pointer justify-center px-2.5 py-2 text-sm font-medium
-                          ${idx === 0 ? 'rounded-l-lg' : ''} 
-                          ${idx === arr.length - 1 ? 'rounded-r-lg' : ''}
-                          ${idx !== arr.length - 1 ? 'border-r' : ''}
-                          border border-gray-200
-                          ${
-                            watch(`ingredients.${index}.unit`) === value
-                              ? 'bg-base-600 text-white hover:bg-base-700 z-10'
-                              : 'bg-white text-gray-900 hover:bg-gray-50'
-                          }
-                          focus:z-10
-                        `}
+                            relative inline-flex items-center cursor-pointer justify-center px-2.5 py-2 text-sm font-medium
+                            ${idx === 0 ? 'rounded-l-lg' : ''} 
+                            ${idx === arr.length - 1 ? 'rounded-r-lg' : ''}
+                            ${idx !== arr.length - 1 ? 'border-r' : ''}
+                            border border-gray-200
+                            ${
+                              watch(`ingredients.${index}.unit`) === value
+                                ? 'bg-base-600 text-white hover:bg-base-700 z-10'
+                                : 'bg-white text-gray-900 hover:bg-gray-50'
+                            }
+                            focus:z-10
+                          `}
                       >
                         <input
                           type="radio"
@@ -303,11 +342,23 @@ export const CreateRecipeForm = () => {
                       </label>
                     ))}
                   </div>
+
+                  {/* For mobile screens */}
+                  <select
+                    {...register(`ingredients.${index}.unit` as const, { required: true })}
+                    className="sm:hidden w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block p-2.5"
+                  >
+                    {Object.entries(MEASUREMENT_UNITS).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <button
                   type="button"
                   onClick={() => remove(index)}
-                  className="p-2.5 text-gray-500 hover:text-red-500"
+                  className="py-2.5 px-1 sm:px-2.5 text-gray-500 hover:text-red-500"
                 >
                   <Trash2 className="w-5 h-5" />
                 </button>
@@ -328,7 +379,7 @@ export const CreateRecipeForm = () => {
         <textarea
           {...register('instructions', {
             required: true,
-            setValueAs: v => v.split('\n').filter(Boolean),
+            setValueAs: v => (Array.isArray(v) ? v : v ? v.split('\n').filter(Boolean) : []),
           })}
           rows={4}
           className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-base-500 focus:border-base-500"
