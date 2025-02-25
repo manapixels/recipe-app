@@ -15,7 +15,6 @@ import {
   RecipeSubcategory,
   CATEGORY_OPTIONS,
   SUBCATEGORY_OPTIONS,
-  DIFFICULTY_LEVELS,
   DifficultyLevel,
   DEFAULT_INGREDIENTS,
   Ingredient,
@@ -109,6 +108,13 @@ const DraggableInstruction = ({
   );
 };
 
+// Add this near the top of the file, after other constants
+const DIFFICULTY_EMOJIS = {
+  '1': '👨‍🍳',
+  '2': '👨‍🍳👨‍🍳',
+  '3': '👨‍🍳👨‍🍳👨‍🍳',
+} as const;
+
 export const CreateRecipeForm = () => {
   const { profile } = useUser();
   const { toast } = useToast();
@@ -163,7 +169,7 @@ export const CreateRecipeForm = () => {
       ],
       total_time: 45,
       servings: 8,
-      difficulty: 3,
+      difficulty: 3 as DifficultyLevel,
       image_thumbnail_url: '',
       image_banner_url: '',
     },
@@ -238,6 +244,7 @@ export const CreateRecipeForm = () => {
   };
 
   const watchCategory = watch('category');
+  const watchDifficulty = watch('difficulty');
 
   useEffect(() => {
     if (watchCategory) {
@@ -339,6 +346,81 @@ export const CreateRecipeForm = () => {
           className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-base-500 focus:border-base-500"
           placeholder="Write your recipe description here..."
         />
+      </div>
+
+      {/* Times, Servings, Difficulty */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            Total Time (minutes)
+          </label>
+          <input
+            type="number"
+            {...register('total_time', { required: true, min: 0 })}
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
+          />
+          {errors.total_time && (
+            <p className="mt-2 text-sm text-red-600">Valid total time is required</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            Servings
+          </label>
+          <input
+            type="number"
+            {...register('servings', { required: true, min: 1 })}
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
+          />
+          {errors.servings && (
+            <p className="mt-2 text-sm text-red-600">Valid number of servings is required</p>
+          )}
+        </div>
+
+        <div className="col-span-2">
+          <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            Difficulty Level
+          </label>
+          <div className="inline-flex rounded-md shadow-sm">
+            {Object.entries(DIFFICULTY_EMOJIS).map(([value, emoji], idx, arr) => (
+              <label
+                key={value}
+                className={`
+                relative inline-flex items-center cursor-pointer justify-center px-4 py-2 text-sm font-medium
+                ${idx === 0 ? 'rounded-l-lg' : ''} 
+                ${idx === arr.length - 1 ? 'rounded-r-lg' : ''}
+                ${idx !== arr.length - 1 ? 'border-r' : ''}
+                border border-gray-200
+                ${
+                  String(watchDifficulty) === String(value)
+                    ? 'bg-base-600 text-white hover:bg-base-700 z-10'
+                    : 'bg-white text-gray-900 hover:bg-gray-50'
+                }
+                focus:z-10
+              `}
+              >
+                <input
+                  type="radio"
+                  {...register('difficulty', {
+                    required: true,
+                    valueAsNumber: true,
+                  })}
+                  value={value}
+                  className="sr-only"
+                />
+                <span>{emoji}</span>
+              </label>
+            ))}
+          </div>
+          {errors.difficulty && (
+            <p className="mt-2 text-sm text-red-600">Difficulty level is required</p>
+          )}
+        </div>
+      </div>
+
+      <div className="space-y-0">
+        <hr className="h-px bg-gray-200 border-0 dark:bg-gray-700 my-12" />
       </div>
 
       {/* Ingredients */}
@@ -509,58 +591,6 @@ export const CreateRecipeForm = () => {
 
         {errors.instructions && (
           <p className="mt-2 text-sm text-red-600">All instruction steps are required</p>
-        )}
-      </div>
-
-      {/* Times and Servings */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-            Total Time (minutes)
-          </label>
-          <input
-            type="number"
-            {...register('total_time', { required: true, min: 0 })}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
-          />
-          {errors.total_time && (
-            <p className="mt-2 text-sm text-red-600">Valid total time is required</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-            Servings
-          </label>
-          <input
-            type="number"
-            {...register('servings', { required: true, min: 1 })}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
-          />
-          {errors.servings && (
-            <p className="mt-2 text-sm text-red-600">Valid number of servings is required</p>
-          )}
-        </div>
-      </div>
-
-      {/* Difficulty */}
-      <div>
-        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-          Difficulty Level
-        </label>
-        <select
-          {...register('difficulty', { required: true })}
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
-        >
-          <option value="">Select difficulty</option>
-          {Object.entries(DIFFICULTY_LEVELS).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-        {errors.difficulty && (
-          <p className="mt-2 text-sm text-red-600">Difficulty level is required</p>
         )}
       </div>
 
