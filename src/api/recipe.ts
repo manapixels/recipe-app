@@ -83,8 +83,7 @@ export const addRecipe = async ({
   subcategory,
   ingredients,
   instructions,
-  prep_time,
-  cook_time,
+  total_time,
   servings,
   difficulty,
   created_by,
@@ -97,8 +96,7 @@ export const addRecipe = async ({
   subcategory: Recipe['subcategory'];
   ingredients: Recipe['ingredients'];
   instructions: Recipe['instructions'];
-  prep_time: Recipe['prep_time'];
-  cook_time: Recipe['cook_time'];
+  total_time: Recipe['total_time'];
   servings: Recipe['servings'];
   difficulty: Recipe['difficulty'];
   created_by: Recipe['created_by'];
@@ -117,8 +115,7 @@ export const addRecipe = async ({
           subcategory,
           ingredients,
           instructions,
-          prep_time,
-          cook_time,
+          total_time,
           servings,
           difficulty,
           created_by,
@@ -149,8 +146,7 @@ export const updateRecipe = async ({
   subcategory,
   ingredients,
   instructions,
-  prep_time,
-  cook_time,
+  total_time,
   servings,
   difficulty,
   created_by,
@@ -164,8 +160,7 @@ export const updateRecipe = async ({
   subcategory?: Recipe['subcategory'];
   ingredients?: Recipe['ingredients'];
   instructions?: Recipe['instructions'];
-  prep_time?: Recipe['prep_time'];
-  cook_time?: Recipe['cook_time'];
+  total_time?: Recipe['total_time'];
   servings?: Recipe['servings'];
   difficulty?: Recipe['difficulty'];
   created_by?: Recipe['created_by'];
@@ -183,8 +178,7 @@ export const updateRecipe = async ({
         subcategory,
         ingredients,
         instructions,
-        prep_time,
-        cook_time,
+        total_time,
         servings,
         difficulty,
         created_by,

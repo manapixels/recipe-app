@@ -48,9 +48,9 @@ export default function RecipeListItem({ recipe }: { recipe: Recipe }) {
           </div>
         )}
         <div className="absolute top-3 right-3 flex gap-2">
-          <Tippy content={`${formatTime(recipe.prep_time + recipe.cook_time)} total`}>
+          <Tippy content={`${formatTime(recipe.total_time)} total`}>
             <span className="bg-base-600 text-white text-xs font-medium px-2.5 py-0.5 rounded">
-              {formatTime(recipe.prep_time)} + {formatTime(recipe.cook_time)}
+              {formatTime(recipe.total_time)}
             </span>
           </Tippy>
           <span className="bg-base-500 text-white text-xs font-medium px-2.5 py-0.5 rounded">

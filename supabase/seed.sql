@@ -88,8 +88,7 @@ BEGIN
     subcategory,
     ingredients,
     instructions,
-    prep_time,
-    cook_time,
+    total_time,
     servings,
     difficulty,
     created_by,
@@ -113,7 +112,6 @@ BEGIN
       {"step": "4", "content": "Bake at 180°C for 12 minutes"}
     ]'::jsonb,
     20,
-    12,
     24,
     2,
     user_id,
@@ -138,7 +136,6 @@ BEGIN
       {"step": "5", "content": "Bake in Dutch oven at 240°C"}
     ]'::jsonb,
     30,
-    45,
     1,
     3,
     user_id,

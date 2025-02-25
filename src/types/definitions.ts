@@ -35,7 +35,6 @@ export interface Database {
       recipes: {
         Row: {
           category: Database['public']['Enums']['recipe_categories'];
-          cook_time: number;
           created_at: string;
           created_by: string;
           description: string | null;
@@ -47,15 +46,14 @@ export interface Database {
           instructions: Json;
           metadata: Json | null;
           name: string;
-          prep_time: number;
           servings: number;
           slug: string;
           status: Database['public']['Enums']['recipe_status'];
           subcategory: Database['public']['Enums']['recipe_subcategories'];
+          total_time: number;
         };
         Insert: {
           category?: Database['public']['Enums']['recipe_categories'];
-          cook_time?: number;
           created_at?: string;
           created_by: string;
           description?: string | null;
@@ -67,15 +65,14 @@ export interface Database {
           instructions?: Json;
           metadata?: Json | null;
           name: string;
-          prep_time?: number;
           servings?: number;
           slug: string;
           status?: Database['public']['Enums']['recipe_status'];
           subcategory: Database['public']['Enums']['recipe_subcategories'];
+          total_time?: number;
         };
         Update: {
           category?: Database['public']['Enums']['recipe_categories'];
-          cook_time?: number;
           created_at?: string;
           created_by?: string;
           description?: string | null;
@@ -87,11 +84,11 @@ export interface Database {
           instructions?: Json;
           metadata?: Json | null;
           name?: string;
-          prep_time?: number;
           servings?: number;
           slug?: string;
           status?: Database['public']['Enums']['recipe_status'];
           subcategory?: Database['public']['Enums']['recipe_subcategories'];
+          total_time?: number;
         };
         Relationships: [
           {
@@ -108,7 +105,6 @@ export interface Database {
       recipes_with_author_data: {
         Row: {
           category: Database['public']['Enums']['recipe_categories'] | null;
-          cook_time: number | null;
           created_at: string | null;
           created_by: Json | null;
           description: string | null;
@@ -119,10 +115,10 @@ export interface Database {
           ingredients: Json | null;
           instructions: Json | null;
           name: string | null;
-          prep_time: number | null;
           servings: number | null;
           slug: string | null;
           status: Database['public']['Enums']['recipe_status'] | null;
+          total_time: number | null;
         };
         Relationships: [];
       };

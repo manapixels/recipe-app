@@ -2,7 +2,9 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useForm, SubmitHandler, Controller, useFieldArray } from 'react-hook-form';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
 
 import { FileUpload } from '@/_components/ui/FileUpload';
 import { useToast } from '@/_components/ui/Toasts/useToast';
@@ -22,7 +24,7 @@ import {
 } from '@/types/recipe';
 import Spinner from '@/_components/ui/Spinner';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Search, GripVertical } from 'lucide-react';
+import { Plus, Trash2, Search } from 'lucide-react';
 import { CustomSelect } from '@/_components/ui/Select';
 
 type Inputs = {
@@ -32,12 +34,79 @@ type Inputs = {
   description: string;
   ingredients: Ingredient[];
   instructions: { step: number; content: string }[];
-  prep_time: number;
-  cook_time: number;
+  total_time: number;
   servings: number;
   difficulty: DifficultyLevel;
   image_thumbnail_url: string;
   image_banner_url: string;
+};
+
+// Add this type for the instruction item
+type InstructionItem = {
+  id: string;
+  step: number;
+  content: string;
+};
+
+// Add this component for draggable instruction
+const DraggableInstruction = ({
+  index,
+  moveInstruction,
+  register,
+  removeInstruction,
+}: {
+  instruction: InstructionItem;
+  index: number;
+  moveInstruction: (dragIndex: number, hoverIndex: number) => void;
+  register: any;
+  removeInstruction: (index: number) => void;
+}) => {
+  const [{ isDragging }, drag] = useDrag({
+    type: 'instruction',
+    item: { index },
+    collect: monitor => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
+
+  const [, drop] = useDrop({
+    accept: 'instruction',
+    hover(item: { index: number }) {
+      if (item.index === index) return;
+      moveInstruction(item.index, index);
+      item.index = index;
+    },
+  });
+
+  return (
+    <div
+      ref={node => drag(drop(node))}
+      className={`flex gap-2 items-start bg-white p-3 rounded-lg border cursor-move ${
+        isDragging ? 'border-base-500 bg-base-200 shadow-lg' : 'border-gray-200'
+      }`}
+    >
+      <div className="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-lg">
+        <span className="text-gray-600 font-medium">{index + 1}</span>
+      </div>
+      <div className="flex-1">
+        <textarea
+          {...register(`instructions.${index}.content` as const, {
+            required: true,
+          })}
+          rows={2}
+          className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-base-500 focus:border-base-500"
+          placeholder={`Step ${index + 1} instructions...`}
+        />
+      </div>
+      <button
+        type="button"
+        onClick={() => removeInstruction(index)}
+        className="p-2 text-gray-500 hover:text-red-500"
+      >
+        <Trash2 className="w-5 h-5" />
+      </button>
+    </div>
+  );
 };
 
 export const CreateRecipeForm = () => {
@@ -92,8 +161,7 @@ export const CreateRecipeForm = () => {
         { step: 4, content: 'Shape and proof overnight' },
         { step: 5, content: 'Bake in Dutch oven at 450°F' },
       ],
-      prep_time: 60,
-      cook_time: 45,
+      total_time: 45,
       servings: 8,
       difficulty: 3,
       image_thumbnail_url: '',
@@ -141,8 +209,7 @@ export const CreateRecipeForm = () => {
           step: index + 1,
           content: instruction.content,
         })),
-        prep_time: data.prep_time,
-        cook_time: data.cook_time,
+        total_time: data.total_time,
         servings: data.servings,
         difficulty: data.difficulty,
         created_by: profile.id,
@@ -193,20 +260,14 @@ export const CreateRecipeForm = () => {
     setOpenDropdown(null);
   };
 
-  const onDragEnd = (result: any) => {
-    if (!result.destination) return;
-
-    const sourceIndex = result.source.index;
-    const destinationIndex = result.destination.index;
-
-    moveInstruction(sourceIndex, destinationIndex);
-
-    // Update step numbers after reordering
-    const instructions = watch('instructions');
-    instructions.forEach((_, index) => {
-      setValue(`instructions.${index}.step`, index + 1);
-    });
-  };
+  // Remove onDragStart and onDragEnd handlers
+  // Add this new function
+  const moveInstructionItem = useCallback(
+    (dragIndex: number, hoverIndex: number) => {
+      moveInstruction(dragIndex, hoverIndex);
+    },
+    [moveInstruction]
+  );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -427,53 +488,24 @@ export const CreateRecipeForm = () => {
           </button>
         </div>
 
-        <DragDropContext onDragEnd={onDragEnd}>
-          <Droppable droppableId="instructions">
-            {provided => (
-              <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
-                {instructionFields.map((field, index) => (
-                  <Draggable key={field.id} draggableId={field.id} index={index}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        className={`flex gap-2 items-start bg-white p-3 rounded-lg border ${
-                          snapshot.isDragging ? 'border-base-500 shadow-lg' : 'border-gray-200'
-                        }`}
-                      >
-                        <div
-                          {...provided.dragHandleProps}
-                          className="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-lg cursor-move"
-                        >
-                          {index + 1}
-                        </div>
-                        <div className="flex-1">
-                          <textarea
-                            {...register(`instructions.${index}.content` as const, {
-                              required: true,
-                            })}
-                            rows={2}
-                            className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-base-500 focus:border-base-500"
-                            placeholder={`Step ${index + 1} instructions...`}
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeInstruction(index)}
-                          className="p-2 text-gray-500 hover:text-red-500"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                        <GripVertical className="w-5 h-5 text-gray-400" />
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+        <DndProvider
+          backend={
+            typeof window !== 'undefined' && 'ontouchstart' in window ? TouchBackend : HTML5Backend
+          }
+        >
+          <div className="space-y-2">
+            {instructionFields.map((field, index) => (
+              <DraggableInstruction
+                key={field.id}
+                instruction={field as InstructionItem}
+                index={index}
+                moveInstruction={moveInstructionItem}
+                register={register}
+                removeInstruction={removeInstruction}
+              />
+            ))}
+          </div>
+        </DndProvider>
 
         {errors.instructions && (
           <p className="mt-2 text-sm text-red-600">All instruction steps are required</p>
@@ -484,29 +516,15 @@ export const CreateRecipeForm = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-            Prep Time (minutes)
+            Total Time (minutes)
           </label>
           <input
             type="number"
-            {...register('prep_time', { required: true, min: 0 })}
+            {...register('total_time', { required: true, min: 0 })}
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
           />
-          {errors.prep_time && (
-            <p className="mt-2 text-sm text-red-600">Valid prep time is required</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-            Cook Time (minutes)
-          </label>
-          <input
-            type="number"
-            {...register('cook_time', { required: true, min: 0 })}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
-          />
-          {errors.cook_time && (
-            <p className="mt-2 text-sm text-red-600">Valid cook time is required</p>
+          {errors.total_time && (
+            <p className="mt-2 text-sm text-red-600">Valid total time is required</p>
           )}
         </div>
 

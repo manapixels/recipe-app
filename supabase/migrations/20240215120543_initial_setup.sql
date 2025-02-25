@@ -73,8 +73,7 @@ create table public.recipes (
     jsonb_typeof(instructions) = 'array'
     and jsonb_array_length(instructions) >= 0
   ),
-  prep_time integer not null default 0,
-  cook_time integer not null default 0,
+  total_time integer not null default 0,
   servings integer not null default 1,
   difficulty integer not null default 1,
   image_thumbnail_url varchar(255),
@@ -167,8 +166,7 @@ select
   r.description,
   r.ingredients,
   r.instructions,
-  r.prep_time,
-  r.cook_time,
+  r.total_time,
   r.servings,
   r.difficulty,
   r.image_thumbnail_url,

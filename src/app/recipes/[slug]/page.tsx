@@ -92,12 +92,8 @@ export default async function RecipeDetailsPage({
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="border border-gray-200 p-4 rounded-lg text-center">
-              <div className="text-sm text-gray-500">Prep Time</div>
-              <div className="font-medium">{formatTime(recipe.prep_time)}</div>
-            </div>
-            <div className="border border-gray-200 p-4 rounded-lg text-center">
-              <div className="text-sm text-gray-500">Cook Time</div>
-              <div className="font-medium">{formatTime(recipe.cook_time)}</div>
+              <div className="text-sm text-gray-500">Total Time</div>
+              <div className="font-medium">{formatTime(recipe.total_time)}</div>
             </div>
             <div className="border border-gray-200 p-4 rounded-lg text-center">
               <div className="text-sm text-gray-500">Difficulty</div>
