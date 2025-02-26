@@ -62,7 +62,7 @@ export default function RecipeListItem({ recipe }: { recipe: Recipe }) {
       <div className="min-w-0 py-2 px-3 md:px-0">
         <p className="truncate text-md md:text-sm font-semibold">{recipe.name}</p>
         <p className="text-sm text-gray-500">
-          {recipe.category} • {recipe.subcategory.replace('.', ' / ')}
+          {recipe.category} • {recipe?.subcategory?.replace('.', ' / ')}
         </p>
         <p className="text-sm text-gray-500">{recipe.servings} servings</p>
       </div>

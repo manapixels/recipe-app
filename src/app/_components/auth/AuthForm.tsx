@@ -49,6 +49,12 @@ export default function AuthForm() {
           description: 'Welcome back!',
           className: 'bg-green-700 text-white border-transparent',
         });
+      } else {
+        toast({
+          title: 'Error',
+          description: resp.message || 'An error occurred',
+          className: 'bg-red-700 text-white border-transparent',
+        });
       }
       router.refresh();
     } else {

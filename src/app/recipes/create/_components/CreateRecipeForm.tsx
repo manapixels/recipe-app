@@ -15,7 +15,6 @@ import {
   RecipeSubcategory,
   CATEGORY_OPTIONS,
   SUBCATEGORY_OPTIONS,
-  DifficultyLevel,
   DEFAULT_INGREDIENTS,
   Ingredient,
   MEASUREMENT_UNITS,
@@ -33,9 +32,9 @@ type Inputs = {
   description: string;
   ingredients: Ingredient[];
   instructions: { step: number; content: string }[];
-  total_time: number;
-  servings: number;
-  difficulty: DifficultyLevel;
+  total_time: string;
+  servings: string;
+  difficulty: string;
   image_thumbnail_url: string;
   image_banner_url: string;
 };
@@ -108,7 +107,6 @@ const DraggableInstruction = ({
   );
 };
 
-// Add this near the top of the file, after other constants
 const DIFFICULTY_EMOJIS = {
   '1': '👨‍🍳',
   '2': '👨‍🍳👨‍🍳',
@@ -167,9 +165,9 @@ export const CreateRecipeForm = () => {
         { step: 4, content: 'Shape and proof overnight' },
         { step: 5, content: 'Bake in Dutch oven at 450°F' },
       ],
-      total_time: 45,
-      servings: 8,
-      difficulty: 3 as DifficultyLevel,
+      total_time: '45',
+      servings: '8',
+      difficulty: '3',
       image_thumbnail_url: '',
       image_banner_url: '',
     },
@@ -200,7 +198,7 @@ export const CreateRecipeForm = () => {
   );
 
   const onSubmit: SubmitHandler<Inputs> = async data => {
-    console.log(data);
+    console.log(data, profile);
     setShowErrorSummary(false);
 
     if (profile?.id) {
@@ -215,9 +213,9 @@ export const CreateRecipeForm = () => {
           step: index + 1,
           content: instruction.content,
         })),
-        total_time: data.total_time,
-        servings: data.servings,
-        difficulty: data.difficulty,
+        total_time: Number(data.total_time),
+        servings: Number(data.servings),
+        difficulty: Number(data.difficulty),
         created_by: profile.id,
         image_thumbnail_url: data.image_thumbnail_url,
         image_banner_url: data.image_banner_url,
@@ -267,8 +265,6 @@ export const CreateRecipeForm = () => {
     setOpenDropdown(null);
   };
 
-  // Remove onDragStart and onDragEnd handlers
-  // Add this new function
   const moveInstructionItem = useCallback(
     (dragIndex: number, hoverIndex: number) => {
       moveInstruction(dragIndex, hoverIndex);
@@ -277,116 +273,117 @@ export const CreateRecipeForm = () => {
   );
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      {/* Name */}
-      <div>
-        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-          Recipe Name
-        </label>
-        <input
-          type="text"
-          {...register('name', { required: true })}
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
-          placeholder="Enter recipe name"
-        />
-        {errors.name && <p className="mt-2 text-sm text-red-600">Recipe name is required</p>}
-      </div>
-
-      {/* Category */}
-      <div>
-        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-          Category
-        </label>
-        <Controller
-          control={control}
-          name="category"
-          rules={{ required: true }}
-          render={({ field }) => (
-            <CustomSelect
-              options={[...CATEGORY_OPTIONS]}
-              value={field.value}
-              onChange={field.onChange}
-              error={!!errors.category}
-              placeholder="Select category"
-            />
-          )}
-        />
-        {errors.category && <p className="mt-2 text-sm text-red-600">Category is required</p>}
-      </div>
-
-      {/* Subcategory */}
-      <div>
-        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-          Subcategory
-        </label>
-        <Controller
-          control={control}
-          name="subcategory"
-          rules={{ required: true }}
-          render={({ field }) => (
-            <CustomSelect
-              options={[...SUBCATEGORY_OPTIONS[selectedCategory]]}
-              value={field.value}
-              onChange={field.onChange}
-              error={!!errors.subcategory}
-              placeholder="Select subcategory"
-            />
-          )}
-        />
-      </div>
-
-      {/* Description */}
-      <div>
-        <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-          Description
-        </label>
-        <textarea
-          {...register('description')}
-          rows={4}
-          className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-base-500 focus:border-base-500"
-          placeholder="Write your recipe description here..."
-        />
-      </div>
-
-      {/* Times, Servings, Difficulty */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="space-y-4 px-2">
+        {/* Name */}
         <div>
           <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-            Total Time (minutes)
+            Recipe Name
           </label>
           <input
-            type="number"
-            {...register('total_time', { required: true, min: 0 })}
+            type="text"
+            {...register('name', { required: true })}
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
+            placeholder="Enter recipe name"
           />
-          {errors.total_time && (
-            <p className="mt-2 text-sm text-red-600">Valid total time is required</p>
-          )}
+          {errors.name && <p className="mt-2 text-sm text-red-600">Recipe name is required</p>}
         </div>
 
+        {/* Category */}
         <div>
           <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-            Servings
+            Category
           </label>
-          <input
-            type="number"
-            {...register('servings', { required: true, min: 1 })}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
+          <Controller
+            control={control}
+            name="category"
+            rules={{ required: true }}
+            render={({ field }) => (
+              <CustomSelect
+                options={[...CATEGORY_OPTIONS]}
+                value={field.value}
+                onChange={field.onChange}
+                error={!!errors.category}
+                placeholder="Select category"
+              />
+            )}
           />
-          {errors.servings && (
-            <p className="mt-2 text-sm text-red-600">Valid number of servings is required</p>
-          )}
+          {errors.category && <p className="mt-2 text-sm text-red-600">Category is required</p>}
         </div>
 
-        <div className="col-span-2">
+        {/* Subcategory */}
+        <div>
           <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-            Difficulty Level
+            Subcategory
           </label>
-          <div className="inline-flex rounded-md shadow-sm">
-            {Object.entries(DIFFICULTY_EMOJIS).map(([value, emoji], idx, arr) => (
-              <label
-                key={value}
-                className={`
+          <Controller
+            control={control}
+            name="subcategory"
+            rules={{ required: true }}
+            render={({ field }) => (
+              <CustomSelect
+                options={[...SUBCATEGORY_OPTIONS[selectedCategory]]}
+                value={field.value}
+                onChange={field.onChange}
+                error={!!errors.subcategory}
+                placeholder="Select subcategory"
+              />
+            )}
+          />
+        </div>
+
+        {/* Description */}
+        <div>
+          <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            Description
+          </label>
+          <textarea
+            {...register('description')}
+            rows={4}
+            className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-base-500 focus:border-base-500"
+            placeholder="Write your recipe description here..."
+          />
+        </div>
+
+        {/* Times, Servings, Difficulty */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+              Total Time (minutes)
+            </label>
+            <input
+              type="number"
+              {...register('total_time', { required: true, min: 0 })}
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
+            />
+            {errors.total_time && (
+              <p className="mt-2 text-sm text-red-600">Valid total time is required</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+              Servings
+            </label>
+            <input
+              type="number"
+              {...register('servings', { required: true, min: 1 })}
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
+            />
+            {errors.servings && (
+              <p className="mt-2 text-sm text-red-600">Valid number of servings is required</p>
+            )}
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+              Difficulty Level
+            </label>
+            <div className="inline-flex rounded-md shadow-sm">
+              {Object.entries(DIFFICULTY_EMOJIS).map(([value, emoji], idx, arr) => (
+                <label
+                  key={value}
+                  className={`
                 relative inline-flex items-center cursor-pointer justify-center px-4 py-2 text-sm font-medium
                 ${idx === 0 ? 'rounded-l-lg' : ''} 
                 ${idx === arr.length - 1 ? 'rounded-r-lg' : ''}
@@ -399,101 +396,100 @@ export const CreateRecipeForm = () => {
                 }
                 focus:z-10
               `}
-              >
-                <input
-                  type="radio"
-                  {...register('difficulty', {
-                    required: true,
-                    valueAsNumber: true,
-                  })}
-                  value={value}
-                  className="sr-only"
-                />
-                <span>{emoji}</span>
-              </label>
-            ))}
+                >
+                  <input
+                    type="radio"
+                    {...register('difficulty', {
+                      required: true,
+                    })}
+                    value={value}
+                    className="sr-only"
+                  />
+                  <span>{emoji}</span>
+                </label>
+              ))}
+            </div>
+            {errors.difficulty && (
+              <p className="mt-2 text-sm text-red-600">Difficulty level is required</p>
+            )}
           </div>
-          {errors.difficulty && (
-            <p className="mt-2 text-sm text-red-600">Difficulty level is required</p>
-          )}
-        </div>
-      </div>
-
-      <div className="space-y-0">
-        <hr className="h-px bg-gray-200 border-0 dark:bg-gray-700 my-12" />
-      </div>
-
-      {/* Ingredients */}
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <label className="block text-sm font-medium text-gray-900 dark:text-white">
-            Ingredients
-          </label>
-          <button
-            type="button"
-            onClick={() => append({ name: '', weight: '', unit: 'g' })}
-            className="inline-flex items-center px-3 py-1 text-sm font-medium text-white bg-base-600 rounded-lg hover:bg-base-700"
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Add
-          </button>
         </div>
 
-        <div className="space-y-2">
-          {fields.map((field, index) => {
-            const searchTerm = searchTerms[index] || '';
-            const isDropdownOpen = openDropdown === index;
-            const filteredIngredients = ALL_INGREDIENTS.filter(ing =>
-              ing.toLowerCase().includes(searchTerm.toLowerCase())
-            );
+        <div className="space-y-0">
+          <hr className="h-px bg-gray-200 border-0 dark:bg-gray-700 my-12" />
+        </div>
 
-            return (
-              <div key={field.id} className="flex gap-2 items-start">
-                <div className="flex-1 relative">
-                  <div className="flex items-center">
+        {/* Ingredients */}
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <label className="block text-sm font-medium text-gray-900 dark:text-white">
+              Ingredients
+            </label>
+            <button
+              type="button"
+              onClick={() => append({ name: '', weight: '', unit: 'g' })}
+              className="inline-flex items-center px-3 py-1 text-sm font-medium text-white bg-base-600 rounded-lg hover:bg-base-700"
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Add
+            </button>
+          </div>
+
+          <div className="space-y-2">
+            {fields.map((field, index) => {
+              const searchTerm = searchTerms[index] || '';
+              const isDropdownOpen = openDropdown === index;
+              const filteredIngredients = ALL_INGREDIENTS.filter(ing =>
+                ing.toLowerCase().includes(searchTerm.toLowerCase())
+              );
+
+              return (
+                <div key={field.id} className="flex gap-2 items-start">
+                  <div className="flex-1 relative">
+                    <div className="flex items-center">
+                      <input
+                        value={watch(`ingredients.${index}.name`) || searchTerm}
+                        onChange={e => handleIngredientSearch(index, e.target.value)}
+                        onFocus={() => setOpenDropdown(index)}
+                        placeholder="Search ingredient..."
+                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
+                      />
+                      <Search className="w-4 h-4 absolute right-3 text-gray-400" />
+                    </div>
+                    {isDropdownOpen && searchTerm && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
+                        {filteredIngredients.map((ingredient, i) => (
+                          <button
+                            key={`${ingredient}-${i}`}
+                            type="button"
+                            className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm"
+                            onClick={() => handleIngredientSelect(index, ingredient)}
+                          >
+                            {ingredient}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <input
-                      value={watch(`ingredients.${index}.name`) || searchTerm}
-                      onChange={e => handleIngredientSearch(index, e.target.value)}
-                      onFocus={() => setOpenDropdown(index)}
-                      placeholder="Search ingredient..."
+                      type="hidden"
+                      {...register(`ingredients.${index}.name` as const, { required: true })}
+                    />
+                  </div>
+                  <div className="w-12 sm:w-32">
+                    <input
+                      {...register(`ingredients.${index}.weight` as const, { required: true })}
+                      placeholder="Amount"
+                      type="number"
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
                     />
-                    <Search className="w-4 h-4 absolute right-3 text-gray-400" />
                   </div>
-                  {isDropdownOpen && searchTerm && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
-                      {filteredIngredients.map((ingredient, i) => (
-                        <button
-                          key={`${ingredient}-${i}`}
-                          type="button"
-                          className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm"
-                          onClick={() => handleIngredientSelect(index, ingredient)}
-                        >
-                          {ingredient}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  <input
-                    type="hidden"
-                    {...register(`ingredients.${index}.name` as const, { required: true })}
-                  />
-                </div>
-                <div className="w-12 sm:w-32">
-                  <input
-                    {...register(`ingredients.${index}.weight` as const, { required: true })}
-                    placeholder="Amount"
-                    type="number"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5"
-                  />
-                </div>
-                <div className="w-14 sm:w-32">
-                  {/* For larger screens */}
-                  <div className="hidden sm:inline-flex rounded-md shadow-sm">
-                    {Object.entries(MEASUREMENT_UNITS).map(([value, label], idx, arr) => (
-                      <label
-                        key={value}
-                        className={`
+                  <div className="w-14 sm:w-32">
+                    {/* For larger screens */}
+                    <div className="hidden sm:inline-flex rounded-md shadow-sm">
+                      {Object.entries(MEASUREMENT_UNITS).map(([value, label], idx, arr) => (
+                        <label
+                          key={value}
+                          className={`
                             relative inline-flex items-center cursor-pointer justify-center px-2.5 py-2 text-sm font-medium
                             ${idx === 0 ? 'rounded-l-lg' : ''} 
                             ${idx === arr.length - 1 ? 'rounded-r-lg' : ''}
@@ -506,158 +502,162 @@ export const CreateRecipeForm = () => {
                             }
                             focus:z-10
                           `}
-                      >
-                        <input
-                          type="radio"
-                          {...register(`ingredients.${index}.unit` as const, { required: true })}
-                          value={value}
-                          className="sr-only"
-                        />
-                        <span>{label}</span>
-                      </label>
-                    ))}
+                        >
+                          <input
+                            type="radio"
+                            {...register(`ingredients.${index}.unit` as const, { required: true })}
+                            value={value}
+                            className="sr-only"
+                          />
+                          <span>{label}</span>
+                        </label>
+                      ))}
+                    </div>
+
+                    {/* For mobile screens */}
+                    <Controller
+                      name={`ingredients.${index}.unit` as const}
+                      control={control}
+                      rules={{ required: true }}
+                      render={({ field }) => (
+                        <div className="sm:hidden">
+                          <CustomSelect
+                            options={Object.entries(MEASUREMENT_UNITS).map(([value, label]) => ({
+                              value,
+                              label,
+                            }))}
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="Select unit"
+                          />
+                        </div>
+                      )}
+                    />
                   </div>
-
-                  {/* For mobile screens */}
-                  <Controller
-                    name={`ingredients.${index}.unit` as const}
-                    control={control}
-                    rules={{ required: true }}
-                    render={({ field }) => (
-                      <div className="sm:hidden">
-                        <CustomSelect
-                          options={Object.entries(MEASUREMENT_UNITS).map(([value, label]) => ({
-                            value,
-                            label,
-                          }))}
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder="Select unit"
-                        />
-                      </div>
-                    )}
-                  />
+                  <button
+                    type="button"
+                    onClick={() => remove(index)}
+                    className="py-2.5 px-1 sm:px-2.5 text-gray-500 hover:text-red-500"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => remove(index)}
-                  className="py-2.5 px-1 sm:px-2.5 text-gray-500 hover:text-red-500"
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-        {errors.ingredients && (
-          <p className="mt-2 text-sm text-red-600">All ingredient fields are required</p>
-        )}
-      </div>
-
-      {/* Instructions */}
-      <div>
-        <div className="flex justify-between items-center mb-2">
-          <label className="block text-sm font-medium text-gray-900 dark:text-white">
-            Instructions
-          </label>
-          <button
-            type="button"
-            onClick={() => appendInstruction({ step: instructionFields.length + 1, content: '' })}
-            className="inline-flex items-center px-3 py-1 text-sm font-medium text-white bg-base-600 rounded-lg hover:bg-base-700"
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Add Step
-          </button>
-        </div>
-
-        <DndProvider
-          backend={
-            typeof window !== 'undefined' && 'ontouchstart' in window ? TouchBackend : HTML5Backend
-          }
-        >
-          <div className="space-y-2">
-            {instructionFields.map((field, index) => (
-              <DraggableInstruction
-                key={field.id}
-                instruction={field as InstructionItem}
-                index={index}
-                moveInstruction={moveInstructionItem}
-                register={register}
-                removeInstruction={removeInstruction}
-              />
-            ))}
+              );
+            })}
           </div>
-        </DndProvider>
-
-        {errors.instructions && (
-          <p className="mt-2 text-sm text-red-600">All instruction steps are required</p>
-        )}
-      </div>
-
-      {/* Images */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-            Thumbnail Image
-          </label>
-          <Controller
-            name="image_thumbnail_url"
-            control={control}
-            render={({ field }) => (
-              <FileUpload
-                bucketId="recipe_thumbnails"
-                userId={profile?.id}
-                currValue={field.value}
-                onUploadComplete={handleThumbnailUpload}
-                register={register}
-                validationSchema={{ required: false }}
-                name="image_thumbnail_url"
-                label="Thumbnail Image"
-              />
-            )}
-          />
+          {errors.ingredients && (
+            <p className="mt-2 text-sm text-red-600">All ingredient fields are required</p>
+          )}
         </div>
+
+        {/* Instructions */}
         <div>
-          <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-            Banner Image
-          </label>
-          <Controller
-            name="image_banner_url"
-            control={control}
-            render={({ field }) => (
-              <FileUpload
-                bucketId="recipe_banners"
-                userId={profile?.id}
-                currValue={field.value}
-                onUploadComplete={handleBannerUpload}
-                register={register}
-                validationSchema={{ required: false }}
-                name="image_banner_url"
-                label="Banner Image"
-              />
-            )}
-          />
+          <div className="flex justify-between items-center mb-2">
+            <label className="block text-sm font-medium text-gray-900 dark:text-white">
+              Instructions
+            </label>
+            <button
+              type="button"
+              onClick={() => appendInstruction({ step: instructionFields.length + 1, content: '' })}
+              className="inline-flex items-center px-3 py-1 text-sm font-medium text-white bg-base-600 rounded-lg hover:bg-base-700"
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Add Step
+            </button>
+          </div>
+
+          <DndProvider
+            backend={
+              typeof window !== 'undefined' && 'ontouchstart' in window
+                ? TouchBackend
+                : HTML5Backend
+            }
+          >
+            <div className="space-y-2">
+              {instructionFields.map((field, index) => (
+                <DraggableInstruction
+                  key={field.id}
+                  instruction={field as InstructionItem}
+                  index={index}
+                  moveInstruction={moveInstructionItem}
+                  register={register}
+                  removeInstruction={removeInstruction}
+                />
+              ))}
+            </div>
+          </DndProvider>
+
+          {errors.instructions && (
+            <p className="mt-2 text-sm text-red-600">All instruction steps are required</p>
+          )}
+        </div>
+
+        {/* Images */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+              Thumbnail Image
+            </label>
+            <Controller
+              name="image_thumbnail_url"
+              control={control}
+              render={({ field }) => (
+                <FileUpload
+                  bucketId="recipe_thumbnails"
+                  userId={profile?.id}
+                  currValue={field.value}
+                  onUploadComplete={handleThumbnailUpload}
+                  register={register}
+                  validationSchema={{ required: false }}
+                  name="image_thumbnail_url"
+                  label="Thumbnail Image"
+                />
+              )}
+            />
+          </div>
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+              Banner Image
+            </label>
+            <Controller
+              name="image_banner_url"
+              control={control}
+              render={({ field }) => (
+                <FileUpload
+                  bucketId="recipe_banners"
+                  userId={profile?.id}
+                  currValue={field.value}
+                  onUploadComplete={handleBannerUpload}
+                  register={register}
+                  validationSchema={{ required: false }}
+                  name="image_banner_url"
+                  label="Banner Image"
+                />
+              )}
+            />
+          </div>
         </div>
       </div>
-
       {/* Submit Button */}
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-base-700 rounded-lg focus:ring-4 focus:ring-base-200 dark:focus:ring-base-900 hover:bg-base-800"
-      >
-        {isLoading ? (
-          <>
-            <Spinner className="mr-2" />
-            Creating Recipe...
-          </>
-        ) : (
-          'Create Recipe'
+      <div className="flex justify-end sticky bottom-0 bg-white py-2 border-t border-gray-200 z-10">
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-base-700 rounded-lg focus:ring-4 focus:ring-base-200 dark:focus:ring-base-900 hover:bg-base-800"
+        >
+          {isLoading ? (
+            <>
+              <Spinner className="mr-2" />
+              Creating Recipe...
+            </>
+          ) : (
+            'Create Recipe'
+          )}
+        </button>
+        {showErrorSummary && (
+          <div className="mt-2 text-sm text-red-600">Please fix the errors before creating.</div>
         )}
-      </button>
-      {showErrorSummary && (
-        <div className="mt-2 text-sm text-red-600">Please fix the errors before creating.</div>
-      )}
+      </div>
     </form>
   );
 };
