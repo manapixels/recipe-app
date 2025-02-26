@@ -19,6 +19,7 @@ import {
   Ingredient,
   MEASUREMENT_UNITS,
   ALL_INGREDIENTS,
+  DIFFICULTY_LEVELS,
 } from '@/types/recipe';
 import Spinner from '@/_components/ui/Spinner';
 import { useRouter } from 'next/navigation';
@@ -106,12 +107,6 @@ const DraggableInstruction = ({
     </div>
   );
 };
-
-const DIFFICULTY_EMOJIS = {
-  '1': '👨‍🍳',
-  '2': '👨‍🍳👨‍🍳',
-  '3': '👨‍🍳👨‍🍳👨‍🍳',
-} as const;
 
 export const CreateRecipeForm = () => {
   const { profile } = useUser();
@@ -380,7 +375,7 @@ export const CreateRecipeForm = () => {
               Difficulty Level
             </label>
             <div className="inline-flex rounded-md shadow-sm">
-              {Object.entries(DIFFICULTY_EMOJIS).map(([value, emoji], idx, arr) => (
+              {Object.entries(DIFFICULTY_LEVELS).map(([value, emoji], idx, arr) => (
                 <label
                   key={value}
                   className={`

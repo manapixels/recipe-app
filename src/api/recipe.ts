@@ -14,8 +14,13 @@ export const fetchRecipes = async () => {
   const supabase = createClient();
   try {
     let { data } = await supabase
-      .from('recipes_with_author_data')
-      .select('*')
+      .from('recipes')
+      .select(
+        `
+        *,
+        author:profiles(id, username, avatar_url, name)
+      `
+      )
       .order('created_at', { ascending: false });
 
     return data;
@@ -34,8 +39,13 @@ export const fetchRecipe = async (slug: string) => {
   const supabase = createClient();
   try {
     let { data } = await supabase
-      .from('recipes_with_author_data')
-      .select('*')
+      .from('recipes')
+      .select(
+        `
+        *,
+        author:profiles(id, username, avatar_url, name)
+      `
+      )
       .eq('slug', slug)
       .single();
 
@@ -59,7 +69,7 @@ export const fetchUserRecipes = async (profile_id: string) => {
       .select(
         `
         *,
-        author:profiles!user_id(id, username, avatar_url, name)
+        author:profiles(id, username, avatar_url, name)
       `
       )
       .eq('created_by', profile_id);

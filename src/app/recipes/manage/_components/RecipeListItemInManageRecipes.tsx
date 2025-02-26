@@ -7,6 +7,7 @@ import { Recipe, DIFFICULTY_LEVELS } from '@/types/recipe';
 import { EditRecipeForm } from './EditRecipeForm';
 import { updateRecipeStatus } from '@/api/recipe';
 import { useToast } from '@/_components/ui/Toasts/useToast';
+import { CustomSelect } from '@/_components/ui/Select';
 
 export const RecipeListItemInManageRecipes = ({
   recipe,
@@ -117,19 +118,19 @@ export const RecipeListItemInManageRecipes = ({
         <div className="flex flex-wrap gap-2 mt-4">
           <button
             onClick={handleEditClick}
-            className="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-4 py-2"
+            className="text-white bg-base-700 hover:bg-base-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-4 py-2"
           >
-            Edit Recipe
+            Edit
           </button>
-          <select
+          <CustomSelect
             value={status}
-            onChange={e => setStatus(e.target.value)}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
-          >
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-            <option value="archived">Archived</option>
-          </select>
+            onChange={value => setStatus(value)}
+            options={[
+              { value: 'draft', label: 'Draft' },
+              { value: 'published', label: 'Published' },
+              { value: 'archived', label: 'Archived' },
+            ]}
+          />
         </div>
       </div>
     </div>

@@ -42,7 +42,7 @@ export default function LoggedInUser({
             <Image
               className="h-full w-full rounded-full"
               src={
-                profile?.avatar_url !== ''
+                profile?.avatar_url !== '' && profile?.avatar_url !== null
                   ? `${BUCKET_URL}/avatars/${profile?.avatar_url}`
                   : '/users/placeholder-avatar.svg'
               }

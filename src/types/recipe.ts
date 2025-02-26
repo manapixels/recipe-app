@@ -35,9 +35,9 @@ export type RecipeSubcategory =
 
 // Difficulty levels
 export const DIFFICULTY_LEVELS = {
-  1: 'Easy',
-  2: 'Medium',
-  3: 'Advanced',
+  '1': '👨‍🍳',
+  '2': '👨‍🍳👨‍🍳',
+  '3': '👨‍🍳👨‍🍳👨‍🍳',
 } as const;
 
 export type DifficultyLevel = keyof typeof DIFFICULTY_LEVELS;
