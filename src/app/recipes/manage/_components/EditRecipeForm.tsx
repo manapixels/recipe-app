@@ -382,7 +382,7 @@ export const EditRecipeForm = ({ recipe, onSuccess, closeModal }: EditRecipeForm
             </label>
             <button
               type="button"
-              onClick={() => append({ name: '', weight: '', unit: 'g' })}
+              onClick={() => append({ name: '', amount: '', unit: 'g' })}
               className="inline-flex items-center px-3 py-1 text-sm font-medium text-white bg-base-600 rounded-lg hover:bg-base-700"
             >
               <Plus className="w-4 h-4 mr-1" />
@@ -431,7 +431,7 @@ export const EditRecipeForm = ({ recipe, onSuccess, closeModal }: EditRecipeForm
                   </div>
                   <div className="w-12 sm:w-32">
                     <input
-                      {...register(`ingredients.${index}.weight` as const, { required: true })}
+                      {...register(`ingredients.${index}.amount` as const, { required: true })}
                       placeholder="Amount"
                       type="number"
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"

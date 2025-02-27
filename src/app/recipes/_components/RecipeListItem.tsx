@@ -2,9 +2,9 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import Tippy from '@tippyjs/react';
+import pluralize from 'pluralize';
 
-import { Recipe, DIFFICULTY_LEVELS } from '@/types/recipe';
+import { Recipe, DIFFICULTY_LEVELS, SUBCATEGORY_OPTIONS } from '@/types/recipe';
 import { BUCKET_URL } from '@/constants';
 
 export default function RecipeListItem({ recipe }: { recipe: Recipe }) {
@@ -15,10 +15,12 @@ export default function RecipeListItem({ recipe }: { recipe: Recipe }) {
 
   // Helper function to format time
   const formatTime = (minutes: number) => {
-    if (minutes < 60) return `${minutes}min`;
+    if (minutes < 60) return `${minutes} ${pluralize('min', minutes)}`;
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
-    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}min` : `${hours}h`;
+    return remainingMinutes > 0
+      ? `${hours}h ${remainingMinutes} ${pluralize('min', remainingMinutes)}`
+      : `${hours} ${pluralize('hour', hours)}`;
   };
 
   return (
@@ -47,24 +49,26 @@ export default function RecipeListItem({ recipe }: { recipe: Recipe }) {
             />
           </div>
         )}
-        <div className="absolute top-3 right-3 flex gap-2">
-          <Tippy content={`${formatTime(recipe.total_time)} total`}>
-            <span className="bg-base-600 text-white text-xs font-medium px-2.5 py-0.5 rounded">
-              {formatTime(recipe.total_time)}
-            </span>
-          </Tippy>
-          <span className="bg-base-500 text-white text-xs font-medium px-2.5 py-0.5 rounded">
-            {formatDifficulty(recipe.difficulty)}
-          </span>
-        </div>
       </div>
 
       <div className="min-w-0 py-2 px-3 md:px-0">
         <p className="truncate text-md md:text-sm font-semibold">{recipe.name}</p>
-        <p className="text-sm text-gray-500">
-          {recipe.category} • {recipe?.subcategory?.replace('.', ' / ')}
+        <p className="text-sm text-gray-500 capitalize">
+          {
+            SUBCATEGORY_OPTIONS[recipe.category]?.find(opt => opt.value === recipe.subcategory)
+              ?.label
+          }
         </p>
-        <p className="text-sm text-gray-500">{recipe.servings} servings</p>
+        <p className="text-sm text-gray-500">
+          {recipe.servings} {pluralize('serving', recipe.servings)}
+        </p>
+
+        <p className="inline-block bg-base-600 text-white text-xs font-medium px-2.5 py-0.5 rounded">
+          {formatTime(recipe.total_time)}
+        </p>
+        <p className="inline-block text-white text-xs font-medium px-2.5 py-0.5 rounded">
+          {formatDifficulty(recipe.difficulty)}
+        </p>
       </div>
     </Link>
   );

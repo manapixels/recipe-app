@@ -7,44 +7,6 @@ DECLARE
   user_id uuid;
   username text;
 BEGIN
-  -- Create regular users
-  FOR i IN 1..10 LOOP
-    user_id := uuid_generate_v4();
-    username := 'user' || i;
-    
-    -- Insert into auth.users
-    INSERT INTO auth.users (
-      id,
-      instance_id,
-      aud,
-      role,
-      email,
-      encrypted_password,
-      email_confirmed_at,
-      invited_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, email_change_token_new, email_change, email_change_sent_at, last_sign_in_at,
-      raw_app_meta_data,
-      raw_user_meta_data,
-      created_at,
-      updated_at
-    ) VALUES (
-      user_id,
-      '00000000-0000-0000-0000-000000000000',
-      'authenticated',
-      'authenticated',
-      username || '@recipe-app.com',
-      crypt('password123', gen_salt('bf')),
-      now(),
-      NULL, '', NULL, '', NULL, '', '', NULL, NULL,
-      '{"provider":"email","providers":["email"]}'::jsonb,
-      ('{"name":"User ' || i || '"}')::jsonb,
-      now(),
-      now()
-    );
-
-    -- Insert into profiles
-    INSERT INTO public.profiles (id, name, username, avatar_url)
-    VALUES (user_id, 'User ' || i, username, NULL);
-  END LOOP;
 
   -- Create admin user
   user_id := 'b02e2f4a-94ed-45ad-a745-435d986db886';
@@ -100,10 +62,10 @@ BEGIN
     'sweets',
     'cookies',
     '[
-      {"name": "All-purpose flour", "weight": "240", "unit": "g"},
-      {"name": "Butter", "weight": "170", "unit": "g"},
-      {"name": "Brown sugar", "weight": "150", "unit": "g"},
-      {"name": "Chocolate chips", "weight": "200", "unit": "g"}
+      {"name": "All-purpose flour", "amount": "240", "unit": "g"},
+      {"name": "Butter", "amount": "170", "unit": "g"},
+      {"name": "Brown sugar", "amount": "150", "unit": "g"},
+      {"name": "Chocolate chips", "amount": "200", "unit": "g"}
     ]'::jsonb,
     '[
       {"step": "1", "content": "Cream butter and sugar"},
@@ -123,10 +85,10 @@ BEGIN
     'breads',
     'sourdough',
     '[
-      {"name": "Bread flour", "weight": "500", "unit": "g"},
-      {"name": "Water", "weight": "350", "unit": "g"},
-      {"name": "Salt", "weight": "10", "unit": "g"},
-      {"name": "Sourdough starter", "weight": "100", "unit": "g"}
+      {"name": "Bread flour", "amount": "500", "unit": "g"},
+      {"name": "Water", "amount": "350", "unit": "g"},
+      {"name": "Salt", "amount": "10", "unit": "g"},
+      {"name": "Sourdough starter", "amount": "100", "unit": "g"}
     ]'::jsonb,
     '[
       {"step": "1", "content": "Mix ingredients and autolyse"},

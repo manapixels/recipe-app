@@ -142,8 +142,9 @@ export type Instruction = {
 // Ingredient type
 export type Ingredient = {
   name: string;
-  weight: string;
+  amount: string;
   unit: MeasurementUnit;
+  image_url?: string;
 };
 
 // Recipe interface matching the database schema
@@ -155,17 +156,17 @@ export type Recipe = Tables<'recipes'> & {
 // Default ingredient templates by category (fallback if no subcategory template exists)
 export const DEFAULT_INGREDIENTS: Record<RecipeCategory, Ingredient[]> = {
   breads: [
-    { name: 'Bread Flour', weight: '500', unit: 'g' },
-    { name: 'Active Dry Yeast', weight: '7', unit: 'g' },
-    { name: 'Salt', weight: '10', unit: 'g' },
-    { name: 'Granulated Sugar', weight: '15', unit: 'g' },
-    { name: 'Water', weight: '350', unit: 'ml' },
+    { name: 'Bread Flour', amount: '500', unit: 'g' },
+    { name: 'Active Dry Yeast', amount: '7', unit: 'g' },
+    { name: 'Salt', amount: '10', unit: 'g' },
+    { name: 'Granulated Sugar', amount: '15', unit: 'g' },
+    { name: 'Water', amount: '350', unit: 'ml' },
   ],
   sweets: [
-    { name: 'All-Purpose Flour', weight: '250', unit: 'g' },
-    { name: 'Granulated Sugar', weight: '200', unit: 'g' },
-    { name: 'Butter', weight: '115', unit: 'g' },
-    { name: 'Whole Eggs', weight: '50', unit: 'g' },
-    { name: 'Vanilla Extract', weight: '1', unit: 'g' },
+    { name: 'All-Purpose Flour', amount: '250', unit: 'g' },
+    { name: 'Granulated Sugar', amount: '200', unit: 'g' },
+    { name: 'Butter', amount: '115', unit: 'g' },
+    { name: 'Whole Eggs', amount: '50', unit: 'g' },
+    { name: 'Vanilla Extract', amount: '1', unit: 'g' },
   ],
 } as const;

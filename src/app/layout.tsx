@@ -15,7 +15,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'recipe-app',
-  description: 'a social initiative app',
+  description: 'a recipe app',
 };
 
 export default function RootLayout({

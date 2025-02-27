@@ -184,7 +184,7 @@ export default function LoggedInUser({
                   setUser(undefined);
                   toast({
                     title: 'Successfully logged out',
-                    description: 'Hope to see you again soon!',
+                    description: '.... .... .... ....',
                     className: 'bg-green-700 text-white border-transparent',
                   });
                   router.push('/recipes');
