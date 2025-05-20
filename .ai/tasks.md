@@ -13,7 +13,7 @@
     - [x] Clearly sectioned ingredients list component (handles `Ingredient[]` objects: name, amount, unit).
     - [x] Clearly sectioned, step-by-step instructions component (handles `Instruction[]` objects: step, content).
     - [x] Prominently display `total_time`, servings, difficulty (using new emoji labels from `src/types/recipe.ts`).
-    - [ ] Ensure responsive design for recipe detail page.
+    - [x] Ensure responsive design for recipe detail page.
   - **Backend (Supabase & API):**
     - [x] Ensure `fetchRecipe` in `src/api/recipe.ts` returns data with `ingredients` and `instructions` parsed from JSON into `Ingredient[]` and `Instruction[]` respectively, and includes `total_time`.
   - **Types:**
@@ -40,51 +40,44 @@
 - **Goal:** Display user information, their created recipes, and their saved/favorited recipes.
 - **Tasks:**
   - **Frontend:**
-    - [ ] Design/Refine UI for user profile pages (`src/app/profiles/[username]/page.tsx`).
-    - [ ] Display user's avatar, username, name, bio (if profile schema supports bio).
-    - [ ] Implement tabbed interface or sections for "Created Recipes" and "Favorited Recipes".
-    - [ ] List created recipes and favorited recipes using the `RecipeCard` component (likely `RecipeListItem`).
+    - [x] Design/Refine UI for user profile pages (`src/app/profiles/[username]/page.tsx`).
+    - [x] Display user's avatar, username, name, bio (if profile schema supports bio).
+    - [x] Implement tabbed interface or sections for "Created Recipes" and "Favorited Recipes".
+    - [x] List created recipes using the `RecipeListItemInProfile` component (display of favorited recipes is part of Phase 2.1).
   - **Backend (API):**
-    - [ ] Ensure `fetchUserProfileWithRecipes` in `src/api/profile.ts` provides data for created recipes.
+    - [x] Ensure `fetchUserProfileWithRecipes` in `src/api/profile.ts` provides data for created recipes.
     - [ ] Ensure `fetchUserFavoriteRecipes` is available for "Favorited Recipes" tab (dependency on Phase 2.1 tasks).
   - **Types:**
-    - [ ] Verify/Update `ProfileWithRecipes` in `src/types/profile.ts` to support both created and favorited recipes lists.
+    - [x] Verify/Update `ProfileWithRecipes` in `src/types/profile.ts` to support bio and created recipes list (support for favorited recipes list to be added in Phase 2.1).
 
-### 4. Recipe Creation/Editing Flow Enhancements (Phase 1.4)
+### 4. Recipe Creation & Editing Enhancements (Focus: Intuitive Form)
 
-- **Goal:** Make creating and editing recipes intuitive and robust, handling new structured data.
-- **Tasks:**
-  - **Frontend - Form Structure & Basic Fields:**
-    - [ ] Design/Refine UI for recipe creation/edit form (e.g., `/recipes/manage` or `/recipes/create`, `/recipes/[slug]/edit`).
-    - [ ] Implement input field for recipe name.
-    - [ ] Implement textarea for recipe description.
-    - [ ] Implement input field for `total_time` (numeric, perhaps in minutes).
-    - [ ] Implement input field for servings (numeric).
-    - [ ] Implement selection for difficulty level (using `DIFFICULTY_LEVELS` from `src/types/recipe.ts`).
-    - [ ] Implement selection for category and subcategory (using `CATEGORY_OPTIONS`, `SUBCATEGORY_OPTIONS` from `src/types/recipe.ts`, with dynamic subcategories).
-  - **Frontend - Dynamic Ingredient & Instruction Fields:**
-    - [ ] Implement component for dynamically adding/removing/editing `Ingredient` objects:
-      - Input for `name` (perhaps suggest from `COMMON_INGREDIENTS`).
-      - Input for `amount` (string/number).
-      - Select for `unit` (using `MEASUREMENT_UNITS`).
-      - (Optional) Input for `image_url`.
-    - [ ] Implement component for dynamically adding/removing/editing `Instruction` objects (textarea for `content`, auto-number `step`).
-  - **Frontend - Image Handling:**
-    - [ ] Implement UI for image thumbnail upload.
-    - [ ] Implement UI for image banner upload.
-    - [ ] Integrate with `src/api/file.ts` for upload process & state management.
-    - [ ] Display image previews.
-  - **Frontend - Form Actions & Validation:**
-    - [ ] Implement client-side validation for all inputs (including structured ingredients/instructions).
-    - [ ] Implement "Save Draft" button (connects to API, sets status to 'draft').
-    - [ ] Implement "Publish" button (connects to API, sets status to 'published').
-    - [ ] Implement "Preview" button/link.
-  - **Backend (API):**
-    - [ ] Review/enhance `addRecipe`, `updateRecipe` in `src/api/recipe.ts` to correctly handle `total_time`.
-    - [ ] Ensure `addRecipe` and `updateRecipe` expect `Ingredient[]` and `Instruction[]` and serialize them to JSON before saving to Supabase.
-    - [ ] Ensure proper error handling for new structured data.
-  - **Types:**
-    - [ ] Confirm `Recipe` type (and nested `Ingredient`, `Instruction`) and API function parameters accurately reflect form data and DB structure (JSON for ingredients/instructions in DB, objects in TS).
+- **Goal**: Implement a comprehensive and user-friendly form for adding and editing recipes, including draft saving and preview capabilities.
+- **Tasks**:
+  - **Frontend - Unified Recipe Form (`RecipeForm.tsx`)**:
+    - [x] Analyze `CreateRecipeForm.tsx` and `EditRecipeForm.tsx` for existing functionalities.
+    - [x] Design a reusable `RecipeForm.tsx` component to handle both creation and editing.
+      - [x] Accept `initialData` prop for editing mode.
+      - [x] Use `react-hook-form` with `defaultValues` based on `initialData` or new recipe defaults.
+      - [x] Dynamically call `addRecipe` or `updateRecipe` API functions.
+      - [x] Include dynamic fields for ingredients (name, amount, unit) with add/remove.
+      - [x] Include dynamic, reorderable fields for instructions (content, step) with add/remove/drag-and-drop.
+      - [x] Integrate image uploads for thumbnail and banner.
+      - [x] Implement form validation for all fields (name, category, subcategory, description, ingredients, instructions, time, servings, difficulty).
+    - [x] Implement "Save Draft" and "Publish" buttons.
+      - [x] Logic to pass `status: 'draft'` or `status: 'published'` to API.
+    - [x] Delete `src/app/recipes/create/_components/CreateRecipeForm.tsx`.
+    - [x] Delete `src/app/recipes/edit/_components/EditRecipeForm.tsx` (if it existed at the expected path).
+  - **Frontend - Pages**:
+    - [x] Update `src/app/recipes/create/page.tsx` to use the unified `RecipeForm.tsx` in `'create'` mode.
+    - [x] Create/Update `src/app/recipes/[slug]/edit/page.tsx` to fetch recipe data and use `RecipeForm.tsx` in `'edit'` mode with `initialData`.
+  - **Backend (API)**:
+    - [x] Review/Enhance `addRecipe` to correctly handle `total_time` (numeric) and `status` (draft/published).
+    - [x] Review/Enhance `updateRecipe` to correctly handle partial updates, `total_time` (numeric), and `status` (draft/published), ensuring `created_by` is not updatable.
+  - **Preview Functionality**:
+    - [x] Design a simple modal or separate page to display a non-editable preview of the recipe being created/edited. (`RecipePreview.tsx` in a modal)
+    - [x] Add a "Preview" button to `RecipeForm.tsx`.
+    - [x] Populate preview with current form data (consider unsaved changes).
 
 ### 5. Recipe Saving/Favorites (Phase 2.1 - Essential New Feature)
 
@@ -104,44 +97,4 @@
   - **Types:**
     - [ ] Create `UserFavoriteRecipe` interface/type.
     - [ ] Update `ProfileWithRecipes` to include an array of favorited `Recipe` objects or IDs.
-    - [ ] Update `Recipe` type (or extended type for detail view) to include optional `isFavorited` boolean.
-
-## Priority 2: Important UX and Community Features
-
-### 1. Search Functionality for Recipes (New feature within Phase 1.2)
-
-- **Goal:** Allow users to search for recipes by name or ingredients.
-- **Tasks:**
-  - **Frontend:**
-  - **Types:**
-    - [ ] No major type changes anticipated.
-
-### 2. User Ratings and Reviews for Recipes (New feature within Phase 1.1)
-
-- **Goal:** Allow users to rate and review recipes.
-- **Tasks:**
-  - **Backend (Supabase & API):**
-  - **Types:**
-    - [ ] New `RecipeReview` type.
-    - [ ] Update `Recipe` type to include `average_rating`, `review_count`.
-
-### 3. Social Sharing (Phase 2.2 - UI Implementation)
-
-- **Goal:** Implement UI for sharing recipes.
-- **Tasks:**
-  - **Frontend:**
-  - **Types:**
-    - [ ] No changes anticipated unless `postRecipeToSocial` interaction changes.
-
-### 4. Commenting on Recipes (Phase 2.3)
-
-- **Goal:** Allow users to leave comments on recipes.
-- **Tasks:**
-  - **Backend (Supabase & API):**
-  - **Types:**
-    - [ ] New `RecipeComment` type.
-    - [ ] Update `Recipe` type if comment count is denormalized.
-
----
-
-This breakdown should give you a solid foundation for planning your development sprints. Remember that technical considerations like error handling, loading states, accessibility, and testing should be incorporated into each relevant task. Also, the removal of the explicit role system means permission handling (e.g. for editing/deleting content, admin actions) needs to be clearly defined based on user ID or the existing `AppPermission` type.
+    - [ ] Update `Recipe` type (or extended type for detail view) to include optional `

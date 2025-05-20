@@ -186,6 +186,7 @@ export const addRecipe = async ({
   created_by,
   image_thumbnail_url,
   image_banner_url,
+  status,
 }: {
   name: FullRecipeType['name'];
   description: FullRecipeType['description'];
@@ -199,28 +200,27 @@ export const addRecipe = async ({
   created_by: FullRecipeType['created_by'];
   image_thumbnail_url?: FullRecipeType['image_thumbnail_url'];
   image_banner_url?: FullRecipeType['image_banner_url'];
+  status?: FullRecipeType['status'];
 }) => {
   const supabase = createClient();
   try {
-    let { data, error } = await supabase
-      .from('recipes')
-      .insert([
-        {
-          name,
-          description,
-          category,
-          subcategory,
-          ingredients,
-          instructions,
-          total_time,
-          servings,
-          difficulty,
-          created_by,
-          image_thumbnail_url,
-          image_banner_url,
-        },
-      ])
-      .select();
+    const recipeDataToInsert = {
+      name,
+      description,
+      category,
+      subcategory,
+      ingredients,
+      instructions,
+      total_time,
+      servings,
+      difficulty,
+      created_by,
+      image_thumbnail_url,
+      image_banner_url,
+      status: status || 'published',
+    };
+
+    let { data, error } = await supabase.from('recipes').insert([recipeDataToInsert]).select();
 
     if (error) throw error;
     return data;
@@ -246,9 +246,9 @@ export const updateRecipe = async ({
   total_time,
   servings,
   difficulty,
-  created_by,
   image_thumbnail_url,
   image_banner_url,
+  status,
 }: {
   id: string;
   name?: FullRecipeType['name'];
@@ -260,28 +260,36 @@ export const updateRecipe = async ({
   total_time?: FullRecipeType['total_time'];
   servings?: FullRecipeType['servings'];
   difficulty?: FullRecipeType['difficulty'];
-  created_by?: FullRecipeType['created_by'];
   image_thumbnail_url?: FullRecipeType['image_thumbnail_url'];
   image_banner_url?: FullRecipeType['image_banner_url'];
+  status?: FullRecipeType['status'];
 }) => {
   const supabase = createClient();
   try {
+    const recipeDataToUpdate: any = {};
+    if (name !== undefined) recipeDataToUpdate.name = name;
+    if (description !== undefined) recipeDataToUpdate.description = description;
+    if (category !== undefined) recipeDataToUpdate.category = category;
+    if (subcategory !== undefined) recipeDataToUpdate.subcategory = subcategory;
+    if (ingredients !== undefined) recipeDataToUpdate.ingredients = ingredients;
+    if (instructions !== undefined) recipeDataToUpdate.instructions = instructions;
+    if (total_time !== undefined) recipeDataToUpdate.total_time = total_time;
+    if (servings !== undefined) recipeDataToUpdate.servings = servings;
+    if (difficulty !== undefined) recipeDataToUpdate.difficulty = difficulty;
+    if (image_thumbnail_url !== undefined)
+      recipeDataToUpdate.image_thumbnail_url = image_thumbnail_url;
+    if (image_banner_url !== undefined) recipeDataToUpdate.image_banner_url = image_banner_url;
+    if (status !== undefined) recipeDataToUpdate.status = status;
+
+    if (Object.keys(recipeDataToUpdate).length === 0) {
+      // Optionally, fetch and return the existing record if nothing changed,
+      // or throw an error, or return a specific message.
+      // For now, let's just proceed, Supabase might handle it or return the existing.
+    }
+
     const { data, error } = await supabase
       .from('recipes')
-      .update({
-        name,
-        description,
-        category,
-        subcategory,
-        ingredients,
-        instructions,
-        total_time,
-        servings,
-        difficulty,
-        created_by,
-        image_thumbnail_url,
-        image_banner_url,
-      })
+      .update(recipeDataToUpdate)
       .match({ id })
       .select('*')
       .single();
