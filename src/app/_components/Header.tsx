@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -19,16 +18,12 @@ export default function Header() {
         aria-label="Global"
       >
         <div className="justify-self-start pr-4 bg-white">
-          <a href="/" className="-m-1.5 p-1.5 block">
-            <Image
-              src="/logo.svg"
-              alt="recipe-app Logo"
-              className="relative w-14 h-10 md:w-20 md:h-14"
-              width={80}
-              height={55}
-              priority
-            />
-          </a>
+          <Link
+            href="/"
+            className="-m-1.5 p-1.5 block text-2xl font-bold text-black hover:text-black"
+          >
+            <span className="italic text-base-700">my</span>recipe
+          </Link>
         </div>
         <div className="justify-self-center bg-white px-4 hidden md:block">
           <div className="bg-gray-50 rounded-full text-sm">
@@ -44,14 +39,12 @@ export default function Header() {
           </div>
         </div>
         <div className="justify-self-end flex gap-4 items-center bg-white pl-4">
-          {profile?.roles?.includes('host') && (
-            <Link
-              href="/recipes/create"
-              className="inline-block whitespace-nowrap self-center px-4 py-2 text-sm md:italic font-bold md:font-medium text-center text-base-700 bg-white border border-base-700 rounded-full hover:border-base-600 hover:text-base-600 focus:ring-4 focus:outline-none focus:ring-base-300 dark:text-base-600 dark:border-base-600 dark:hover:bg-base-600 dark:hover:text-white dark:focus:ring-base-800"
-            >
-              + Create <span className="hidden md:inline-block">recipe</span>
-            </Link>
-          )}
+          <Link
+            href="/recipes/create"
+            className="inline-block whitespace-nowrap self-center px-4 py-2 text-sm md:italic font-bold md:font-medium text-center text-base-700 bg-white border border-base-700 rounded-full hover:border-base-600 hover:text-base-800 hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-base-300 dark:text-base-600 dark:border-base-600 dark:hover:bg-base-600 dark:hover:text-white dark:focus:ring-base-800"
+          >
+            + Create <span className="hidden md:inline-block">recipe</span>
+          </Link>
           {profile?.id ? <LoggedInUser profile={profile} user={user} /> : <AuthForm />}
         </div>
         <div className="absolute top-1/2 flex justify-center w-full pointer-events-none">

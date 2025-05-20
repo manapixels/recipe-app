@@ -63,9 +63,7 @@ export default function RecipeListItemInMyRecipes({ recipe }: { recipe: Recipe }
 
           {/* Recipe details */}
           <div className="text-sm text-gray-500 space-y-1">
-            <p>
-              Prep: {formatTime(recipe.prep_time)} • Cook: {formatTime(recipe.cook_time)}
-            </p>
+            <p>Total: {formatTime(recipe.total_time)}</p>
             <p>Difficulty: {formatDifficulty(recipe.difficulty)}</p>
             <p>Servings: {recipe.servings}</p>
           </div>

@@ -53,9 +53,7 @@ export default function RecipeListItemInProfile({ recipe }: { recipe: Recipe }) 
         <p className="text-sm text-gray-500">
           {recipe.category} • {recipe.subcategory.replace('.', ' / ')}
         </p>
-        <p className="text-sm text-gray-500">
-          {formatTime(recipe.prep_time + recipe.cook_time)} total
-        </p>
+        <p className="text-sm text-gray-500">{formatTime(recipe.total_time)} total</p>
       </div>
     </Link>
   );

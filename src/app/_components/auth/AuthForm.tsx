@@ -10,6 +10,7 @@ import { useToast } from '@/_components/ui/Toasts/useToast';
 import { useUser } from '@/_contexts/UserContext';
 import { useAuthModal } from '@/_contexts/AuthContext';
 import { signInWithEmail, signUpNewUser } from '@/api/auth';
+import { LogIn } from 'lucide-react';
 
 interface AuthFormInput {
   email: string;
@@ -48,6 +49,12 @@ export default function AuthForm() {
           description: 'Welcome back!',
           className: 'bg-green-700 text-white border-transparent',
         });
+      } else {
+        toast({
+          title: 'Error',
+          description: resp.message || 'An error occurred',
+          className: 'bg-red-700 text-white border-transparent',
+        });
       }
       router.refresh();
     } else {
@@ -64,7 +71,11 @@ export default function AuthForm() {
       onClick={toggleModal}
       className="text-white bg-black hover:bg-gray-900 focus:ring-4 focus:ring-base-200 font-medium rounded-full text-md px-7 py-2.5 dark:bg-base-600 dark:hover:bg-base-700 focus:outline-none dark:focus:ring-base-800"
     >
-      Log in <span aria-hidden="true">&rarr;</span>
+      <span className="hidden lg:inline">Log in</span>
+      <LogIn className="w-4 h-4 lg:hidden" />
+      <span aria-hidden="true" className="hidden lg:inline">
+        &rarr;
+      </span>
     </button>
   );
 

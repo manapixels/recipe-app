@@ -17,7 +17,11 @@ export const signUpNewUser = async (email, password) => {
       emailRedirectTo: '/recipes',
     },
   });
-  if (error) return error;
+  if (error)
+    return {
+      message: error.message,
+      status: error.status || 500,
+    };
   return data;
 };
 
@@ -34,7 +38,13 @@ export const signInWithEmail = async (email, password) => {
     email,
     password,
   });
-  if (error) return error;
+
+  if (error) {
+    return {
+      message: error.message,
+      status: error.status || 500,
+    };
+  }
   return data;
 };
 
@@ -61,7 +71,11 @@ export const updateEmail = async (email: string) => {
   const { data, error } = await supabase.auth.updateUser({
     email,
   });
-  if (error) return error;
+  if (error)
+    return {
+      message: error.message,
+      status: error.status || 500,
+    };
   return data;
 };
 
@@ -76,6 +90,10 @@ export const updatePassword = async (password: string) => {
   const { data, error } = await supabase.auth.updateUser({
     password,
   });
-  if (error) return error;
+  if (error)
+    return {
+      message: error.message,
+      status: error.status || 500,
+    };
   return data;
 };

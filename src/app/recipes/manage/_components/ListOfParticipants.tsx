@@ -14,7 +14,7 @@ const ListOfParticipants = ({ participants }: { participants: any[] }) => {
         participant.name.toLowerCase().includes(searchTerm.toLowerCase())
       )
     );
-  }, [searchTerm]);
+  }, [searchTerm, participants]);
 
   return (
     <div>

@@ -29,43 +29,44 @@ export function FileUpload({
       setUploadedImagePath(currValue);
       setUploaded(true);
     }
-  }, [currValue]);
-
-  const handleFileAccepted = async file => {
-    setIsUploading(true);
-    setImageLoading(true);
-    try {
-      // Create a new FormData object and append the file
-      const formData = new FormData();
-      formData.append('file', file);
-
-      // Attempt to upload the file
-      const uploadResult = await uploadFileToBucket(userId, bucketId, formData);
-      console.log(uploadResult);
-
-      // If successful, update the upload status and set the image URL
-      setUploaded(true);
-      if (uploadResult?.path) {
-        onUploadComplete?.(uploadResult?.path);
-        setUploadedImagePath(uploadResult.path);
-      }
-    } catch (error) {
-      // Handle any errors
-      console.error('Upload failed', error);
-      setUploaded(false);
-    } finally {
-      setIsUploading(false);
-    }
-  };
+  }, [currValue, uploadedImagePath]);
 
   const onDrop = useCallback(
     acceptedFiles => {
       // Reset upload status on new drop
       setUploaded(false);
       setUploadedImagePath(''); // Reset the image URL on new drop
+
+      const handleFileAccepted = async file => {
+        setIsUploading(true);
+        setImageLoading(true);
+        try {
+          // Create a new FormData object and append the file
+          const formData = new FormData();
+          formData.append('file', file);
+
+          // Attempt to upload the file
+          const uploadResult = await uploadFileToBucket(userId, bucketId, formData);
+          console.log(uploadResult);
+
+          // If successful, update the upload status and set the image URL
+          setUploaded(true);
+          if (uploadResult?.path) {
+            onUploadComplete?.(uploadResult?.path);
+            setUploadedImagePath(uploadResult.path);
+          }
+        } catch (error) {
+          // Handle any errors
+          console.error('Upload failed', error);
+          setUploaded(false);
+        } finally {
+          setIsUploading(false);
+        }
+      };
+
       handleFileAccepted(acceptedFiles[0]);
     },
-    [handleFileAccepted]
+    [bucketId, onUploadComplete, userId]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({

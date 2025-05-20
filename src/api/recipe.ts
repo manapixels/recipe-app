@@ -14,8 +14,13 @@ export const fetchRecipes = async () => {
   const supabase = createClient();
   try {
     let { data } = await supabase
-      .from('recipes_with_author_data')
-      .select('*')
+      .from('recipes')
+      .select(
+        `
+        *,
+        author:profiles(id, username, avatar_url, name)
+      `
+      )
       .order('created_at', { ascending: false });
 
     return data;
@@ -34,8 +39,13 @@ export const fetchRecipe = async (slug: string) => {
   const supabase = createClient();
   try {
     let { data } = await supabase
-      .from('recipes_with_author_data')
-      .select('*')
+      .from('recipes')
+      .select(
+        `
+        *,
+        author:profiles(id, username, avatar_url, name)
+      `
+      )
       .eq('slug', slug)
       .single();
 
@@ -59,7 +69,7 @@ export const fetchUserRecipes = async (profile_id: string) => {
       .select(
         `
         *,
-        author:profiles!user_id(id, username, avatar_url, name)
+        author:profiles(id, username, avatar_url, name)
       `
       )
       .eq('created_by', profile_id);
@@ -83,8 +93,7 @@ export const addRecipe = async ({
   subcategory,
   ingredients,
   instructions,
-  prep_time,
-  cook_time,
+  total_time,
   servings,
   difficulty,
   created_by,
@@ -97,8 +106,7 @@ export const addRecipe = async ({
   subcategory: Recipe['subcategory'];
   ingredients: Recipe['ingredients'];
   instructions: Recipe['instructions'];
-  prep_time: Recipe['prep_time'];
-  cook_time: Recipe['cook_time'];
+  total_time: Recipe['total_time'];
   servings: Recipe['servings'];
   difficulty: Recipe['difficulty'];
   created_by: Recipe['created_by'];
@@ -117,8 +125,7 @@ export const addRecipe = async ({
           subcategory,
           ingredients,
           instructions,
-          prep_time,
-          cook_time,
+          total_time,
           servings,
           difficulty,
           created_by,
@@ -149,8 +156,7 @@ export const updateRecipe = async ({
   subcategory,
   ingredients,
   instructions,
-  prep_time,
-  cook_time,
+  total_time,
   servings,
   difficulty,
   created_by,
@@ -164,8 +170,7 @@ export const updateRecipe = async ({
   subcategory?: Recipe['subcategory'];
   ingredients?: Recipe['ingredients'];
   instructions?: Recipe['instructions'];
-  prep_time?: Recipe['prep_time'];
-  cook_time?: Recipe['cook_time'];
+  total_time?: Recipe['total_time'];
   servings?: Recipe['servings'];
   difficulty?: Recipe['difficulty'];
   created_by?: Recipe['created_by'];
@@ -183,8 +188,7 @@ export const updateRecipe = async ({
         subcategory,
         ingredients,
         instructions,
-        prep_time,
-        cook_time,
+        total_time,
         servings,
         difficulty,
         created_by,
@@ -257,6 +261,7 @@ export const postRecipeToSocial = async (recipe_id: string, profile: Profile) =>
   try {
     // TODO: Implement actual social media sharing logic
     // This is a placeholder that simulates a successful share
+    console.log('Recipe shared successfully', recipe_id, profile);
     return { success: true };
   } catch (error) {
     console.error('Error sharing recipe:', error);

@@ -27,7 +27,7 @@ const stripe = new Stripe(
     // Register this as an official Stripe plugin.
     // https://stripe.com/docs/building-plugins#setappinfo
     appInfo: {
-      name: 'inner circle',
+      name: 'recipe-app',
       version: '0.0.0',
       url: '',
     },

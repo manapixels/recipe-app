@@ -93,14 +93,13 @@ export const Modal = ({
   const [isBrowser, setIsBrowser] = useState(false);
   const [trigger, setTrigger] = onExitComplete ?? [undefined, undefined];
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    if (!isOpen || event.key !== 'Escape') return;
-
-    handleClose();
-  };
-
   useEffect(() => {
     if (!isOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isOpen || event.key !== 'Escape') return;
+      handleClose();
+    };
 
     document.body.style.overflow = 'hidden';
     document.addEventListener('keydown', handleKeyDown);
@@ -109,7 +108,7 @@ export const Modal = ({
       document.body.style.overflow = 'auto';
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen]);
+  }, [isOpen, handleClose]);
 
   useEffect(() => {
     setIsBrowser(true);
