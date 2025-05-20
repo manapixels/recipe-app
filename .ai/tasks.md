@@ -35,7 +35,22 @@
   - **Types:**
     - [x] No major type changes anticipated, confirm `Recipe` type used in lists contains necessary fields.
 
-### 3. Recipe Creation/Editing Flow Enhancements (Phase 1.4)
+### 3. User Profile Page Enhancements (Phase 1.3)
+
+- **Goal:** Display user information, their created recipes, and their saved/favorited recipes.
+- **Tasks:**
+  - **Frontend:**
+    - [ ] Design/Refine UI for user profile pages (`src/app/profiles/[username]/page.tsx`).
+    - [ ] Display user's avatar, username, name, bio (if profile schema supports bio).
+    - [ ] Implement tabbed interface or sections for "Created Recipes" and "Favorited Recipes".
+    - [ ] List created recipes and favorited recipes using the `RecipeCard` component (likely `RecipeListItem`).
+  - **Backend (API):**
+    - [ ] Ensure `fetchUserProfileWithRecipes` in `src/api/profile.ts` provides data for created recipes.
+    - [ ] Ensure `fetchUserFavoriteRecipes` is available for "Favorited Recipes" tab (dependency on Phase 2.1 tasks).
+  - **Types:**
+    - [ ] Verify/Update `ProfileWithRecipes` in `src/types/profile.ts` to support both created and favorited recipes lists.
+
+### 4. Recipe Creation/Editing Flow Enhancements (Phase 1.4)
 
 - **Goal:** Make creating and editing recipes intuitive and robust, handling new structured data.
 - **Tasks:**
@@ -71,7 +86,7 @@
   - **Types:**
     - [ ] Confirm `Recipe` type (and nested `Ingredient`, `Instruction`) and API function parameters accurately reflect form data and DB structure (JSON for ingredients/instructions in DB, objects in TS).
 
-### 4. Recipe Saving/Favorites (Phase 2.1 - Essential New Feature)
+### 5. Recipe Saving/Favorites (Phase 2.1 - Essential New Feature)
 
 - **Goal:** Allow users to save or "favorite" recipes.
 - **Tasks:**
@@ -89,4 +104,44 @@
   - **Types:**
     - [ ] Create `UserFavoriteRecipe` interface/type.
     - [ ] Update `ProfileWithRecipes` to include an array of favorited `Recipe` objects or IDs.
-    - [ ] Update `Recipe` type (or extended type for detail view) to include optional `
+    - [ ] Update `Recipe` type (or extended type for detail view) to include optional `isFavorited` boolean.
+
+## Priority 2: Important UX and Community Features
+
+### 1. Search Functionality for Recipes (New feature within Phase 1.2)
+
+- **Goal:** Allow users to search for recipes by name or ingredients.
+- **Tasks:**
+  - **Frontend:**
+  - **Types:**
+    - [ ] No major type changes anticipated.
+
+### 2. User Ratings and Reviews for Recipes (New feature within Phase 1.1)
+
+- **Goal:** Allow users to rate and review recipes.
+- **Tasks:**
+  - **Backend (Supabase & API):**
+  - **Types:**
+    - [ ] New `RecipeReview` type.
+    - [ ] Update `Recipe` type to include `average_rating`, `review_count`.
+
+### 3. Social Sharing (Phase 2.2 - UI Implementation)
+
+- **Goal:** Implement UI for sharing recipes.
+- **Tasks:**
+  - **Frontend:**
+  - **Types:**
+    - [ ] No changes anticipated unless `postRecipeToSocial` interaction changes.
+
+### 4. Commenting on Recipes (Phase 2.3)
+
+- **Goal:** Allow users to leave comments on recipes.
+- **Tasks:**
+  - **Backend (Supabase & API):**
+  - **Types:**
+    - [ ] New `RecipeComment` type.
+    - [ ] Update `Recipe` type if comment count is denormalized.
+
+---
+
+This breakdown should give you a solid foundation for planning your development sprints. Remember that technical considerations like error handling, loading states, accessibility, and testing should be incorporated into each relevant task. Also, the removal of the explicit role system means permission handling (e.g. for editing/deleting content, admin actions) needs to be clearly defined based on user ID or the existing `AppPermission` type.
