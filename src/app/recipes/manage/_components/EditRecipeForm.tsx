@@ -192,7 +192,6 @@ export const EditRecipeForm = ({ recipe, onSuccess, closeModal }: EditRecipeForm
         total_time: data.total_time,
         servings: data.servings,
         difficulty: parseInt(data.difficulty),
-        created_by: profile.id,
         image_thumbnail_url: data.image_thumbnail_url,
         image_banner_url: data.image_banner_url,
       });

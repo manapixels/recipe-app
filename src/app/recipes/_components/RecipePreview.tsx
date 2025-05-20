@@ -1,23 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import { Recipe, Ingredient, Instruction, DIFFICULTY_LEVELS } from '@/types/recipe';
-import {
-  Clock,
-  Users,
-  BarChart3,
-  Tag,
-  Bookmark,
-  Edit3,
-  Trash2,
-  Share2,
-  Printer,
-  ChefHat,
-  Soup,
-  Sandwich,
-  Cake,
-  Utensils,
-} from 'lucide-react';
+import { Recipe, DIFFICULTY_LEVELS } from '@/types/recipe';
+import { Clock, Users, BarChart3, Soup, Sandwich, Cake } from 'lucide-react';
 
 interface RecipePreviewProps {
   recipeData: Partial<Recipe>; // Use Partial as some fields might be missing during form input
