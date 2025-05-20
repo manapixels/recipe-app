@@ -6,8 +6,15 @@ import pluralize from 'pluralize';
 
 import { Recipe, DIFFICULTY_LEVELS, SUBCATEGORY_OPTIONS } from '@/types/recipe';
 import { BUCKET_URL } from '@/constants';
+import { FavoriteButton } from '@/_components/ui/FavoriteButton';
 
-export default function RecipeListItem({ recipe }: { recipe: Recipe }) {
+export default function RecipeListItem({
+  recipe,
+  initialIsFavorited,
+}: {
+  recipe: Recipe;
+  initialIsFavorited: boolean;
+}) {
   // Helper function to format difficulty level
   const formatDifficulty = (level: number) => {
     return DIFFICULTY_LEVELS[level] || 'Unknown';
@@ -49,6 +56,9 @@ export default function RecipeListItem({ recipe }: { recipe: Recipe }) {
             />
           </div>
         )}
+        <div className="absolute top-2 right-2 z-10">
+          <FavoriteButton recipeId={recipe.id} initialIsFavorited={initialIsFavorited} />
+        </div>
       </div>
 
       <div className="min-w-0 py-2 px-3 md:px-0">

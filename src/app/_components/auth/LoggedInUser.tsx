@@ -113,7 +113,7 @@ export default function LoggedInUser({
                 My Account
               </Link>
               <Link
-                href="/recipes/my"
+                href="/recipes/manage"
                 className="text-gray-700 px-4 py-2 text-sm flex gap-1 hover:bg-gray-50"
                 tabIndex={-1}
                 onClick={() => setIsOpen(false)}
@@ -169,7 +169,7 @@ export default function LoggedInUser({
                     strokeLinejoin="round"
                   ></path>
                 </svg>
-                My Recipes
+                Manage Recipes
               </Link>
 
               <hr className="my-2" />

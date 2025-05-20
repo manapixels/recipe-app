@@ -100,6 +100,46 @@ export interface Database {
           },
         ];
       };
+      user_favorite_recipes: {
+        Row: {
+          created_at: string;
+          recipe_id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          recipe_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          recipe_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_favorite_recipes_recipe_id_fkey';
+            columns: ['recipe_id'];
+            isOneToOne: false;
+            referencedRelation: 'recipes';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'user_favorite_recipes_recipe_id_fkey';
+            columns: ['recipe_id'];
+            isOneToOne: false;
+            referencedRelation: 'recipes_with_author_data';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'user_favorite_recipes_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: {
       recipes_with_author_data: {

@@ -16,6 +16,7 @@ export type Profile = Database['public']['Tables']['profiles']['Row'] & {
 export type UserWithProfile = User & Tables<'profiles'>;
 export type ProfileWithRecipes = Profile & {
   recipes_created?: Recipe[];
+  favorite_recipes?: Recipe[];
   recipes_count?: number;
   bio?: string;
 };

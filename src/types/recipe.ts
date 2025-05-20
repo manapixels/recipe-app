@@ -151,6 +151,15 @@ export type Ingredient = {
 export type Recipe = Tables<'recipes'> & {
   ingredients: Ingredient[];
   instructions: Instruction[];
+  is_favorited?: boolean;
+};
+
+// Type for the join table user_favorite_recipes
+export type UserFavoriteRecipe = {
+  user_id: string;
+  recipe_id: string;
+  created_at: string;
+  recipes?: Recipe; // Optional: if we decide to join and return full recipe object
 };
 
 // Default ingredient templates by category (fallback if no subcategory template exists)

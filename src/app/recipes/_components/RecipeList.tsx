@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { fetchRecipes, FetchRecipesParams } from '@/api/recipe';
+import { fetchRecipes, FetchRecipesParams, fetchUserFavoriteRecipes } from '@/api/recipe';
 import RecipeListItem from './RecipeListItem';
 import RecipeFilters from './RecipeFilters';
 import RecipeSort, { SortByOptions, SortDirectionOptions } from './RecipeSort';
 import { Recipe, RecipeCategory, RecipeSubcategory, DifficultyLevel } from '@/types/recipe';
+import { useUser } from '@/_contexts/UserContext';
 
 interface FiltersState {
   category?: RecipeCategory;
@@ -22,6 +23,9 @@ export default function RecipeList() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [favoriteRecipeIds, setFavoriteRecipeIds] = useState<Set<string>>(new Set());
+
+  const { user, loading: userLoading } = useUser();
 
   const [filters, setFilters] = useState<FiltersState>({});
   const [sortParams, setSortParams] = useState<SortState>({
@@ -38,12 +42,13 @@ export default function RecipeList() {
         sortBy: sortParams.sortBy,
         sortDirection: sortParams.sortDirection,
       };
-      const fetchedRecipes = (await fetchRecipes(params)) as Recipe[] | Error;
-      if (fetchedRecipes instanceof Error) {
-        setError(fetchedRecipes.message);
+      const fetchedRecipesData = await fetchRecipes(params);
+
+      if (fetchedRecipesData instanceof Error) {
+        setError(fetchedRecipesData.message);
         setRecipes([]);
       } else {
-        setRecipes(fetchedRecipes || []);
+        setRecipes(Array.isArray(fetchedRecipesData) ? fetchedRecipesData : []);
       }
     } catch (e: any) {
       console.error('Failed to fetch recipes:', e);
@@ -56,6 +61,29 @@ export default function RecipeList() {
   useEffect(() => {
     loadRecipes();
   }, [loadRecipes]);
+
+  useEffect(() => {
+    const loadUserFavorites = async () => {
+      if (user && user.id) {
+        const { data: favoriteEntries, error: favError } = await fetchUserFavoriteRecipes(user.id);
+        if (favError) {
+          console.error('Error fetching user favorites:', favError);
+          setFavoriteRecipeIds(new Set());
+        } else {
+          const ids = new Set(
+            favoriteEntries.map(fav => fav.recipe_id).filter(id => id !== null) as string[]
+          );
+          setFavoriteRecipeIds(ids);
+        }
+      } else {
+        setFavoriteRecipeIds(new Set());
+      }
+    };
+
+    if (!userLoading) {
+      loadUserFavorites();
+    }
+  }, [user, userLoading]);
 
   const handleFilterChange = useCallback((newFilters: FiltersState) => {
     setFilters(newFilters);
@@ -90,7 +118,11 @@ export default function RecipeList() {
       {!isLoading && !error && recipes.length > 0 && (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
           {recipes.map(recipe => (
-            <RecipeListItem recipe={recipe} key={recipe.id} />
+            <RecipeListItem
+              recipe={recipe}
+              key={recipe.id}
+              initialIsFavorited={favoriteRecipeIds.has(recipe.id)}
+            />
           ))}
         </div>
       )}

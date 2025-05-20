@@ -203,3 +203,34 @@ where
 drop publication if exists supabase_realtime;
 
 create publication supabase_realtime for table recipes;
+
+CREATE TABLE public.user_favorite_recipes (
+  user_id UUID NOT NULL,
+  recipe_id UUID NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+  CONSTRAINT user_favorite_recipes_pkey PRIMARY KEY (user_id, recipe_id),
+  CONSTRAINT user_favorite_recipes_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id) ON DELETE CASCADE,
+  CONSTRAINT user_favorite_recipes_recipe_id_fkey FOREIGN KEY (recipe_id) REFERENCES public.recipes(id) ON DELETE CASCADE
+);
+
+COMMENT ON TABLE public.user_favorite_recipes IS 'Stores recipes favorited by users.';
+COMMENT ON COLUMN public.user_favorite_recipes.user_id IS 'ID of the user who favorited the recipe.';
+COMMENT ON COLUMN public.user_favorite_recipes.recipe_id IS 'ID of the recipe that was favorited.';
+COMMENT ON COLUMN public.user_favorite_recipes.created_at IS 'Timestamp of when the recipe was favorited.';
+
+ALTER TABLE public.user_favorite_recipes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow users to view their own favorites"
+ON public.user_favorite_recipes
+FOR SELECT
+USING (auth.uid() = user_id);
+
+CREATE POLICY "Allow users to insert their own favorites"
+ON public.user_favorite_recipes
+FOR INSERT
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Allow users to delete their own favorites"
+ON public.user_favorite_recipes
+FOR DELETE
+USING (auth.uid() = user_id);

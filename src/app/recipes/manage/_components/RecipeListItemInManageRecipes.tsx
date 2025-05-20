@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 
 import { BUCKET_URL } from '@/constants';
 import { Recipe, DIFFICULTY_LEVELS } from '@/types/recipe';
-import { EditRecipeForm } from './EditRecipeForm';
+// import { EditRecipeForm } from './EditRecipeForm'; // Old form
+import { RecipeForm } from '../../_components/RecipeForm'; // Unified form
 import { updateRecipeStatus } from '@/api/recipe';
 import { useToast } from '@/_components/ui/Toasts/useToast';
 import { CustomSelect } from '@/_components/ui/Select';
@@ -48,16 +49,29 @@ export const RecipeListItemInManageRecipes = ({
         description: `Recipe status updated`,
         className: 'bg-green-700 text-white border-transparent',
       });
+      // Also update the recipe in the parent list to reflect status change immediately if needed
+      // This might require refetching or smarter state update in parent
+      updateRecipeInList({ ...recipe, status: status as Recipe['status'] });
     };
 
     if (status !== recipe.status) {
       updateStatus();
     }
-  }, [status, recipe.status, toast, recipe.id]);
+  }, [status, recipe, toast, updateRecipeInList]); // Added recipe and updateRecipeInList to dependency array
 
   const handleEditClick = () => {
     const modalContent = (
-      <EditRecipeForm recipe={recipe} onSuccess={updateRecipeInList} closeModal={closeModal} />
+      <div className="p-4 sm:p-6">
+        <RecipeForm
+          mode="edit"
+          initialData={recipe}
+          onSuccess={updatedRecipe => {
+            updateRecipeInList(updatedRecipe);
+            closeModal();
+          }}
+          onCancel={closeModal}
+        />
+      </div>
     );
     openModal(modalContent);
   };

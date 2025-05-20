@@ -6,6 +6,7 @@ import { Profile } from '@/types/profile';
 import Image from 'next/image';
 import Link from 'next/link';
 import RecipeIngredients from '../_components/RecipeIngredients';
+import { FavoriteButton } from '@/_components/ui/FavoriteButton';
 
 export const metadata: Metadata = {
   title: 'recipe-app | Recipe Details',
@@ -22,6 +23,11 @@ export default async function RecipeDetailsPage({
     };
   };
 
+  // Handle case where recipe might not be found
+  if (!recipe) {
+    return <div className="text-center py-10">Recipe not found.</div>;
+  }
+
   // Helper function to format time
   const formatTime = (minutes: number) => {
     if (minutes < 60) return `${minutes}min`;
@@ -32,8 +38,16 @@ export default async function RecipeDetailsPage({
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="text-2xl sm:text-3xl font-bold mb-2 text-gray-900 dark:text-white">
-        {recipe?.name}
+      <div className="flex justify-between items-start mb-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex-grow">
+          {recipe.name}
+        </h1>
+        <FavoriteButton
+          recipeId={recipe.id}
+          initialIsFavorited={!!recipe.is_favorited}
+          className="ml-4 flex-shrink-0"
+          size="lg"
+        />
       </div>
       <div className="flex flex-wrap justify-between items-center gap-y-2 mb-4">
         <div className="flex items-center gap-2">
