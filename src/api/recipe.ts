@@ -32,11 +32,14 @@ export const fetchRecipes = async (params?: FetchRecipesParams) => {
     let query = supabase.from('recipes').select(
       `
         *,
-        author:profiles(id, username, avatar_url, name)
+        author:profiles!recipes_created_by_fkey(id, username, avatar_url, name)
       `
     );
 
-    // Apply filters
+    // Only fetch recipes that are explicitly 'published' for public viewing
+    query = query.eq('status', 'published');
+
+    // Apply additional optional filters
     if (params?.category) {
       query = query.eq('category', params.category);
     }
@@ -184,7 +187,7 @@ export const fetchUserRecipes = async (profile_id: string) => {
       .select(
         `
         *,
-        author:profiles(id, username, avatar_url, name)
+        author:profiles!recipes_created_by_fkey(id, username, avatar_url, name)
       `
       )
       .eq('created_by', profile_id);
@@ -479,9 +482,9 @@ export const fetchUserFavoriteRecipes = async (userId: string) => {
         created_at,
         recipe_id, 
         user_id,
-        recipes (
+        recipes ( 
           *,
-          author:profiles(id, username, avatar_url, name)
+          author:profiles!recipes_created_by_fkey(id, username, avatar_url, name) 
         )
       `
       )

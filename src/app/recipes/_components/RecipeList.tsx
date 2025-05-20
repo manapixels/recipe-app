@@ -48,6 +48,7 @@ export default function RecipeList() {
         setError(fetchedRecipesData.message);
         setRecipes([]);
       } else {
+        console.log('fetchedRecipesData', fetchedRecipesData);
         setRecipes(Array.isArray(fetchedRecipesData) ? fetchedRecipesData : []);
       }
     } catch (e: any) {
