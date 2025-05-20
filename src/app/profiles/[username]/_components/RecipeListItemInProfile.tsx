@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Recipe, DIFFICULTY_LEVELS } from '@/types/recipe';
 import { BUCKET_URL } from '@/constants';
+import { FavoriteButton } from '@/_components/ui/FavoriteButton';
 
 export default function RecipeListItemInProfile({ recipe }: { recipe: Recipe }) {
   // Helper function to format difficulty level
@@ -42,10 +43,12 @@ export default function RecipeListItemInProfile({ recipe }: { recipe: Recipe }) 
             />
           </div>
         )}
-        <div className="absolute top-2 right-2 z-10">
-          <span className="bg-base-500 text-white text-xs font-medium px-2.5 py-0.5 rounded dark:bg-base-600 dark:text-base-50">
-            {formatDifficulty(recipe.difficulty)}
-          </span>
+        <div className="absolute top-2 right-2 z-20">
+          <FavoriteButton
+            recipeId={recipe.id}
+            initialIsFavorited={!!recipe.is_favorited}
+            size="sm"
+          />
         </div>
       </div>
       <div className="p-4">
@@ -62,6 +65,9 @@ export default function RecipeListItemInProfile({ recipe }: { recipe: Recipe }) 
           </span>
           <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-200 dark:ring-gray-600/20">
             {formatTime(recipe.total_time)}
+          </span>
+          <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-200 dark:ring-gray-600/20 capitalize">
+            {formatDifficulty(recipe.difficulty)}
           </span>
         </div>
       </div>

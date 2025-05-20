@@ -420,30 +420,31 @@ export const addFavoriteRecipe = async (recipeId: string) => {
       data: { user },
       error: userError,
     } = await supabase.auth.getUser();
+
     if (userError || !user) {
-      console.error('User not authenticated', userError);
-      return new Error('User not authenticated');
+      console.error('Error fetching user or user not logged in:', userError);
+      return { error: userError || new Error('User not authenticated') };
     }
 
     const { data, error } = await supabase
       .from('user_favorite_recipes')
-      .insert({ user_id: user.id, recipe_id: recipeId })
-      .select()
-      .single(); // Assuming you want the created record back
+      .insert([{ user_id: user.id, recipe_id: recipeId }])
+      .select(); // Optionally select to confirm insertion
 
     if (error) {
-      console.error('Error favoriting recipe:', error);
-      // Handle potential conflict (already favorited) gracefully if needed
+      console.error('Error adding favorite recipe:', error);
+      // Check for unique constraint violation (already favorited)
       if (error.code === '23505') {
-        // Unique violation
-        return new Error('Recipe already favorited');
+        // PostgreSQL unique_violation error code
+        return { error: new Error('Recipe already favorited.') };
       }
-      return error;
+      return { error };
     }
-    return data;
+
+    return { data };
   } catch (error) {
-    console.error('Unexpected error favoriting recipe:', error);
-    return new Error('Unexpected error favoriting recipe');
+    console.error('Unexpected error in addFavoriteRecipe:', error);
+    return { error: error instanceof Error ? error : new Error('Unexpected error occurred') };
   }
 };
 
@@ -459,9 +460,10 @@ export const removeFavoriteRecipe = async (recipeId: string) => {
       data: { user },
       error: userError,
     } = await supabase.auth.getUser();
+
     if (userError || !user) {
-      console.error('User not authenticated', userError);
-      return new Error('User not authenticated');
+      console.error('Error fetching user or user not logged in:', userError);
+      return { error: userError || new Error('User not authenticated') };
     }
 
     const { error } = await supabase
@@ -470,13 +472,18 @@ export const removeFavoriteRecipe = async (recipeId: string) => {
       .match({ user_id: user.id, recipe_id: recipeId });
 
     if (error) {
-      console.error('Error unfavoriting recipe:', error);
-      return error;
+      console.error('Error removing favorite recipe:', error);
+      return { error };
     }
-    return true;
+
+    // Check if any row was actually deleted, data will be null or an empty array if no match was found
+    // Supabase delete doesn't typically return the deleted rows unless you .select() before/after or use returning
+    // For this use case, success is simply no error and the command executing.
+    // If you need to confirm a row was deleted, you might check `status` or `count` from the response if available and non-null.
+    return { data: { success: true } }; // Indicate success
   } catch (error) {
-    console.error('Unexpected error unfavoriting recipe:', error);
-    return new Error('Unexpected error unfavoriting recipe');
+    console.error('Unexpected error in removeFavoriteRecipe:', error);
+    return { error: error instanceof Error ? error : new Error('Unexpected error occurred') };
   }
 };
 
@@ -488,45 +495,52 @@ export const removeFavoriteRecipe = async (recipeId: string) => {
 export const fetchUserFavoriteRecipes = async (userId: string) => {
   const supabase = createClient();
   try {
-    const { data: userFavorites, error } = await supabase
+    if (!userId) {
+      console.error('User ID is required to fetch favorite recipes.');
+      return { error: new Error('User ID is required.') };
+    }
+
+    // Fetch recipe IDs favorited by the user
+    const { data: favoriteEntries, error: favoritesError } = await supabase
       .from('user_favorite_recipes')
-      .select(
-        `
-        created_at,
-        recipe_id, 
-        user_id,
-        recipes ( 
-          *,
-          author:profiles!recipes_created_by_fkey(id, username, avatar_url, name) 
-        )
-      `
-      )
+      .select('recipe_id')
       .eq('user_id', userId);
 
-    if (error) {
-      console.error('Error fetching user favorite recipes:', error);
-      return { data: [], error };
+    if (favoritesError) {
+      console.error('Error fetching user favorite entries:', favoritesError);
+      return { error: favoritesError };
     }
 
-    if (!userFavorites) {
-      return { data: [], error: null };
+    if (!favoriteEntries || favoriteEntries.length === 0) {
+      return { data: [] }; // No favorites found
     }
 
-    // Correctly type the transformation
-    const favoritesWithRecipeDetails = userFavorites.map(fav => ({
-      created_at: fav.created_at as string, // Assuming created_at is always a string
-      // The 'recipes' field from the join will be an object if the recipe exists, or null.
-      // Cast to unknown first, then to the specific type to satisfy TypeScript when inference is tricky.
-      recipes: fav.recipes as unknown as FullRecipeType | null,
-      recipe_id: fav.recipe_id as string,
-      user_id: fav.user_id as string,
-    }));
+    const recipeIds = favoriteEntries.map(fav => fav.recipe_id);
 
-    // console.log('favoritesWithRecipeDetails', favoritesWithRecipeDetails);
+    // Fetch the actual recipe details for the favorited recipe IDs
+    // We will also fetch author information similar to how `fetchRecipes` does.
+    const { data: recipes, error: recipesError } = await supabase
+      .from('recipes') // Consider using 'recipes_with_author_data' if it simplifies and status is handled
+      .select(
+        `
+        *,
+        author:profiles!recipes_created_by_fkey(id, username, avatar_url, name)
+      `
+      )
+      .in('id', recipeIds)
+      .eq('status', 'published'); // Ensure only published recipes are fetched, or adjust as needed
 
-    return { data: favoritesWithRecipeDetails, error: null };
-  } catch (err) {
-    console.error('Unexpected error in fetchUserFavoriteRecipes:', err);
-    return { data: [], error: err instanceof Error ? err : new Error('Unknown error') };
+    if (recipesError) {
+      console.error('Error fetching favorite recipes details:', recipesError);
+      return { error: recipesError };
+    }
+
+    // It might be beneficial to parse ingredients and instructions here as well,
+    // similar to how it's done in `fetchRecipe`, if the components consuming this data expect it.
+    // For now, returning them as is.
+    return { data: recipes || [] };
+  } catch (error) {
+    console.error('Unexpected error in fetchUserFavoriteRecipes:', error);
+    return { error: error instanceof Error ? error : new Error('Unexpected error occurred') };
   }
 };

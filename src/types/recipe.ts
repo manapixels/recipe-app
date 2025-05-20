@@ -154,13 +154,14 @@ export type Recipe = Tables<'recipes'> & {
   is_favorited?: boolean;
 };
 
-// Type for the join table user_favorite_recipes
-export type UserFavoriteRecipe = {
-  user_id: string;
-  recipe_id: string;
-  created_at: string;
-  recipes?: Recipe; // Optional: if we decide to join and return full recipe object
-};
+// Represents an entry in the user_favorite_recipes table
+export interface UserFavoriteRecipe {
+  user_id: string; // UUID of the user
+  recipe_id: string; // UUID of the recipe
+  created_at: string; // ISO 8601 date string
+  // Optionally, you might want to include the full recipe details here if you often fetch them together
+  // recipe?: Recipe;
+}
 
 // Default ingredient templates by category (fallback if no subcategory template exists)
 export const DEFAULT_INGREDIENTS: Record<RecipeCategory, Ingredient[]> = {

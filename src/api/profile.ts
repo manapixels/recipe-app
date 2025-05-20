@@ -37,13 +37,14 @@ export const fetchUserProfileWithRecipes = async ({
   try {
     let query = supabase.from('profiles').select(`
         *,
-        recipes_created:recipes!recipes_created_by_fkey(*, author:profiles!recipes_created_by_fkey(id, username, avatar_url, name)),
+        recipes_created:recipes!recipes_created_by_fkey(*, author:profiles!recipes_created_by_fkey(id, username, avatar_url, name), is_favorited),
         user_favorite_recipes ( 
           created_at, 
           recipe_id, 
           recipes ( 
             *,
-            author:profiles!recipes_created_by_fkey(id, username, avatar_url, name)
+            author:profiles!recipes_created_by_fkey(id, username, avatar_url, name),
+            is_favorited 
           )
         )
       `);
@@ -56,6 +57,8 @@ export const fetchUserProfileWithRecipes = async ({
       throw new Error('Both username and userId are undefined');
     }
 
+    const { data: authUser } = await supabase.auth.getUser(); // Get current user for is_favorited logic
+
     const { data, error } = await query.single();
 
     if (error) {
@@ -67,15 +70,48 @@ export const fetchUserProfileWithRecipes = async ({
       return null;
     }
 
-    const transformedData = {
-      ...data,
-      recipes_created: data.recipes_created || [],
-      favorite_recipes: data.user_favorite_recipes
-        ? data.user_favorite_recipes.map((fav: any) => fav.recipes).filter(Boolean)
-        : [],
+    // Function to check if a recipe is favorited by the current authUser
+    // This might be redundant if we can rely on the join, but good for explicit marking
+    const checkIsFavorited = async (recipeId: string) => {
+      if (!authUser?.user) return false;
+      const { data: fav, error: favError } = await supabase
+        .from('user_favorite_recipes')
+        .select('recipe_id')
+        .match({ user_id: authUser.user.id, recipe_id: recipeId })
+        .maybeSingle();
+      if (favError) {
+        console.error('Error checking if recipe is favorited:', favError);
+        return false;
+      }
+      return !!fav;
     };
 
-    return transformedData as ProfileWithRecipes;
+    const createdRecipes = data.recipes_created
+      ? await Promise.all(
+          data.recipes_created.map(async (recipe: any) => ({
+            ...recipe,
+            is_favorited:
+              recipe.is_favorited !== undefined
+                ? recipe.is_favorited
+                : await checkIsFavorited(recipe.id),
+          }))
+        )
+      : [];
+
+    const favoriteRecipesFromDb = data.user_favorite_recipes
+      ? data.user_favorite_recipes
+          .map((fav: any) => fav.recipes) // Extract the recipe object
+          .filter(Boolean) // Filter out any null/undefined recipes
+          .map((recipe: any) => ({ ...recipe, is_favorited: true })) // Mark all as favorited
+      : [];
+
+    const transformedData: ProfileWithRecipes = {
+      ...(data as any), // Cast to any to avoid type issues with intermediate structure
+      recipes_created: createdRecipes,
+      favorite_recipes: favoriteRecipesFromDb,
+    };
+
+    return transformedData;
   } catch (error) {
     console.error('fetchUserProfileWithRecipes error:', error);
     return null;

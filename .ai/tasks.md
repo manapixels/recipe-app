@@ -84,17 +84,17 @@
 - **Goal:** Allow users to save or "favorite" recipes.
 - **Tasks:**
   - **Backend (Supabase & API):**
-    - [ ] **Database:** Define and create `user_favorite_recipes` table in Supabase (`user_id FK to profiles.id`, `recipe_id FK to recipes.id`, `created_at`).
-    - [ ] **API:** Create `addFavoriteRecipe(userId, recipeId)` function.
-    - [ ] **API:** Create `removeFavoriteRecipe(userId, recipeId)` function.
-    - [ ] **API:** Create `fetchUserFavoriteRecipes(userId)` function.
-    - [ ] **API:** Modify `fetchRecipe` to include a boolean `isFavorited` by current user (requires joining/checking `user_favorite_recipes`).
+    - [x] **Database:** Define and create `user_favorite_recipes` table in Supabase (`user_id FK to profiles.id`, `recipe_id FK to recipes.id`, `created_at`).
+    - [x] **API:** Create `addFavoriteRecipe(userId, recipeId)` function.
+    - [x] **API:** Create `removeFavoriteRecipe(userId, recipeId)` function.
+    - [x] **API:** Create `fetchUserFavoriteRecipes(userId)` function.
+    - [x] **API:** Modify `fetchRecipe` to include a boolean `isFavorited` by current user (requires joining/checking `user_favorite_recipes`).
   - **Frontend:**
-    - [ ] Add "Favorite/Unfavorite" button component.
-    - [ ] Integrate button into recipe detail page and recipe cards.
-    - [ ] Ensure button state reflects if recipe is favorited and calls correct API.
-    - [ ] Display list of favorited recipes on user's profile page.
+    - [x] Add "Favorite/Unfavorite" button component.
+    - [x] Integrate button into recipe detail page and recipe cards.
+    - [x] Ensure button state reflects if recipe is favorited and calls correct API.
+    - [x] Display list of favorited recipes on user's profile page.
   - **Types:**
-    - [ ] Create `UserFavoriteRecipe` interface/type.
-    - [ ] Update `ProfileWithRecipes` to include an array of favorited `Recipe` objects or IDs.
-    - [ ] Update `Recipe` type (or extended type for detail view) to include optional `
+    - [x] Create `UserFavoriteRecipe` interface/type.
+    - [x] Update `ProfileWithRecipes` to include an array of favorited `Recipe` objects or IDs.
+    - [x] Update `Recipe` type (or extended type for detail view) to include optional `is_favorited`.
