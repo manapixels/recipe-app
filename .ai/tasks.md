@@ -98,3 +98,97 @@
     - [x] Create `UserFavoriteRecipe` interface/type.
     - [x] Update `ProfileWithRecipes` to include an array of favorited `Recipe` objects or IDs.
     - [x] Update `Recipe` type (or extended type for detail view) to include optional `is_favorited`.
+
+### 6. Advanced Recipe Detail Enhancements (Phase 2.2)
+
+- **Goal:** Further enrich the recipe detail page with advanced features for better usability, SEO, and personalization.
+- **Tasks:**
+
+  - **Feature: Structured Data (Schema.org for SEO)**
+
+    - **Frontend:**
+      - [ ] Implement JSON-LD script in `src/app/recipes/[slug]/page.tsx` to output `Recipe` schema.
+      - [ ] Ensure all relevant recipe data (name, image, ingredients, instructions, times, author, etc.) is correctly mapped to schema properties.
+    - **Types:**
+      - [ ] Review `Recipe` type in `src/types/recipe.ts` to ensure all necessary fields for schema.org are available and correctly typed.
+
+  - **Feature: Print-Friendly Version**
+
+    - **Frontend:**
+      - [ ] Create a new print-specific CSS stylesheet or utility classes to hide non-essential UI elements (header, footer, sidebars, buttons).
+      - [ ] Add a "Print Recipe" button to `src/app/recipes/[slug]/page.tsx`.
+      - [ ] Implement JavaScript logic (if needed) to trigger browser's print dialog and apply print styles.
+      - [ ] Ensure recipe content (title, ingredients, instructions, images) is clearly legible and well-formatted for printing.
+
+  - **Feature: Unit Conversion (Metric/Imperial)**
+
+    - **Frontend - Recipe Page:**
+      - [ ] Design and implement a UI toggle/dropdown on `src/app/recipes/[slug]/page.tsx` for users to select their preferred unit system.
+      - [ ] Develop utility functions to convert common cooking units (e.g., grams to oz, ml to cups, Celsius to Fahrenheit) for display purposes.
+      - [ ] Update ingredient display logic to use converted values based on user selection.
+    - **Frontend - App-wide Setting (Header/User Settings):**
+      - [ ] Design UI element in `Header.tsx` or a new user settings page for selecting a default unit preference.
+      - [ ] Use `UserContext` or a similar state management solution to store and retrieve this preference.
+      - [ ] Ensure the recipe page respects this global setting as the default, while still allowing per-page override.
+    - **Backend (Supabase & API):**
+      - [ ] Consider adding a `preferred_unit_system` (e.g., 'metric', 'imperial') field to the `profiles` table in Supabase to persist user preference.
+      - [ ] Update API for fetching user profile to include this preference.
+      - [ ] Update API for updating user profile to allow changing this preference.
+    - **Types:**
+      - [ ] Add `preferred_unit_system` to relevant profile types.
+
+  - **Feature: Equipment List**
+
+    - **Frontend:**
+      - [ ] Design and implement a new section/component on `src/app/recipes/[slug]/page.tsx` to display `equipment_list`.
+      - [ ] Update `RecipeForm.tsx` to include a field for inputting `equipment_list` (e.g., a text area or dynamic list of items).
+    - **Backend (Supabase & API):**
+      - [ ] Add an `equipment_list: text[]` (array of strings) or `equipment_list: jsonb` field to the `recipes` table in Supabase.
+      - [ ] Ensure `fetchRecipe` returns `equipment_list`.
+      - [ ] Modify `addRecipe` and `updateRecipe` to handle saving `equipment_list`.
+    - **Types:**
+      - [ ] Add `equipment_list` to the `Recipe` type in `src/types/recipe.ts`.
+
+  - **Feature: Author's Notes/Story**
+
+    - **Frontend:**
+      - [ ] Design and implement a section on `src/app/recipes/[slug]/page.tsx` to display `authors_notes`.
+      - [ ] Update `RecipeForm.tsx` to include a rich text editor or textarea for `authors_notes`.
+    - **Backend (Supabase & API):**
+      - [ ] Add an `authors_notes: text` field to the `recipes` table.
+      - [ ] Ensure `fetchRecipe` returns `authors_notes`.
+      - [ ] Modify `addRecipe` and `updateRecipe` to handle saving `authors_notes`.
+    - **Types:**
+      - [ ] Add `authors_notes` to the `Recipe` type.
+
+  - **Feature: Clearer Nutritional Information Display**
+
+    - **Frontend:**
+      - [ ] Design and implement a section/component on `src/app/recipes/[slug]/page.tsx` to display nutritional information (e.g., calories, protein, carbs, fat).
+      - [ ] Update `RecipeForm.tsx` if nutritional info is to be manually entered (or integrate with an API for estimation if desired in future).
+    - **Backend (Supabase & API):**
+      - [ ] Add fields for nutritional data to `recipes` table (e.g., `calories: int`, `protein_g: int`, etc., or a `nutrition_info: jsonb` field).
+      - [ ] Ensure `fetchRecipe` returns nutritional data.
+      - [ ] Modify `addRecipe` and `updateRecipe` to handle saving nutritional data.
+    - **Types:**
+      - [ ] Add nutritional fields to the `Recipe` type.
+
+  - **Feature: Baker's Percentage Display for Bread Recipes (Category-Specific)**
+    - **Goal:** Allow authors to mark flour ingredients for bread recipes, enabling an optional and accurate baker's percentage view for users.
+    - **Frontend (`RecipeForm.tsx`):**
+      - [ ] If recipe category is 'bread' (or similar), add a checkbox for each ingredient: "Mark as flour (for Baker's Percentage calculation)". This sets `ingredient.is_flour`.
+      - [ ] Provide clear UI guidance to the recipe creator that when marking ingredients as flour, all ingredient amounts (especially flours and liquids) should be in consistent weight units (e.g., grams) for accurate percentage calculation.
+    - **Frontend (`/recipes/[slug]/page.tsx`):**
+      - [ ] If `recipe.category` is 'bread' (or similar) AND at least one `ingredient.is_flour === true` in `recipe.ingredients`:
+        - [ ] Display a "Show/Hide Baker's Percentages" toggle button.
+      - [ ] When toggled "on":
+        - [ ] Implement logic to calculate total flour weight: sum the `amount` of all ingredients where `ingredient.is_flour === true`. (Ensure robust handling if amounts are not purely numeric or units are inconsistent, though primary reliance is on author inputting correct data as per form guidance).
+        - [ ] For each ingredient, calculate its percentage: (`ingredient.amount` / Total Flour Weight) \* 100.
+        - [ ] Display the calculated percentage alongside the ingredient's existing amount and unit (e.g., "Water: 350g (70%)").
+        - [ ] Clearly indicate that percentages are relative to total flour weight.
+    - **Backend (Supabase & API):**
+      - (No specific new top-level fields on `recipes` table needed. `addRecipe` and `updateRecipe` already handle the `ingredients` JSONB which will now contain the optional `is_flour` flags within each ingredient object.)
+    - **Types (`src/types/recipe.ts`):**
+      - [ ] Add `is_flour?: boolean` to the `Ingredient` type (nested within `Recipe`).
+    - **Data Considerations:**
+      - [ ] Existing bread recipes will not have `is_flour` flags; the baker's percentage toggle will not appear for them by default, which is the correct behavior.

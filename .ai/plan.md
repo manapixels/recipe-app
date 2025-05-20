@@ -27,6 +27,15 @@
 
 1.  **Detailed Recipe View:**
     - **Enhancement:** Create a rich recipe detail page. Display all recipe information in a user-friendly format: name, description, author, high-quality images (banner/thumbnail), structured ingredients (name, amount, unit), structured instructions (step, content), `total_time`, servings, difficulty.
+    - **Further Enhancements (General):**
+      - Implement `Recipe` schema markup (JSON-LD) for improved SEO and rich snippets.
+      - Add a print-friendly version of the recipe page.
+      - Implement unit conversion (e.g., metric/imperial), potentially with an app-wide setting changeable in the header/user settings.
+      - Include an "Equipment List" section.
+      - Add a section for "Author's Notes/Story" to personalize recipes.
+      - Display clearer nutritional information (if data is collected).
+    - **Category-Specific Enhancements:**
+      - Add Baker's Percentage display for bread recipes (requires authors to mark flour ingredients and use weight-based units).
     - **New Feature:** User ratings and reviews for recipes.
 2.  **Recipe Listing & Filtering:**
     - **Current:** `fetchRecipes` exists.
