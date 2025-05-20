@@ -37,7 +37,15 @@ export const fetchUserProfileWithRecipes = async ({
   try {
     let query = supabase.from('profiles').select(`
         *,
-        recipes_created:recipes(*)
+        recipes_created:recipes!recipes_created_by_fkey(*, author:profiles!recipes_created_by_fkey(id, username, avatar_url, name)),
+        user_favorite_recipes ( 
+          created_at, 
+          recipe_id, 
+          recipes ( 
+            *,
+            author:profiles!recipes_created_by_fkey(id, username, avatar_url, name)
+          )
+        )
       `);
 
     if (username) {
@@ -50,11 +58,26 @@ export const fetchUserProfileWithRecipes = async ({
 
     const { data, error } = await query.single();
 
-    if (error) throw new Error('Error fetching profile with recipes');
+    if (error) {
+      console.error('Error fetching profile with recipes:', error);
+      throw error;
+    }
 
-    return data as ProfileWithRecipes;
+    if (!data) {
+      return null;
+    }
+
+    const transformedData = {
+      ...data,
+      recipes_created: data.recipes_created || [],
+      favorite_recipes: data.user_favorite_recipes
+        ? data.user_favorite_recipes.map((fav: any) => fav.recipes).filter(Boolean)
+        : [],
+    };
+
+    return transformedData as ProfileWithRecipes;
   } catch (error) {
-    console.error('error', error);
+    console.error('fetchUserProfileWithRecipes error:', error);
     return null;
   }
 };

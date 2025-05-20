@@ -25,13 +25,14 @@ export default async function ProfilePage({ params }: { params: { username: stri
     return <div className="text-center py-10">Profile not found.</div>;
   }
 
-  const recipes = (profile?.recipes_created as Recipe[]) || [];
+  const createdRecipes = (profile?.recipes_created as Recipe[]) || [];
+  const favoritedRecipes = (profile?.favorite_recipes as Recipe[]) || [];
   const isOwnProfile = authUser?.user?.id === profile?.id;
   const bio = profile.bio || "This user hasn't set a bio yet.";
 
   const createdRecipesContent = (
     <>
-      {isOwnProfile && !recipes.length && (
+      {isOwnProfile && !createdRecipes.length && (
         <div className="text-center text-gray-500 py-6">
           <p>You haven&apos;t created any recipes yet.</p>
           <Link
@@ -42,14 +43,42 @@ export default async function ProfilePage({ params }: { params: { username: stri
           </Link>
         </div>
       )}
-      {!isOwnProfile && !recipes.length && (
+      {!isOwnProfile && !createdRecipes.length && (
         <div className="text-center text-gray-500 py-10">
           <p>{`${profile.name || 'This user'} hasn't`} created any recipes yet.</p>
         </div>
       )}
-      {recipes.length > 0 && (
+      {createdRecipes.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {recipes.map(recipe => (
+          {createdRecipes.map(recipe => (
+            <RecipeListItemInProfile recipe={recipe} key={recipe.id} />
+          ))}
+        </div>
+      )}
+    </>
+  );
+
+  const favoritedRecipesContent = (
+    <>
+      {isOwnProfile && !favoritedRecipes.length && (
+        <div className="text-center text-gray-500 py-6">
+          <p>You haven&apos;t favorited any recipes yet.</p>
+          <Link
+            href="/recipes"
+            className="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-150"
+          >
+            Discover Recipes
+          </Link>
+        </div>
+      )}
+      {!isOwnProfile && !favoritedRecipes.length && (
+        <div className="text-center text-gray-500 py-10">
+          <p>{`${profile.name || 'This user'} hasn't`} favorited any recipes yet.</p>
+        </div>
+      )}
+      {favoritedRecipes.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {favoritedRecipes.map(recipe => (
             <RecipeListItemInProfile recipe={recipe} key={recipe.id} />
           ))}
         </div>
@@ -100,7 +129,10 @@ export default async function ProfilePage({ params }: { params: { username: stri
         </div>
       </div>
 
-      <ProfileTabs createdRecipesContent={createdRecipesContent} />
+      <ProfileTabs
+        createdRecipesContent={createdRecipesContent}
+        favoritedRecipesContent={favoritedRecipesContent}
+      />
     </div>
   );
 }

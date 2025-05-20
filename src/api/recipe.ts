@@ -81,14 +81,15 @@ export const fetchRecipe = async (slug: string) => {
       data: { user: authUser },
     } = await supabase.auth.getUser();
 
+    // Fetch the recipe by slug - no status filter here initially
     let { data: rawData, error: fetchError } = await supabase
       .from('recipes')
       .select(
         `
         *,
-        author:profiles(id, username, avatar_url, name)
+        author:profiles!recipes_created_by_fkey(id, username, avatar_url, name) 
       `
-      )
+      ) // Added join hint for author
       .eq('slug', slug)
       .single();
 
@@ -98,6 +99,18 @@ export const fetchRecipe = async (slug: string) => {
     }
 
     if (!rawData) {
+      return null; // Recipe not found by slug
+    }
+
+    // Check if the recipe is viewable by the current user
+    const recipeIsPublished = rawData.status === 'published';
+    const isOwner = authUser && rawData.created_by === authUser.id;
+
+    if (!recipeIsPublished && !isOwner) {
+      // Non-owner trying to access a non-published recipe
+      console.log(
+        `Access denied: User ${authUser?.id} trying to access non-published recipe ${rawData.id} by ${rawData.created_by}`
+      );
       return null;
     }
 

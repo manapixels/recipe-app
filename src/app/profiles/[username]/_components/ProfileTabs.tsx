@@ -4,12 +4,15 @@ import React, { useState, ReactNode } from 'react';
 
 interface ProfileTabsProps {
   createdRecipesContent: ReactNode;
-  // favoritedRecipesContent will be added later
+  favoritedRecipesContent: ReactNode;
 }
 
 type TabKey = 'created' | 'favorites';
 
-const ProfileTabs: React.FC<ProfileTabsProps> = ({ createdRecipesContent }) => {
+const ProfileTabs: React.FC<ProfileTabsProps> = ({
+  createdRecipesContent,
+  favoritedRecipesContent,
+}) => {
   const [activeTab, setActiveTab] = useState<TabKey>('created');
 
   const renderContent = () => {
@@ -17,7 +20,7 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({ createdRecipesContent }) => {
       case 'created':
         return createdRecipesContent;
       case 'favorites':
-        return <p className="text-gray-500 py-4">Favorited recipes will appear here soon!</p>; // Placeholder
+        return favoritedRecipesContent;
       default:
         return null;
     }
@@ -50,9 +53,8 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({ createdRecipesContent }) => {
               }
               whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
             `}
-            // disabled // Will enable when favorites are implemented
           >
-            Favorited Recipes (Coming Soon)
+            Favorited Recipes
           </button>
         </nav>
       </div>
