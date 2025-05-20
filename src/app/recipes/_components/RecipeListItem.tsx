@@ -63,12 +63,14 @@ export default function RecipeListItem({ recipe }: { recipe: Recipe }) {
           {recipe.servings} {pluralize('serving', recipe.servings)}
         </p>
 
-        <p className="inline-block bg-base-600 text-white text-xs font-medium px-2.5 py-0.5 rounded">
-          {formatTime(recipe.total_time)}
-        </p>
-        <p className="inline-block text-white text-xs font-medium px-2.5 py-0.5 rounded">
-          {formatDifficulty(recipe.difficulty)}
-        </p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+            {formatTime(recipe.total_time)}
+          </span>
+          <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 capitalize">
+            {formatDifficulty(recipe.difficulty)}
+          </span>
+        </div>
       </div>
     </Link>
   );

@@ -1,27 +1,63 @@
 'use server';
 
 import { createClient } from '@/utils/supabase/server';
-import { Recipe } from '@/types/recipe';
+import {
+  Recipe as FullRecipeType,
+  Ingredient,
+  Instruction,
+  RecipeCategory,
+  RecipeSubcategory,
+  DifficultyLevel,
+} from '@/types/recipe';
 import { Profile } from '@/types/profile';
 
 const validStatuses = ['draft', 'published', 'archived'];
 
+export interface FetchRecipesParams {
+  category?: RecipeCategory;
+  subcategory?: RecipeSubcategory;
+  difficulty?: DifficultyLevel;
+  sortBy?: 'created_at' | 'name' | 'total_time'; // Add more as needed, e.g., 'rating', 'popularity'
+  sortDirection?: 'asc' | 'desc';
+}
+
 /**
- * Fetches all recipes and their authors.
+ * Fetches all recipes and their authors, with optional filtering and sorting.
+ * @param params - Optional parameters for filtering and sorting.
  * @returns The recipes data or error.
  */
-export const fetchRecipes = async () => {
+export const fetchRecipes = async (params?: FetchRecipesParams) => {
   const supabase = createClient();
   try {
-    let { data } = await supabase
-      .from('recipes')
-      .select(
-        `
+    let query = supabase.from('recipes').select(
+      `
         *,
         author:profiles(id, username, avatar_url, name)
       `
-      )
-      .order('created_at', { ascending: false });
+    );
+
+    // Apply filters
+    if (params?.category) {
+      query = query.eq('category', params.category);
+    }
+    if (params?.subcategory) {
+      query = query.eq('subcategory', params.subcategory);
+    }
+    if (params?.difficulty) {
+      query = query.eq('difficulty', params.difficulty);
+    }
+
+    // Apply sorting
+    const sortBy = params?.sortBy || 'created_at';
+    const sortDirection = params?.sortDirection || 'desc';
+    query = query.order(sortBy, { ascending: sortDirection === 'asc' });
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.log('error fetching recipes:', error);
+      return error; // Or throw error, depending on desired error handling
+    }
 
     return data;
   } catch (error) {
@@ -38,7 +74,7 @@ export const fetchRecipes = async () => {
 export const fetchRecipe = async (slug: string) => {
   const supabase = createClient();
   try {
-    let { data } = await supabase
+    let { data: rawData, error: fetchError } = await supabase
       .from('recipes')
       .select(
         `
@@ -49,10 +85,61 @@ export const fetchRecipe = async (slug: string) => {
       .eq('slug', slug)
       .single();
 
-    return data;
+    if (fetchError) {
+      console.log('Error fetching recipe by slug:', fetchError);
+      return null;
+    }
+
+    if (!rawData) {
+      return null;
+    }
+
+    const dbRecord = rawData as Omit<FullRecipeType, 'ingredients' | 'instructions'> & {
+      ingredients: unknown;
+      instructions: unknown;
+    };
+
+    let ingredients: Ingredient[] = [];
+    let instructions: Instruction[] = [];
+
+    try {
+      if (dbRecord.ingredients) {
+        if (typeof dbRecord.ingredients === 'string') {
+          ingredients = JSON.parse(dbRecord.ingredients) as Ingredient[];
+        } else if (Array.isArray(dbRecord.ingredients)) {
+          ingredients = dbRecord.ingredients as Ingredient[];
+        } else {
+          console.warn('Ingredients field is not a string or array:', dbRecord.ingredients);
+        }
+      }
+    } catch (e) {
+      console.error('Error parsing ingredients JSON:', e);
+    }
+
+    try {
+      if (dbRecord.instructions) {
+        if (typeof dbRecord.instructions === 'string') {
+          instructions = JSON.parse(dbRecord.instructions) as Instruction[];
+        } else if (Array.isArray(dbRecord.instructions)) {
+          instructions = dbRecord.instructions as Instruction[];
+        } else {
+          console.warn('Instructions field is not a string or array:', dbRecord.instructions);
+        }
+      }
+    } catch (e) {
+      console.error('Error parsing instructions JSON:', e);
+    }
+
+    const finalRecipe: FullRecipeType = {
+      ...(dbRecord as FullRecipeType),
+      ingredients,
+      instructions,
+    };
+
+    return finalRecipe;
   } catch (error) {
-    console.log('error', error);
-    return error;
+    console.log('error fetching or parsing recipe', error);
+    return null;
   }
 };
 
@@ -100,18 +187,18 @@ export const addRecipe = async ({
   image_thumbnail_url,
   image_banner_url,
 }: {
-  name: Recipe['name'];
-  description: Recipe['description'];
-  category: Recipe['category'];
-  subcategory: Recipe['subcategory'];
-  ingredients: Recipe['ingredients'];
-  instructions: Recipe['instructions'];
-  total_time: Recipe['total_time'];
-  servings: Recipe['servings'];
-  difficulty: Recipe['difficulty'];
-  created_by: Recipe['created_by'];
-  image_thumbnail_url?: Recipe['image_thumbnail_url'];
-  image_banner_url?: Recipe['image_banner_url'];
+  name: FullRecipeType['name'];
+  description: FullRecipeType['description'];
+  category: FullRecipeType['category'];
+  subcategory: FullRecipeType['subcategory'];
+  ingredients: FullRecipeType['ingredients'];
+  instructions: FullRecipeType['instructions'];
+  total_time: FullRecipeType['total_time'];
+  servings: FullRecipeType['servings'];
+  difficulty: FullRecipeType['difficulty'];
+  created_by: FullRecipeType['created_by'];
+  image_thumbnail_url?: FullRecipeType['image_thumbnail_url'];
+  image_banner_url?: FullRecipeType['image_banner_url'];
 }) => {
   const supabase = createClient();
   try {
@@ -164,18 +251,18 @@ export const updateRecipe = async ({
   image_banner_url,
 }: {
   id: string;
-  name?: Recipe['name'];
-  description?: Recipe['description'];
-  category?: Recipe['category'];
-  subcategory?: Recipe['subcategory'];
-  ingredients?: Recipe['ingredients'];
-  instructions?: Recipe['instructions'];
-  total_time?: Recipe['total_time'];
-  servings?: Recipe['servings'];
-  difficulty?: Recipe['difficulty'];
-  created_by?: Recipe['created_by'];
-  image_thumbnail_url?: Recipe['image_thumbnail_url'];
-  image_banner_url?: Recipe['image_banner_url'];
+  name?: FullRecipeType['name'];
+  description?: FullRecipeType['description'];
+  category?: FullRecipeType['category'];
+  subcategory?: FullRecipeType['subcategory'];
+  ingredients?: FullRecipeType['ingredients'];
+  instructions?: FullRecipeType['instructions'];
+  total_time?: FullRecipeType['total_time'];
+  servings?: FullRecipeType['servings'];
+  difficulty?: FullRecipeType['difficulty'];
+  created_by?: FullRecipeType['created_by'];
+  image_thumbnail_url?: FullRecipeType['image_thumbnail_url'];
+  image_banner_url?: FullRecipeType['image_banner_url'];
 }) => {
   const supabase = createClient();
   try {

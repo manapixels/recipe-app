@@ -7,33 +7,33 @@
 - **Goal:** Create a rich, user-friendly recipe detail page.
 - **Tasks:**
   - **Frontend:**
-    - [ ] Design and implement layout for `src/app/recipes/[slug]/page.tsx`.
-    - [ ] Display recipe name, description, author (link to profile).
-    - [ ] Display high-quality banner and thumbnail images.
-    - [ ] Clearly sectioned ingredients list component (handles `Ingredient[]` objects: name, amount, unit).
-    - [ ] Clearly sectioned, step-by-step instructions component (handles `Instruction[]` objects: step, content).
-    - [ ] Prominently display `total_time`, servings, difficulty (using new emoji labels from `src/types/recipe.ts`).
+    - [x] Design and implement layout for `src/app/recipes/[slug]/page.tsx`.
+    - [x] Display recipe name, description, author (link to profile).
+    - [x] Display high-quality banner and thumbnail images.
+    - [x] Clearly sectioned ingredients list component (handles `Ingredient[]` objects: name, amount, unit).
+    - [x] Clearly sectioned, step-by-step instructions component (handles `Instruction[]` objects: step, content).
+    - [x] Prominently display `total_time`, servings, difficulty (using new emoji labels from `src/types/recipe.ts`).
     - [ ] Ensure responsive design for recipe detail page.
   - **Backend (Supabase & API):**
-    - [ ] Ensure `fetchRecipe` in `src/api/recipe.ts` returns data with `ingredients` and `instructions` parsed from JSON into `Ingredient[]` and `Instruction[]` respectively, and includes `total_time`.
+    - [x] Ensure `fetchRecipe` in `src/api/recipe.ts` returns data with `ingredients` and `instructions` parsed from JSON into `Ingredient[]` and `Instruction[]` respectively, and includes `total_time`.
   - **Types:**
-    - [ ] Verify `Recipe` type in `src/types/recipe.ts` (including `Ingredient`, `Instruction` nested types) aligns with data fetched and displayed.
-    - [ ] Ensure `total_time` is present in the `Recipe` type (likely via `Tables<'recipes'>`).
+    - [x] Verify `Recipe` type in `src/types/recipe.ts` (including `Ingredient`, `Instruction` nested types) aligns with data fetched and displayed.
+    - [x] Ensure `total_time` is present in the `Recipe` type (likely via `Tables<'recipes'>`).
 
 ### 2. Recipe Listing & Filtering/Sorting Enhancements (Phase 1.2)
 
 - **Goal:** Improve recipe discoverability on the `/recipes` page.
 - **Tasks:**
   - **Frontend:**
-    - [ ] Implement UI component for filtering options (category, subcategory - using new emoji labels; difficulty - using new emoji labels).
-    - [ ] Implement UI component for sorting options (creation date; later: rating, popularity).
-    - [ ] Update `src/app/recipes/page.tsx` to integrate filter/sort components, manage state, and re-fetch data.
-    - [ ] Create or modify recipe card component (`src/app/_components/RecipeCard.tsx`) to display key info (including `total_time` if desired) and link to detail page.
+    - [x] Implement UI component for filtering options (category, subcategory - using new emoji labels; difficulty - using new emoji labels).
+    - [x] Implement UI component for sorting options (creation date; later: rating, popularity).
+    - [x] Update `src/app/recipes/page.tsx` to integrate filter/sort components, manage state, and re-fetch data.
+    - [x] Create or modify recipe card component (`src/app/_components/RecipeCard.tsx`) to display key info (including `total_time` if desired) and link to detail page.
   - **Backend (Supabase & API):**
-    - [ ] Modify `fetchRecipes` in `src/api/recipe.ts` to accept filter and sort parameters (ensure it fetches `total_time`).
-    - [ ] Update Supabase query in `fetchRecipes` to apply these filters and sorting.
+    - [x] Modify `fetchRecipes` in `src/api/recipe.ts` to accept filter and sort parameters (ensure it fetches `total_time`).
+    - [x] Update Supabase query in `fetchRecipes` to apply these filters and sorting.
   - **Types:**
-    - [ ] No major type changes anticipated, confirm `Recipe` type used in lists contains necessary fields.
+    - [x] No major type changes anticipated, confirm `Recipe` type used in lists contains necessary fields.
 
 ### 3. Recipe Creation/Editing Flow Enhancements (Phase 1.4)
 
@@ -89,94 +89,4 @@
   - **Types:**
     - [ ] Create `UserFavoriteRecipe` interface/type.
     - [ ] Update `ProfileWithRecipes` to include an array of favorited `Recipe` objects or IDs.
-    - [ ] Update `Recipe` type (or extended type for detail view) to include optional `isFavorited` boolean.
-
-### 5. User Profile Page Enhancements (Phase 1.3)
-
-- **Goal:** Display user information, their created recipes, and their saved/favorited recipes.
-- **Tasks:**
-  - **Frontend:**
-    - [ ] Design/Refine UI for user profile pages (`src/app/profiles/[username]/page.tsx`).
-    - [ ] Display user's avatar, username, name, bio (if profile schema supports bio).
-    - [ ] Implement tabbed interface or sections for "Created Recipes" and "Favorited Recipes".
-    - [ ] List created recipes and favorited recipes using the `RecipeCard` component.
-  - **Backend (API):**
-    - [ ] Ensure `fetchUserProfileWithRecipes` in `src/api/profile.ts` provides data for created recipes.
-    - [ ] Ensure `fetchUserFavoriteRecipes` is available for "Favorited Recipes" tab.
-  - **Types:**
-    - [ ] Verify/Update `ProfileWithRecipes` in `src/types/profile.ts` to support both created and favorited recipes lists.
-
-## Priority 2: Important UX and Community Features
-
-### 1. Search Functionality for Recipes (New feature within Phase 1.2)
-
-- **Goal:** Allow users to search for recipes by name or ingredients.
-- **Tasks:**
-  - **Frontend:**
-    - [ ] Add a search bar component.
-    - [ ] Handle search input state and trigger API call.
-    - [ ] Display search results.
-  - **Backend (API & Supabase):**
-    - [ ] Create `searchRecipes(searchTerm)` function in `src/api/recipe.ts`.
-    - [ ] Implement Supabase query: For ingredients, this will need to search within the JSONB column if ingredients are stored as JSON. This can be complex (e.g., using `->>` or `@>`). Consider if a simpler search on name/description is MVP.
-    - [ ] _Advanced:_ Set up Full-Text Search on relevant columns. For JSONB ingredients, this might involve creating a generated column that unnests ingredients into a searchable text format.
-  - **Types:**
-    - [ ] No major type changes anticipated.
-
-### 2. User Ratings and Reviews for Recipes (New feature within Phase 1.1)
-
-- **Goal:** Allow users to rate and review recipes.
-- **Tasks:**
-  - **Backend (Supabase & API):**
-    - [ ] **Database:** Define/create `recipe_reviews` table (`id`, `recipe_id FK`, `user_id FK`, `rating (1-5)`, `review_text`, `created_at`).
-    - [ ] **API:** `addRecipeReview(recipeId, userId, rating, reviewText)`.
-    - [ ] **API:** `fetchRecipeReviews(recipeId)` (with pagination).
-    - [ ] **API:** `updateRecipeReview(reviewId, rating, reviewText)` (user owns review).
-    - [ ] **API:** `deleteRecipeReview(reviewId)` (user owns review / admin).
-    - [ ] **API:** Modify `fetchRecipe` to include average rating and review count.
-    - [ ] _Optional:_ DB triggers to auto-update `average_rating`, `review_count` on `recipes` table.
-  - **Frontend:**
-    - **Recipe Detail Page:**
-      - [ ] Display average rating (star component).
-      - [ ] Display number of reviews.
-      - [ ] Component to list existing reviews.
-      - [ ] Form for logged-in users to submit/edit their rating & review.
-  - **Types:**
-    - [ ] New `RecipeReview` type.
-    - [ ] Update `Recipe` type to include `average_rating`, `review_count`.
-
-### 3. Social Sharing (Phase 2.2 - UI Implementation)
-
-- **Goal:** Implement UI for sharing recipes.
-- **Tasks:**
-  - **Frontend:**
-    - [ ] Add social share button/component to recipe detail page.
-    - [ ] Implement logic for share options (SDKs, URL construction, Copy Link).
-    - [ ] _Clarification:_ Re-evaluate relevance of `postRecipeToSocial` API vs. client-side sharing.
-  - **Backend (API):**
-    - [ ] Adapt/remove `postRecipeToSocial` if client-side sharing is preferred and API isn't adding value (e.g. tracking shares).
-  - **Types:**
-    - [ ] No changes anticipated unless `postRecipeToSocial` interaction changes.
-
-### 4. Commenting on Recipes (Phase 2.3)
-
-- **Goal:** Allow users to leave comments on recipes.
-- **Tasks:**
-  - **Backend (Supabase & API):**
-    - [ ] **Database:** Define/create `recipe_comments` table (`id`, `recipe_id FK`, `user_id FK`, `parent_comment_id FK nullable`, `comment_text`, `created_at`).
-    - [ ] **API:** `addRecipeComment(...)`.
-    - [ ] **API:** `fetchRecipeComments(...)` (pagination, sorting).
-    - [ ] **API:** `updateRecipeComment(...)` (user owns comment).
-    - [ ] **API:** `deleteRecipeComment(...)` (user owns comment / admin; soft delete).
-  - **Frontend:**
-    - **Recipe Detail Page:**
-      - [ ] Component to display comments (threading if implemented).
-      - [ ] Form for new comments.
-      - [ ] UI for replying, editing/deleting own comments.
-  - **Types:**
-    - [ ] New `RecipeComment` type.
-    - [ ] Update `Recipe` type if comment count is denormalized.
-
----
-
-This breakdown should give you a solid foundation for planning your development sprints. Remember that technical considerations like error handling, loading states, accessibility, and testing should be incorporated into each relevant task. Also, the removal of the explicit role system means permission handling (e.g. for editing/deleting content, admin actions) needs to be clearly defined based on user ID or the existing `AppPermission` type.
+    - [ ] Update `Recipe` type (or extended type for detail view) to include optional `

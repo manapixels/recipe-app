@@ -4,6 +4,7 @@ import { BUCKET_URL } from '@/constants';
 import { CATEGORY_OPTIONS, DIFFICULTY_LEVELS, Recipe, SUBCATEGORY_OPTIONS } from '@/types/recipe';
 import { Profile } from '@/types/profile';
 import Image from 'next/image';
+import Link from 'next/link';
 import RecipeIngredients from '../_components/RecipeIngredients';
 
 export const metadata: Metadata = {
@@ -41,11 +42,19 @@ export default async function RecipeDetailsPage({
                 className="h-5 w-5 rounded-full mx-1"
                 src={`${BUCKET_URL}/avatars/${recipe.author.avatar_url}`}
                 alt=""
+                width={20}
+                height={20}
               />
             ) : (
               <div className="h-5 w-5 rounded-full mx-1 bg-gray-200"></div>
             )}
-            <b>{recipe.author?.name}</b>
+            {recipe.author?.username ? (
+              <Link href={`/profiles/${recipe.author.username}`} className="hover:underline">
+                <b>{recipe.author?.name}</b>
+              </Link>
+            ) : (
+              <b>{recipe.author?.name || 'Unknown Author'}</b>
+            )}
           </div>
         </div>
         <div className="bg-gray-50 p-1 rounded-lg text-center ring-1 ring-inset ring-gray-500/10">
