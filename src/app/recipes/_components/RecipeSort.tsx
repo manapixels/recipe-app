@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { CustomSelect } from '@/_components/ui/Select';
 
 export type SortByOptions = 'created_at' | 'name' | 'total_time';
 export type SortDirectionOptions = 'asc' | 'desc';
@@ -35,57 +36,50 @@ const RecipeSort: React.FC<RecipeSortProps> = ({
     onSortChange({ sortBy, sortDirection });
   }, [sortBy, sortDirection, onSortChange]);
 
-  const handleSortByChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSortBy(e.target.value as SortByOptions);
+  const handleSortByChange = (value: string) => {
+    setSortBy(value as SortByOptions);
   };
 
-  const handleSortDirectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSortDirection(e.target.value as SortDirectionOptions);
+  const handleSortDirectionChange = (value: string) => {
+    setSortDirection(value as SortDirectionOptions);
   };
 
   return (
-    <div className="p-4 mb-6 bg-gray-50 rounded-lg shadow">
-      <h3 className="text-lg font-semibold mb-3 text-gray-700">Sort Recipes</h3>
+    <div className="p-4 mb-6 bg-gray-50 rounded-lg shadow dark:bg-gray-800">
+      <h3 className="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-200">Sort Recipes</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Sort By Filter */}
         <div>
-          <label htmlFor="sort-by-filter" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="sort-by-filter"
+            className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300"
+          >
             Sort By
           </label>
-          <select
-            id="sort-by-filter"
+          <CustomSelect
+            name="sort-by-filter"
             value={sortBy}
             onChange={handleSortByChange}
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md shadow-sm"
-          >
-            {SORT_BY_CHOICES.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            options={SORT_BY_CHOICES}
+            placeholder="Select Sort Property"
+          />
         </div>
 
         {/* Sort Direction Filter */}
         <div>
           <label
             htmlFor="sort-direction-filter"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300"
           >
             Direction
           </label>
-          <select
-            id="sort-direction-filter"
+          <CustomSelect
+            name="sort-direction-filter"
             value={sortDirection}
             onChange={handleSortDirectionChange}
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md shadow-sm"
-          >
-            {SORT_DIRECTION_CHOICES.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            options={SORT_DIRECTION_CHOICES}
+            placeholder="Select Sort Direction"
+          />
         </div>
       </div>
     </div>

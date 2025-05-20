@@ -44,7 +44,7 @@ const ModalContent = ({ className, children, handleClose, ariaLabel }: ModalCont
     role="dialog"
     aria-modal={true}
     aria-label={ariaLabel}
-    className={`relative m-auto overflow-y-auto max-w-2xl ${className || 'max-h-full px-5 pt-5 pb-2 bg-white rounded-lg shadow-lg'}`}
+    className={`relative m-auto overflow-y-auto max-w-2xl ${className || 'max-h-full px-5 pt-5 pb-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg'}`}
     variants={effect}
     initial="hidden"
     animate="visible"
@@ -56,7 +56,7 @@ const ModalContent = ({ className, children, handleClose, ariaLabel }: ModalCont
       <button
         type="button"
         onClick={handleClose}
-        className="absolute text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white top-6 right-6"
+        className="absolute text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white top-6 right-6 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-base-500"
         aria-label={`Close ${ariaLabel || 'dialog'}`}
       >
         <svg

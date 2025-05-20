@@ -11,14 +11,16 @@ export default async function AccountPage() {
   } = await supabase.auth.getUser();
 
   return (
-    <div>
-      <div className="max-w-md mx-auto">
-        <h3 className="text-lg font-medium mb-4">
+    <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 md:mb-8">
+        Account Settings
+      </h1>
+
+      <div>
+        <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-4 flex items-center">
           <svg
-            className="inline mr-2"
+            className="inline mr-2 h-5 w-5"
             xmlns="http://www.w3.org/2000/svg"
-            width="1em"
-            height="1em"
             viewBox="0 0 24 24"
           >
             <path
@@ -29,12 +31,11 @@ export default async function AccountPage() {
           Personal Information
         </h3>
         <ProfileForm userId={user?.id} />
-        <h3 className="text-lg font-medium mt-8 mb-4">
+
+        <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mt-8 mb-4 flex items-center">
           <svg
-            className="inline mr-2"
+            className="inline mr-2 h-5 w-5"
             xmlns="http://www.w3.org/2000/svg"
-            width="1em"
-            height="1em"
             viewBox="0 0 14 14"
           >
             <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
@@ -45,7 +46,7 @@ export default async function AccountPage() {
           </svg>
           Security
         </h3>
-        <div className="p-5 md:p-10 border border-gray-300 rounded-lg bg-gray-50">
+        <div className="p-5 md:p-10 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
           <EmailForm currEmail={user?.email} />
           <div className="mb-6"></div>
           <PasswordForm />

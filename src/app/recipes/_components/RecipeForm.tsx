@@ -930,7 +930,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
             type="button"
             onClick={onCancel || (() => router.back())}
             disabled={isLoading || isSubmitting}
-            className="w-full sm:w-auto px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 order-last sm:order-first mt-2 sm:mt-0"
+            className="w-full sm:w-auto px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-base-500 disabled:opacity-50 order-last sm:order-first mt-2 sm:mt-0"
           >
             {isEditMode ? 'Cancel' : 'Cancel'}
           </button>
@@ -938,7 +938,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
             type="button"
             onClick={handlePreview}
             disabled={isSubmitting}
-            className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2.5 text-sm font-medium text-center text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-center text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-base-500 disabled:opacity-50"
           >
             <Eye className="mr-2 h-4 w-4" />
             Preview
@@ -947,7 +947,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
             type="button"
             onClick={() => handleFormSubmit('draft')}
             disabled={isLoading || isSubmitting}
-            className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2.5 text-sm font-medium text-center text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-center text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-base-500 disabled:opacity-50"
           >
             {isLoading && submitAction === 'draft' ? (
               <>
@@ -964,7 +964,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
             type="button"
             onClick={() => handleFormSubmit('published')}
             disabled={isLoading || isSubmitting}
-            className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2.5 text-sm font-medium text-center text-white bg-base-600 rounded-lg hover:bg-base-700 disabled:opacity-50"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-center text-white bg-base-600 rounded-lg hover:bg-base-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-base-500 disabled:opacity-50"
           >
             {isLoading && submitAction === 'published' ? (
               <>

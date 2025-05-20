@@ -69,7 +69,7 @@ export default function AuthForm() {
     <button
       type="button"
       onClick={toggleModal}
-      className="text-white bg-black hover:bg-gray-900 focus:ring-4 focus:ring-base-200 font-medium rounded-full text-md px-7 py-2.5 dark:bg-base-600 dark:hover:bg-base-700 focus:outline-none dark:focus:ring-base-800"
+      className="text-white bg-black hover:bg-gray-900 font-medium rounded-full text-md px-7 py-2.5 dark:bg-base-600 dark:hover:bg-base-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-base-500 dark:focus-visible:ring-offset-gray-900 dark:focus-visible:ring-base-500"
     >
       <span className="hidden lg:inline">Log in</span>
       <LogIn className="w-4 h-4 lg:hidden" />
@@ -96,7 +96,7 @@ export default function AuthForm() {
             <input
               type="email"
               id="email"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2.5 py-4 md:py-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-base-500 dark:focus:border-base-500"
               required
               placeholder="Email"
               {...register('email', {
@@ -113,7 +113,7 @@ export default function AuthForm() {
               <input
                 type={showPassword ? 'text' : 'password'}
                 id="password"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2.5 py-4 md:py-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-base-500 dark:focus:border-base-500"
                 required
                 placeholder="Password"
                 {...register('password', { required: true })}
@@ -189,10 +189,10 @@ export default function AuthForm() {
           )}
           <button
             type="submit"
-            className={`text-black text-sm bg-base-100 hover:bg-base-200 focus:ring-4 focus:outline-none focus:ring-base-300 font-bold block w-full px-5 py-4 md:py-2.5 text-center dark:bg-base-600 dark:hover:bg-base-700 dark:focus:ring-base-800 ${isSubmitting ? 'disabled:opacity-50' : ''} rounded-full`}
+            className={`text-white bg-base-600 hover:bg-base-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-base-500 font-medium rounded-lg text-sm px-5 py-2.5 w-full text-center ${isSubmitting ? 'disabled:opacity-50' : ''} dark:bg-base-600 dark:hover:bg-base-700 dark:focus-visible:ring-base-700`}
             disabled={isSubmitting}
           >
-            {isSubmitting && <Spinner className="mr-1.5" />}
+            {isSubmitting && <Spinner className="mr-1.5 inline-block" />}
             {state === 'login' ? 'Log in' : 'Sign up'}
           </button>
 

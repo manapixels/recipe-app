@@ -9,6 +9,7 @@ import {
   SUBCATEGORY_OPTIONS,
   DIFFICULTY_LEVELS,
 } from '@/types/recipe';
+import { CustomSelect } from '@/_components/ui/Select';
 
 interface RecipeFiltersProps {
   initialCategory?: RecipeCategory;
@@ -54,92 +55,100 @@ const RecipeFilters: React.FC<RecipeFiltersProps> = ({
     });
   }, [selectedCategory, selectedSubcategory, selectedDifficulty, onFilterChange]);
 
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value as RecipeCategory | '';
-    setSelectedCategory(value === '' ? undefined : value);
+  const ALL_FILTER_VALUE = '--all--';
+
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value === ALL_FILTER_VALUE ? undefined : (value as RecipeCategory));
     setSelectedSubcategory(undefined);
   };
 
-  const handleSubcategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value as RecipeSubcategory | '';
-    setSelectedSubcategory(value === '' ? undefined : value);
+  const handleSubcategoryChange = (value: string) => {
+    setSelectedSubcategory(value === ALL_FILTER_VALUE ? undefined : (value as RecipeSubcategory));
   };
 
-  const handleDifficultyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value as DifficultyLevel | '';
-    setSelectedDifficulty(value === '' ? undefined : value);
+  const handleDifficultyChange = (value: string) => {
+    setSelectedDifficulty(value === ALL_FILTER_VALUE ? undefined : (value as DifficultyLevel));
   };
+
+  const categoryOptions = [
+    { label: 'All Categories', value: ALL_FILTER_VALUE },
+    ...CATEGORY_OPTIONS.map(option => ({ label: option.label, value: option.value as string })),
+  ];
+
+  const subcategoryOptions = selectedCategory
+    ? [
+        { label: 'All Subcategories', value: ALL_FILTER_VALUE },
+        ...(SUBCATEGORY_OPTIONS[selectedCategory] ?? []).map(option => ({
+          label: option.label,
+          value: option.value as string,
+        })),
+      ]
+    : [{ label: 'All Subcategories', value: ALL_FILTER_VALUE }];
+
+  const difficultyOptions = [
+    { label: 'All Difficulties', value: ALL_FILTER_VALUE },
+    ...Object.entries(DIFFICULTY_LEVELS).map(([value, label]) => ({
+      label: label,
+      value: value as string,
+    })),
+  ];
 
   return (
-    <div className="p-4 mb-6 bg-gray-50 rounded-lg shadow">
-      <h3 className="text-lg font-semibold mb-3 text-gray-700">Filter Recipes</h3>
+    <div className="p-4 mb-6 bg-gray-50 rounded-lg shadow dark:bg-gray-800">
+      <h3 className="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-200">
+        Filter Recipes
+      </h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Category Filter */}
         <div>
-          <label htmlFor="category-filter" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="category-filter"
+            className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300"
+          >
             Category
           </label>
-          <select
-            id="category-filter"
-            value={selectedCategory || ''}
+          <CustomSelect
+            name="category-filter"
+            value={selectedCategory || ALL_FILTER_VALUE}
             onChange={handleCategoryChange}
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md shadow-sm"
-          >
-            <option value="">All Categories</option>
-            {CATEGORY_OPTIONS.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            options={categoryOptions}
+            placeholder="All Categories"
+          />
         </div>
 
         {/* Subcategory Filter */}
         <div>
           <label
             htmlFor="subcategory-filter"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300"
           >
             Subcategory
           </label>
-          <select
-            id="subcategory-filter"
-            value={selectedSubcategory || ''}
+          <CustomSelect
+            name="subcategory-filter"
+            value={selectedSubcategory || ALL_FILTER_VALUE}
             onChange={handleSubcategoryChange}
+            options={subcategoryOptions}
+            placeholder="All Subcategories"
             disabled={!selectedCategory || !SUBCATEGORY_OPTIONS[selectedCategory]?.length}
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md shadow-sm disabled:bg-gray-100"
-          >
-            <option value="">All Subcategories</option>
-            {selectedCategory &&
-              (SUBCATEGORY_OPTIONS[selectedCategory] ?? []).map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-          </select>
+          />
         </div>
 
         {/* Difficulty Filter */}
         <div>
           <label
             htmlFor="difficulty-filter"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300"
           >
             Difficulty
           </label>
-          <select
-            id="difficulty-filter"
-            value={selectedDifficulty || ''}
+          <CustomSelect
+            name="difficulty-filter"
+            value={selectedDifficulty || ALL_FILTER_VALUE}
             onChange={handleDifficultyChange}
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md shadow-sm"
-          >
-            <option value="">All Difficulties</option>
-            {Object.entries(DIFFICULTY_LEVELS).map(([value, label]) => (
-              <option key={value} value={value as DifficultyLevel}>
-                {label}
-              </option>
-            ))}
-          </select>
+            options={difficultyOptions}
+            placeholder="All Difficulties"
+          />
         </div>
       </div>
     </div>

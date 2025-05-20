@@ -37,7 +37,7 @@ export default async function ProfilePage({ params }: { params: { username: stri
           <p>You haven&apos;t created any recipes yet.</p>
           <Link
             href="/recipes/create"
-            className="mt-4 inline-block bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-150"
+            className="mt-4 inline-block bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-700"
           >
             Create Your First Recipe
           </Link>
@@ -65,7 +65,7 @@ export default async function ProfilePage({ params }: { params: { username: stri
           <p>You haven&apos;t favorited any recipes yet.</p>
           <Link
             href="/recipes"
-            className="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-150"
+            className="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-700"
           >
             Discover Recipes
           </Link>
@@ -103,29 +103,29 @@ export default async function ProfilePage({ params }: { params: { username: stri
         <div className="text-center md:text-left flex-grow">
           <div className="flex flex-col md:flex-row justify-between items-center mb-2">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 {profile.name || profile.username}
               </h1>
-              <p className="text-md text-gray-600">@{profile.username}</p>
+              <p className="text-md text-gray-500 dark:text-gray-400">@{profile.username}</p>
             </div>
             {isOwnProfile && (
               <div className="mt-4 md:mt-0 flex flex-col md:flex-row gap-2 items-center">
                 <Link
                   href="/account/settings"
-                  className="text-sm text-indigo-600 hover:text-indigo-500 px-3 py-1.5 rounded-md hover:bg-indigo-50 transition-colors duration-150 whitespace-nowrap"
+                  className="text-sm text-indigo-600 hover:text-indigo-500 px-3 py-1.5 rounded-lg hover:bg-indigo-50 transition-colors duration-150 whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-700"
                 >
                   Edit Profile
                 </Link>
                 <Link
                   href="/recipes/manage"
-                  className="text-sm text-white bg-indigo-600 hover:bg-indigo-700 font-medium rounded-md px-3 py-1.5 transition-colors duration-150 whitespace-nowrap"
+                  className="text-sm text-white bg-indigo-600 hover:bg-indigo-700 font-medium rounded-lg px-3 py-1.5 transition-colors duration-150 whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-700"
                 >
                   Manage My Recipes
                 </Link>
               </div>
             )}
           </div>
-          <p className="mt-3 text-gray-700 text-sm md:text-base">{bio}</p>
+          <p className="mt-3 text-gray-700 dark:text-gray-300 text-sm md:text-base">{bio}</p>
         </div>
       </div>
 

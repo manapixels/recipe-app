@@ -80,7 +80,7 @@ export function FileUpload({
   return (
     <div
       {...getRootProps()}
-      className={`relative border-dashed border-2 border-gray-300 rounded-lg p-3 md:p-6 text-center cursor-pointer overflow-hidden ${isDragActive || isUploading || imageLoading ? 'bg-gray-100 animate-pulse' : 'bg-gray-50'} hover:bg-gray-100 ${className}`}
+      className={`relative border-dashed border-2 border-gray-300 rounded-lg p-3 md:p-6 text-center cursor-pointer overflow-hidden ${isDragActive || isUploading || imageLoading ? 'bg-gray-100 animate-pulse' : 'bg-gray-50'} hover:bg-gray-100 ${className} focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-base-500`}
     >
       <input name={name} {...register(name, validationSchema)} {...getInputProps()} />
       {isDragActive ? (

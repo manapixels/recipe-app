@@ -9,8 +9,10 @@ export const metadata: Metadata = {
 export default async function ManageRecipesPage() {
   return (
     <ProtectedWrapper>
-      <div className="flex w-full flex-col md:col-span-4">
-        <h2 className="font-bold text-xl mb-4">Manage My Recipes</h2>
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 md:mb-8">
+          Manage My Recipes
+        </h1>
         <RecipeListInManageRecipes />
       </div>
     </ProtectedWrapper>

@@ -77,7 +77,7 @@ export const RecipeListItemInManageRecipes = ({
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 p-4 bg-white rounded-lg">
+    <div className="flex flex-col md:flex-row gap-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
       <div className="w-full md:w-48 relative aspect-square flex-shrink-0">
         {recipe?.image_thumbnail_url ? (
           <Image
@@ -88,13 +88,13 @@ export const RecipeListItemInManageRecipes = ({
             height="300"
           />
         ) : (
-          <div className="bg-gray-200 rounded-lg w-full h-full flex justify-center items-center">
+          <div className="bg-gray-200 dark:bg-gray-700 rounded-lg w-full h-full flex justify-center items-center">
             <Image
               src="/recipe-placeholder.svg"
               alt="Recipe"
               width="100"
               height="100"
-              className="grayscale opacity-20"
+              className="grayscale opacity-20 dark:opacity-50"
             />
           </div>
         )}
@@ -103,25 +103,25 @@ export const RecipeListItemInManageRecipes = ({
       <div className="min-w-0 py-2 flex-grow flex flex-col md:gap-4 justify-between">
         <div>
           {/* Recipe name & tags */}
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
             <Link
               href={`/recipes/${recipe?.slug}`}
-              className="truncate text-md md:text-sm font-semibold mb-1"
+              className="text-lg font-semibold text-gray-900 dark:text-white hover:text-base-600 dark:hover:text-base-400 truncate mb-1 sm:mb-0"
             >
               {recipe?.name}
             </Link>
-            <div className="items-center gap-2 mb-2 hidden md:flex">
-              <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+            <div className="flex flex-wrap items-center gap-2 mt-1 sm:mt-0">
+              <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-200 dark:ring-gray-600/20 capitalize">
                 {recipe.category}
               </span>
-              <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+              <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-200 dark:ring-gray-600/20 capitalize">
                 {recipe.subcategory.replace('.', ' / ')}
               </span>
             </div>
           </div>
 
           {/* Recipe details */}
-          <div className="text-sm text-gray-500 space-y-1">
+          <div className="text-sm text-gray-500 dark:text-gray-400 space-y-1 mt-2">
             <p>Time: {formatTime(recipe.total_time)}</p>
             <p>Difficulty: {formatDifficulty(recipe.difficulty)}</p>
             <p>Servings: {recipe.servings}</p>
@@ -129,10 +129,10 @@ export const RecipeListItemInManageRecipes = ({
         </div>
 
         {/* Actions */}
-        <div className="flex flex-wrap gap-2 mt-4">
+        <div className="flex flex-wrap items-center gap-2 mt-4">
           <button
             onClick={handleEditClick}
-            className="text-white bg-base-700 hover:bg-base-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-4 py-2"
+            className="text-white bg-base-600 hover:bg-base-700 focus-visible:outline-base-600 dark:bg-base-500 dark:hover:bg-base-600 dark:focus-visible:outline-base-500 font-medium rounded-lg text-sm px-5 py-2.5 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
           >
             Edit
           </button>
