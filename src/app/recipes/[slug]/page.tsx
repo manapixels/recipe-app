@@ -7,6 +7,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import RecipeIngredients from '../_components/RecipeIngredients';
 import { FavoriteButton } from '@/_components/ui/FavoriteButton';
+import PrintRecipeButton from '@/_components/ui/PrintRecipeButton';
+
+// It's good practice to import icons if you use them, or use an icon library
+// For simplicity, using a text-based icon or emoji for now.
+// import { PrinterIcon } from '@heroicons/react/24/outline'; // Example if using Heroicons
 
 export const metadata: Metadata = {
   title: 'recipe-app | Recipe Details',
@@ -37,17 +42,20 @@ export default async function RecipeDetailsPage({
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 recipe-print-area">
       <div className="flex justify-between items-start mb-2">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex-grow">
           {recipe.name}
         </h1>
-        <FavoriteButton
-          recipeId={recipe.id}
-          initialIsFavorited={!!recipe.is_favorited}
-          className="ml-4 flex-shrink-0"
-          size="lg"
-        />
+        <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+          <FavoriteButton
+            recipeId={recipe.id}
+            initialIsFavorited={!!recipe.is_favorited}
+            className=""
+            size="lg"
+          />
+          <PrintRecipeButton />
+        </div>
       </div>
       <div className="flex flex-wrap justify-between items-center gap-y-2 mb-4">
         <div className="flex items-center gap-2">

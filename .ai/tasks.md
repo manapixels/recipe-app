@@ -1,3 +1,42 @@
+## Project Context & Conventions
+
+This document outlines tasks for the Recipe App. Below are key technical details and conventions to keep in mind:
+
+- **Framework & Core Stack:**
+  - Next.js (App Router)
+  - React (Server Components and Client Components using `'use client';`)
+  - TypeScript
+  - Tailwind CSS for styling.
+  - Supabase for backend (database, authentication, storage).
+- **Styling & UI:**
+  - **Iconography**: `lucide-react` is the chosen library for UI icons. Please use icons from this library for consistency.
+  - **Class Name Composition**: The `cn` utility function (from `src/utils/cn.ts`, using `clsx` and `tailwind-merge`) should be used for conditional and merged Tailwind CSS class names.
+  - **Theming**: Tailwind CSS `globals.css` contains base styles and CSS variables for light/dark mode theming.
+  - **Toasts**: Custom `Toaster` and `URLToaster` components are located in `src/app/_components/ui/Toasts/`.
+  - **Tooltips**: Tippy.js is used for tooltips (CSS imported in `layout.tsx`).
+  - **Modals**: A modal portal (`<div id="modal-portal"></div>`) is set up in `layout.tsx`.
+- **State Management:**
+  - Global state is primarily managed using React Context API. Key contexts include `UserContext` (for user session and profile) and `AuthContext` (for authentication state), found in `src/app/_contexts/`.
+- **Data Fetching & API:**
+  - Backend interactions are handled via Supabase. Separate Supabase clients are used for server-side (`@/utils/supabase/server`) and client-side (`@/utils/supabase/client`) logic.
+  - API logic is primarily implemented as Next.js Server Actions (marked with `'use server';`) located in `src/api/`.
+  - Complex data types like `ingredients` and `instructions` are stored as JSON in Supabase and parsed into typed arrays within the application code (e.g., in `fetchRecipe`).
+- **Forms:**
+  - `react-hook-form` is used for form management (as noted in `RecipeForm.tsx` tasks).
+- **Types:**
+  - Supabase-generated types are in `src/types/definitions.ts`.
+  - Application-specific custom types are defined in files like `src/types/recipe.ts` and `src/types/profile.ts`.
+- **Constants:**
+  - Project-wide constants, such as `BUCKET_URL` for Supabase storage, are defined in `src/constants.tsx`.
+- **Helpers & Utilities:**
+  - General utility functions can be found in `src/utils/`, `src/helpers/text.ts`, and `src/helpers/misc.ts`.
+- **Routing & Structure:**
+  - The project follows standard Next.js App Router file-based routing.
+  - Reusable UI components are generally located in `src/app/_components/`.
+  - Context providers are in `src/app/_contexts/`.
+
+---
+
 # Recipe App Tasks Breakdown
 
 ## Priority 1: Essential Core Enhancements & Key Engagement Feature
@@ -104,21 +143,13 @@
 - **Goal:** Further enrich the recipe detail page with advanced features for better usability, SEO, and personalization.
 - **Tasks:**
 
-  - **Feature: Structured Data (Schema.org for SEO)**
-
-    - **Frontend:**
-      - [ ] Implement JSON-LD script in `src/app/recipes/[slug]/page.tsx` to output `Recipe` schema.
-      - [ ] Ensure all relevant recipe data (name, image, ingredients, instructions, times, author, etc.) is correctly mapped to schema properties.
-    - **Types:**
-      - [ ] Review `Recipe` type in `src/types/recipe.ts` to ensure all necessary fields for schema.org are available and correctly typed.
-
   - **Feature: Print-Friendly Version**
 
     - **Frontend:**
-      - [ ] Create a new print-specific CSS stylesheet or utility classes to hide non-essential UI elements (header, footer, sidebars, buttons).
-      - [ ] Add a "Print Recipe" button to `src/app/recipes/[slug]/page.tsx`.
-      - [ ] Implement JavaScript logic (if needed) to trigger browser's print dialog and apply print styles.
-      - [ ] Ensure recipe content (title, ingredients, instructions, images) is clearly legible and well-formatted for printing.
+      - [x] Create a new print-specific CSS stylesheet or utility classes to hide non-essential UI elements (header, footer, sidebars, buttons).
+      - [x] Add a "Print Recipe" button to `src/app/recipes/[slug]/page.tsx`.
+      - [x] Implement JavaScript logic (if needed) to trigger browser's print dialog and apply print styles.
+      - [x] Ensure recipe content (title, ingredients, instructions, images) is clearly legible and well-formatted for printing.
 
   - **Feature: Unit Conversion (Metric/Imperial)**
 
@@ -174,6 +205,7 @@
       - [ ] Add nutritional fields to the `Recipe` type.
 
   - **Feature: Baker's Percentage Display for Bread Recipes (Category-Specific)**
+
     - **Goal:** Allow authors to mark flour ingredients for bread recipes, enabling an optional and accurate baker's percentage view for users.
     - **Frontend (`RecipeForm.tsx`):**
       - [ ] If recipe category is 'bread' (or similar), add a checkbox for each ingredient: "Mark as flour (for Baker's Percentage calculation)". This sets `ingredient.is_flour`.
@@ -192,3 +224,11 @@
       - [ ] Add `is_flour?: boolean` to the `Ingredient` type (nested within `Recipe`).
     - **Data Considerations:**
       - [ ] Existing bread recipes will not have `is_flour` flags; the baker's percentage toggle will not appear for them by default, which is the correct behavior.
+
+  - **Feature: Structured Data (Schema.org for SEO)**
+
+    - **Frontend:**
+      - [ ] Implement JSON-LD script in `src/app/recipes/[slug]/page.tsx` to output `Recipe` schema.
+      - [ ] Ensure all relevant recipe data (name, image, ingredients, instructions, times, author, etc.) is correctly mapped to schema properties.
+    - **Types:**
+      - [ ] Review `Recipe` type in `src/types/recipe.ts` to ensure all necessary fields for schema.org are available and correctly typed.

@@ -83,3 +83,71 @@
     @apply text-black hover:text-base-600;
   }
 }
+
+/* Print-specific styles */
+@media print {
+  body * {
+    visibility: hidden; /* Hide everything by default */
+  }
+
+  /* Make the recipe content area and its children visible */
+  .recipe-print-area,
+  .recipe-print-area * {
+    visibility: visible;
+  }
+
+  /* Position the recipe print area at the top of the page */
+  .recipe-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 20px; /* Add some padding for print */
+    font-size: 12pt; /* Adjust base font size for print */
+    line-height: 1.4;
+  }
+
+  /* Hide specific elements that should not be printed */
+  header,
+  footer,
+  nav,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Ensure links are still somewhat identifiable, but not overly distracting */
+  a,
+  a:visited {
+    color: #555 !important; /* Dark gray for links */
+    text-decoration: underline;
+  }
+
+  /* Optional: Show URL for links when printed */
+  /* 
+  a[href]:after {
+    content: " (" attr(href) ")"; 
+    font-size: 90%;
+  }
+  */
+
+  /* Control image sizes for print */
+  .recipe-print-area img {
+    max-width: 100% !important; /* Ensure images don't overflow */
+    height: auto !important;
+    page-break-inside: avoid;
+  }
+
+  /* Typography adjustments for print */
+  .recipe-print-area h1,
+  .recipe-print-area h2,
+  .recipe-print-area h3 {
+    color: black !important;
+    page-break-after: avoid; /* Try to keep headings with their content */
+  }
+
+  .recipe-print-area ul,
+  .recipe-print-area ol {
+    page-break-inside: avoid; /* Try to keep lists together */
+  }
+}
