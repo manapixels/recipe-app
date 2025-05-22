@@ -237,3 +237,27 @@ CREATE POLICY "Allow users to delete their own favorites"
 ON public.user_favorite_recipes
 FOR DELETE
 USING (auth.uid() = user_id);
+
+-- ....................
+--
+-- STORAGE
+--
+-- ....................
+insert into
+  storage.buckets (id, name, public)
+values
+  ('avatars', 'avatars', true),
+  ('recipe_thumbnails', 'recipe_thumbnails', true),
+  ('recipe_banners', 'recipe_banners', true);
+
+create policy "Public read access for avatars, recipe thumbnails, and recipe banners" on storage.objects for
+select
+  using (
+    bucket_id in ('avatars', 'recipe_thumbnails', 'recipe_banners')
+  );
+
+create policy "Public insert access for avatars, recipe thumbnails, and recipe banners" on storage.objects for insert
+with
+  check (
+    bucket_id in ('avatars', 'recipe_thumbnails', 'recipe_banners')
+  );

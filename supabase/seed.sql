@@ -44,6 +44,7 @@ BEGIN
 
   -- Insert sample recipes
   INSERT INTO public.recipes (
+    id,
     name,
     description,
     category,
@@ -54,9 +55,12 @@ BEGIN
     servings,
     difficulty,
     created_by,
-    status
+    status,
+    image_thumbnail_url,
+    image_banner_url
   ) VALUES 
   (
+    'd2d3c8a0-40a3-4a8e-8c6b-6f8e1a2b3c4d',
     'Chocolate Chip Cookies',
     'Classic chocolate chip cookies that are crispy on the outside and chewy on the inside',
     'sweets',
@@ -77,9 +81,12 @@ BEGIN
     24,
     2,
     user_id,
-    'published'
+    'published',
+    'd2d3c8a0-40a3-4a8e-8c6b-6f8e1a2b3c4d-thumbnail.jpg',
+    'd2d3c8a0-40a3-4a8e-8c6b-6f8e1a2b3c4d-banner.jpg'
   ),
   (
+    'f0f1f2f3-f4f5-f6f7-f8f9-fafbfcfdfeff',
     'Sourdough Bread',
     'Traditional sourdough bread with a crispy crust and chewy interior',
     'breads',
@@ -101,7 +108,9 @@ BEGIN
     1,
     3,
     user_id,
-    'published'
+    'published',
+    'f0f1f2f3-f4f5-f6f7-f8f9-fafbfcfdfeff-thumbnail.jpg',
+    'f0f1f2f3-f4f5-f6f7-f8f9-fafbfcfdfeff-banner.jpg'
   );
 END $$;
 
