@@ -38,6 +38,8 @@ export default function Header() {
             </Link>
           </div>
 
+          <div className="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
+
           <Link
             href="/recipes/create"
             className="inline-block whitespace-nowrap self-center px-4 py-2 text-sm font-bold md:font-medium text-center text-base-600 dark:text-base-400 border border-base-600 dark:border-base-500 rounded-lg focus:ring-4 focus:outline-none focus:ring-base-300 dark:focus:ring-base-700 hover:shadow-[0_0_0px_3px_rgba(146,120,0,0.4)]"
