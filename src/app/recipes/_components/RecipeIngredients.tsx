@@ -184,9 +184,6 @@ export default function RecipeIngredients({ recipe }: RecipeIngredientsProps) {
             </div>
           </div>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          Note: Conversions are approximate.
-        </p>
       </div>
 
       <ul className="border-t border-gray-200 dark:border-gray-700">

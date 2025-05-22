@@ -96,7 +96,7 @@ export default function RecipeList() {
 
   return (
     <div className="flex w-full flex-col">
-      <div className="mb-8">
+      <div className="mb-8 flex flex-col md:flex-row gap-4">
         <RecipeFilters
           initialCategory={filters.category}
           initialSubcategory={filters.subcategory}

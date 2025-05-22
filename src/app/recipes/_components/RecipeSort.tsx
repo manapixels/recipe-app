@@ -46,7 +46,6 @@ const RecipeSort: React.FC<RecipeSortProps> = ({
 
   return (
     <div className="p-4 mb-6 bg-gray-50 rounded-lg shadow dark:bg-gray-800">
-      <h3 className="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-200">Sort Recipes</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Sort By Filter */}
         <div>
