@@ -28,6 +28,8 @@ export default function PostToSocial({ recipe }: { recipe: Recipe }) {
           name: profile.name,
           username: profile.username,
           avatar_url: profile.avatar_url,
+          preferred_unit_system: profile.preferred_unit_system,
+          updated_at: profile.updated_at,
         };
         await postRecipeToSocial(recipe.id, profileData);
         toast({

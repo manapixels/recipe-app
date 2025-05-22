@@ -2,14 +2,50 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 import AuthForm from '@/_components/auth/AuthForm';
 import LoggedInUser from '@/_components/auth/LoggedInUser';
 import { useUser } from '@/_contexts/UserContext';
+import { CustomSelect } from '@/_components/ui/Select';
+
+const unitOptions = [
+  { label: 'Metric', value: 'metric' },
+  { label: 'Imperial', value: 'imperial' },
+];
 
 export default function Header() {
   const pathname = usePathname();
-  const { profile, user } = useUser();
+  const { profile, user, updateUserPreferredUnitSystem, loading: userLoading } = useUser();
+  const [displayUnitSystem, setDisplayUnitSystem] = useState<'metric' | 'imperial'>('metric');
+
+  useEffect(() => {
+    if (!userLoading && profile && profile.preferred_unit_system) {
+      if (
+        profile.preferred_unit_system === 'metric' ||
+        profile.preferred_unit_system === 'imperial'
+      ) {
+        setDisplayUnitSystem(profile.preferred_unit_system);
+      } else {
+        setDisplayUnitSystem('metric');
+      }
+    } else if (!userLoading && !profile) {
+      setDisplayUnitSystem('metric');
+    }
+  }, [profile, userLoading]);
+
+  const handleUnitSystemChange = async (value: string) => {
+    const newSystem = value as 'metric' | 'imperial';
+    setDisplayUnitSystem(newSystem);
+
+    if (profile && updateUserPreferredUnitSystem) {
+      try {
+        await updateUserPreferredUnitSystem(newSystem);
+      } catch (error) {
+        console.error('Failed to update unit system:', error);
+      }
+    }
+  };
 
   return (
     <header className="max-w-7xl w-full mx-auto bg-white dark:bg-gray-800">
@@ -38,7 +74,12 @@ export default function Header() {
             </Link>
           </div>
         </div>
-        <div className="justify-self-end flex gap-4 items-center pl-4">
+        <div className="justify-self-end flex gap-2 items-center pl-4">
+          <CustomSelect
+            options={unitOptions}
+            value={displayUnitSystem}
+            onChange={handleUnitSystemChange}
+          />
           <Link
             href="/recipes/create"
             className="inline-block whitespace-nowrap self-center px-4 py-2 text-sm md:italic font-bold md:font-medium text-center text-base-600 dark:text-base-400 border border-base-600 dark:border-base-500 rounded-full hover:bg-base-50 dark:hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-base-300 dark:focus:ring-base-700"

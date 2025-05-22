@@ -5,11 +5,14 @@ create type public.app_permission as enum('events.create', 'events.delete');
 -- PROFILES
 --
 -- ..........
+create type public.unit_system as enum('metric', 'imperial');
 create table public.profiles (
   id uuid not null primary key references auth.users (id) on delete cascade,
   name text not null,
   avatar_url text,
-  username text not null unique
+  username text not null unique,
+  preferred_unit_system unit_system default 'metric',
+  updated_at timestamp with time zone default timezone ('utc'::text, now()) not null
 );
 
 -- Comments

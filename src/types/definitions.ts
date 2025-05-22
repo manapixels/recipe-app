@@ -8,18 +8,24 @@ export interface Database {
           avatar_url: string | null;
           id: string;
           name: string;
+          preferred_unit_system: Database['public']['Enums']['unit_system'] | null;
+          updated_at: string;
           username: string;
         };
         Insert: {
           avatar_url?: string | null;
           id: string;
           name: string;
+          preferred_unit_system?: Database['public']['Enums']['unit_system'] | null;
+          updated_at?: string;
           username: string;
         };
         Update: {
           avatar_url?: string | null;
           id?: string;
           name?: string;
+          preferred_unit_system?: Database['public']['Enums']['unit_system'] | null;
+          updated_at?: string;
           username?: string;
         };
         Relationships: [
@@ -210,6 +216,7 @@ export interface Database {
         | 'croissants'
         | 'baguettes'
         | 'natural-yeast';
+      unit_system: 'metric' | 'imperial';
     };
     CompositeTypes: {
       [_ in never]: never;

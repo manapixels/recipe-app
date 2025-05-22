@@ -89,6 +89,7 @@ export const MEASUREMENT_UNITS = {
   // Weight
   g: 'g',
   mg: 'mg',
+  kg: 'kg',
   // Volume
   ml: 'ml',
   l: 'l',

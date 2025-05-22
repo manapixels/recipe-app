@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
-import { fetchUserProfile } from '@/api/profile';
+import { fetchUserProfile, updateUserProfile } from '@/api/profile';
 import { Profile } from '@/types/profile';
 import { createClient } from '@/utils/supabase/client';
 
@@ -13,12 +13,14 @@ const UserContext = createContext<{
   profile: Profile | undefined;
   setUser: (user: User | undefined) => void;
   loading: boolean;
+  updateUserPreferredUnitSystem: (system: Profile['preferred_unit_system']) => Promise<void>;
 }>({
   user: undefined,
   session: null,
   profile: undefined,
   setUser: () => {},
   loading: true,
+  updateUserPreferredUnitSystem: async () => {},
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
@@ -58,9 +60,39 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const callAndSetProfile = async (userId: string) => {
-    const profile = await fetchUserProfile(userId);
-    if (profile) {
-      setProfile(profile as Profile);
+    const profileData = await fetchUserProfile(userId);
+    if (profileData && !(profileData instanceof Error)) {
+      setProfile(profileData as Profile);
+    } else if (profileData instanceof Error) {
+      console.error('Failed to fetch profile:', profileData);
+      setProfile(undefined);
+    }
+  };
+
+  const updateUserPreferredUnitSystem = async (system: Profile['preferred_unit_system']) => {
+    if (!profile || !user) {
+      console.warn('User profile or user not available for updating unit system.');
+      throw new Error('User profile not available for update.');
+    }
+
+    try {
+      const updatedProfileData: Profile = {
+        ...profile,
+        preferred_unit_system: system,
+      };
+
+      const result = await updateUserProfile(updatedProfileData);
+
+      if (result && typeof result === 'object' && 'error' in result && result.error === true) {
+        console.error('Failed to update preferred unit system in API:', (result as any).message);
+        throw new Error((result as any).message || 'Failed to update preference.');
+      }
+
+      setProfile(result as Profile);
+      // console.log('Preferred unit system updated successfully.');
+    } catch (error) {
+      console.error('Error in updateUserPreferredUnitSystem:', error);
+      throw error;
     }
   };
 
@@ -73,7 +105,16 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, [user]);
 
   return (
-    <UserContext.Provider value={{ user, session, profile, setUser, loading }}>
+    <UserContext.Provider
+      value={{
+        user,
+        session,
+        profile,
+        setUser,
+        loading,
+        updateUserPreferredUnitSystem,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

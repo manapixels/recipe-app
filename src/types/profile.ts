@@ -10,6 +10,7 @@ export type AppPermission = 'recipes.create' | 'recipes.delete';
 export type Profile = Database['public']['Tables']['profiles']['Row'] & {
   email?: string;
   bio?: string;
+  preferred_unit_system?: 'metric' | 'imperial' | null;
 };
 
 // Extended profile types

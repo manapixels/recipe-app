@@ -47,7 +47,7 @@ export const CustomSelect = forwardRef<HTMLButtonElement, SelectProps>(
                 <Select.Item
                   key={option.value}
                   value={option.value}
-                  className="relative flex items-center px-6 py-2 text-sm rounded-md cursor-default select-none hover:bg-base-100 dark:hover:bg-gray-600 focus:bg-base-100 dark:focus:bg-gray-600 focus:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 text-gray-900 dark:text-gray-200"
+                  className="relative flex items-center px-6 py-2 text-sm rounded-md cursor-pointer select-none hover:bg-base-100 dark:hover:bg-gray-600 focus:bg-base-100 dark:focus:bg-gray-600 focus:outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 text-gray-900 dark:text-gray-200"
                 >
                   <Select.ItemText>{option.label}</Select.ItemText>
                   <Select.ItemIndicator className="absolute left-1 inline-flex items-center">

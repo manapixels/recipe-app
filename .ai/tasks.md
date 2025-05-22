@@ -154,19 +154,19 @@ This document outlines tasks for the Recipe App. Below are key technical details
   - **Feature: Unit Conversion (Metric/Imperial)**
 
     - **Frontend - Recipe Page:**
-      - [ ] Design and implement a UI toggle/dropdown on `src/app/recipes/[slug]/page.tsx` for users to select their preferred unit system.
-      - [ ] Develop utility functions to convert common cooking units (e.g., grams to oz, ml to cups, Celsius to Fahrenheit) for display purposes.
-      - [ ] Update ingredient display logic to use converted values based on user selection.
+      - [x] Design and implement a UI toggle/dropdown on `src/app/recipes/[slug]/page.tsx` for users to select their preferred unit system (Metric/Imperial only).
+      - [x] Develop utility functions to convert common cooking units (e.g., grams to oz, ml to cups, Celsius to Fahrenheit) for display purposes.
+      - [x] Update ingredient display logic to use converted values based on user selection.
     - **Frontend - App-wide Setting (Header/User Settings):**
-      - [ ] Design UI element in `Header.tsx` or a new user settings page for selecting a default unit preference.
-      - [ ] Use `UserContext` or a similar state management solution to store and retrieve this preference.
-      - [ ] Ensure the recipe page respects this global setting as the default, while still allowing per-page override.
+      - [x] Design UI element in `Header.tsx` or a new user settings page for selecting a default unit preference (Metric/Imperial only).
+      - [x] Use `UserContext` or a similar state management solution to store and retrieve this preference.
+      - [x] Ensure the recipe page respects this global setting as the default (metric if no preference), while still allowing per-page override.
     - **Backend (Supabase & API):**
-      - [ ] Consider adding a `preferred_unit_system` (e.g., 'metric', 'imperial') field to the `profiles` table in Supabase to persist user preference.
-      - [ ] Update API for fetching user profile to include this preference.
-      - [ ] Update API for updating user profile to allow changing this preference.
+      - [x] Consider adding a `preferred_unit_system` (e.g., 'metric', 'imperial') field to the `profiles` table in Supabase to persist user preference.
+      - [x] Update API for fetching user profile to include this preference.
+      - [x] Update API for updating user profile to allow changing this preference.
     - **Types:**
-      - [ ] Add `preferred_unit_system` to relevant profile types.
+      - [x] Add `preferred_unit_system` to relevant profile types (values: 'metric', 'imperial', or null).
 
   - **Feature: Equipment List**
 
@@ -189,8 +189,8 @@ This document outlines tasks for the Recipe App. Below are key technical details
       - [ ] Add an `authors_notes: text` field to the `recipes` table.
       - [ ] Ensure `fetchRecipe` returns `authors_notes`.
       - [ ] Modify `addRecipe` and `updateRecipe` to handle saving `authors_notes`.
-    - **Types:**
-      - [ ] Add `authors_notes` to the `Recipe` type.
+      - **Types:**
+        - [ ] Add `authors_notes` to the `Recipe` type.
 
   - **Feature: Clearer Nutritional Information Display**
 
@@ -201,8 +201,8 @@ This document outlines tasks for the Recipe App. Below are key technical details
       - [ ] Add fields for nutritional data to `recipes` table (e.g., `calories: int`, `protein_g: int`, etc., or a `nutrition_info: jsonb` field).
       - [ ] Ensure `fetchRecipe` returns nutritional data.
       - [ ] Modify `addRecipe` and `updateRecipe` to handle saving nutritional data.
-    - **Types:**
-      - [ ] Add nutritional fields to the `Recipe` type.
+      - **Types:**
+        - [ ] Add nutritional fields to the `Recipe` type.
 
   - **Feature: Baker's Percentage Display for Bread Recipes (Category-Specific)**
 

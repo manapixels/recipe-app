@@ -14,7 +14,7 @@
     "supabase:restart": "npm run supabase:stop && npm run supabase:start",
     "supabase:db-reset": "npx supabase db reset",
     "supabase:db-seed-images": "ts-node supabase/seed-images.js",
-    "supabase:db-reset-all": "npm run supabase:db-reset && npm run supabase:generate-types",
+    "supabase:db-reset-all": "npm run supabase:db-reset && npm run supabase:generate-types && prettier --write ./src/types/definitions.ts",
     "supabase:generate-types": "npx supabase gen types typescript --local --schema public > ./src/types/definitions.ts",
     "supabase:generate-migration": "npx supabase db diff | npx supabase migration new",
     "supabase:push": "npx supabase push",
