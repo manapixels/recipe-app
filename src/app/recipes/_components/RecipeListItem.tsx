@@ -2,33 +2,21 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import pluralize from 'pluralize';
-
-import { Recipe, DIFFICULTY_LEVELS, SUBCATEGORY_OPTIONS } from '@/types/recipe';
+import { Recipe, SUBCATEGORY_OPTIONS } from '@/types/recipe';
 import { BUCKET_URL } from '@/constants';
+import DifficultyDisplay from '@/_components/ui/DifficultyDisplay';
 import { FavoriteButton } from '@/_components/ui/FavoriteButton';
+import { formatTime } from '@/utils/formatters';
 
-export default function RecipeListItem({
-  recipe,
-  initialIsFavorited,
-}: {
+interface RecipeListItemProps {
   recipe: Recipe;
   initialIsFavorited: boolean;
-}) {
-  // Helper function to format difficulty level
-  const formatDifficulty = (level: number) => {
-    return DIFFICULTY_LEVELS[level] || 'Unknown';
-  };
+}
 
-  // Helper function to format time
-  const formatTime = (minutes: number) => {
-    if (minutes < 60) return `${minutes} ${pluralize('min', minutes)}`;
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return remainingMinutes > 0
-      ? `${hours}h ${remainingMinutes} ${pluralize('min', remainingMinutes)}`
-      : `${hours} ${pluralize('hour', hours)}`;
-  };
+export default function RecipeListItem({ recipe, initialIsFavorited }: RecipeListItemProps) {
+  const subcategoryLabel = SUBCATEGORY_OPTIONS[recipe.category]?.find(
+    opt => opt.value === recipe.subcategory
+  )?.label;
 
   return (
     <Link
@@ -66,19 +54,16 @@ export default function RecipeListItem({
           {recipe.name}
         </p>
         <p className="text-sm text-gray-500 dark:text-gray-400 capitalize mb-2">
-          {
-            SUBCATEGORY_OPTIONS[recipe.category]?.find(opt => opt.value === recipe.subcategory)
-              ?.label
-          }
+          {subcategoryLabel}
         </p>
 
         <div className="mt-2 flex flex-wrap gap-2">
           <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-200 dark:ring-gray-600/20">
             {formatTime(recipe.total_time)}
           </span>
-          <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-200 dark:ring-gray-600/20 capitalize">
-            {formatDifficulty(recipe.difficulty)}
-          </span>
+          <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+            <DifficultyDisplay difficulty={recipe.difficulty} iconSize={14} />
+          </div>
         </div>
       </div>
     </Link>

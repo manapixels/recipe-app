@@ -1,23 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Recipe, DIFFICULTY_LEVELS } from '@/types/recipe';
+import { Recipe } from '@/types/recipe';
 import { BUCKET_URL } from '@/constants';
 import { FavoriteButton } from '@/_components/ui/FavoriteButton';
+import DifficultyDisplay from '@/_components/ui/DifficultyDisplay';
+import { formatTime } from '@/utils/formatters';
 
 export default function RecipeListItemInProfile({ recipe }: { recipe: Recipe }) {
-  // Helper function to format difficulty level
-  const formatDifficulty = (level: number) => {
-    return DIFFICULTY_LEVELS[level] || 'Unknown';
-  };
-
-  // Helper function to format time
-  const formatTime = (minutes: number) => {
-    if (minutes < 60) return `${minutes}min`;
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}min` : `${hours}h`;
-  };
-
   return (
     <Link
       href={`/recipes/${recipe.slug}`}
@@ -52,23 +41,13 @@ export default function RecipeListItemInProfile({ recipe }: { recipe: Recipe }) 
         </div>
       </div>
       <div className="p-4">
-        <p className="text-lg font-semibold text-gray-900 dark:text-white truncate mb-1">
+        <h3 className="font-semibold text-md mb-1 group-hover:text-primary transition-colors duration-200">
           {recipe.name}
-        </p>
-
-        <div className="mt-2 flex flex-wrap gap-2">
-          <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-200 dark:ring-gray-600/20 capitalize">
-            {recipe.category}
-          </span>
-          <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-200 dark:ring-gray-600/20 capitalize">
-            {recipe.subcategory.replace('.', ' / ')}
-          </span>
-          <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-200 dark:ring-gray-600/20">
-            {formatTime(recipe.total_time)}
-          </span>
-          <span className="inline-flex items-center rounded-md bg-gray-100 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-200 dark:ring-gray-600/20 capitalize">
-            {formatDifficulty(recipe.difficulty)}
-          </span>
+        </h3>
+        <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+          <DifficultyDisplay difficulty={recipe.difficulty} iconSize={14} />
+          <span className="mx-1">|</span>
+          <span>{formatTime(recipe.total_time)}</span>
         </div>
       </div>
     </Link>

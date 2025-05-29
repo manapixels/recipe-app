@@ -22,12 +22,13 @@ import {
   Ingredient,
   MEASUREMENT_UNITS,
   ALL_INGREDIENTS,
-  DIFFICULTY_LEVELS,
   RecipeStatus,
+  DifficultyLevel,
 } from '@/types/recipe';
 import Spinner from '@/_components/ui/Spinner';
 import { CustomSelect } from '@/_components/ui/Select';
 import { RecipePreview } from './RecipePreview';
+import DifficultyDisplay from '../../_components/ui/DifficultyDisplay';
 
 // Type for the instruction item, used by DraggableInstruction
 type DraggableInstructionItem = {
@@ -641,9 +642,9 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
                 Difficulty Level
               </label>
               <div className="inline-flex rounded-md shadow-sm w-full">
-                {Object.entries(DIFFICULTY_LEVELS).map(([value, emoji], idx, arr) => (
+                {([1, 2, 3] as DifficultyLevel[]).map((level, idx, arr) => (
                   <label
-                    key={value}
+                    key={level}
                     className={`
                         relative inline-flex items-center cursor-pointer justify-center px-3 py-2 text-sm font-medium flex-1 text-center
                         ${idx === 0 ? 'rounded-l-lg' : ''} 
@@ -651,7 +652,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
                         ${idx !== arr.length - 1 ? 'border-r-0' : ''}
                         border border-gray-300 dark:border-gray-600
                         ${
-                          String(watchDifficulty) === String(value)
+                          String(watchDifficulty) === String(level)
                             ? 'bg-base-600 text-white hover:bg-base-700 z-10 border-base-600 dark:border-base-500'
                             : 'bg-white text-gray-900 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                         }
@@ -663,10 +664,10 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
                       {...register('difficulty', {
                         required: 'Difficulty level is required.',
                       })}
-                      value={value}
+                      value={String(level)}
                       className="sr-only"
                     />
-                    <span>{emoji}</span>
+                    <DifficultyDisplay difficulty={level} iconSize={16} showText={false} />
                   </label>
                 ))}
               </div>

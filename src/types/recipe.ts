@@ -33,14 +33,8 @@ export type RecipeSubcategory =
   | 'baguettes'
   | 'natural-yeast';
 
-// Difficulty levels
-export const DIFFICULTY_LEVELS = {
-  '1': '👨‍🍳',
-  '2': '👨‍🍳👨‍🍳',
-  '3': '👨‍🍳👨‍🍳👨‍🍳',
-} as const;
-
-export type DifficultyLevel = keyof typeof DIFFICULTY_LEVELS;
+// Difficulty levels type (numeric)
+export type DifficultyLevel = 1 | 2 | 3;
 
 // Category options for UI
 export const CATEGORY_OPTIONS = [

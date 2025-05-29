@@ -7,7 +7,6 @@ import {
   DifficultyLevel,
   CATEGORY_OPTIONS,
   SUBCATEGORY_OPTIONS,
-  DIFFICULTY_LEVELS,
 } from '@/types/recipe';
 import { CustomSelect } from '@/_components/ui/Select';
 
@@ -34,8 +33,8 @@ const RecipeFilters: React.FC<RecipeFiltersProps> = ({
   const [selectedSubcategory, setSelectedSubcategory] = useState<RecipeSubcategory | undefined>(
     initialSubcategory
   );
-  const [selectedDifficulty, setSelectedDifficulty] = useState<DifficultyLevel | undefined>(
-    initialDifficulty
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string | undefined>(
+    initialDifficulty ? String(initialDifficulty) : undefined
   );
 
   useEffect(() => {
@@ -51,7 +50,10 @@ const RecipeFilters: React.FC<RecipeFiltersProps> = ({
     onFilterChange({
       category: selectedCategory,
       subcategory: selectedSubcategory,
-      difficulty: selectedDifficulty,
+      difficulty:
+        selectedDifficulty && selectedDifficulty !== ALL_FILTER_VALUE
+          ? (parseInt(selectedDifficulty, 10) as DifficultyLevel)
+          : undefined,
     });
   }, [selectedCategory, selectedSubcategory, selectedDifficulty, onFilterChange]);
 
@@ -67,7 +69,7 @@ const RecipeFilters: React.FC<RecipeFiltersProps> = ({
   };
 
   const handleDifficultyChange = (value: string) => {
-    setSelectedDifficulty(value === ALL_FILTER_VALUE ? undefined : (value as DifficultyLevel));
+    setSelectedDifficulty(value === ALL_FILTER_VALUE ? undefined : value);
   };
 
   const categoryOptions = [
@@ -87,10 +89,9 @@ const RecipeFilters: React.FC<RecipeFiltersProps> = ({
 
   const difficultyOptions = [
     { label: 'All Difficulties', value: ALL_FILTER_VALUE },
-    ...Object.entries(DIFFICULTY_LEVELS).map(([value, label]) => ({
-      label: label,
-      value: value as string,
-    })),
+    { label: 'Level 1', value: '1' },
+    { label: 'Level 2', value: '2' },
+    { label: 'Level 3', value: '3' },
   ];
 
   return (

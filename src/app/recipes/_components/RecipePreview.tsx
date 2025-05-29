@@ -1,8 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import { Recipe, DIFFICULTY_LEVELS } from '@/types/recipe';
-import { Clock, Users, BarChart3, Soup, Sandwich, Cake } from 'lucide-react';
+import { Recipe } from '@/types/recipe';
+import { Clock, Users, Soup, Sandwich, Cake } from 'lucide-react';
+import DifficultyDisplay from '../../_components/ui/DifficultyDisplay';
 
 interface RecipePreviewProps {
   recipeData: Partial<Recipe>; // Use Partial as some fields might be missing during form input
@@ -24,8 +25,6 @@ const CategoryIcon = ({ category }: { category?: string }) => {
 
 export const RecipePreview: React.FC<RecipePreviewProps> = ({ recipeData, onClose, isVisible }) => {
   if (!isVisible) return null;
-
-  const difficultyEmoji = recipeData.difficulty ? DIFFICULTY_LEVELS[recipeData.difficulty] : '-';
 
   // Ensure ingredients and instructions are arrays, even if undefined in partial data
   const ingredients = Array.isArray(recipeData.ingredients) ? recipeData.ingredients : [];
@@ -92,10 +91,7 @@ export const RecipePreview: React.FC<RecipePreviewProps> = ({ recipeData, onClos
               </span>
             </div>
             <div className="flex items-center bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-              <BarChart3 className="w-5 h-5 mr-2 text-gray-600 dark:text-gray-400" />
-              <span>
-                Difficulty: <strong className="text-lg">{difficultyEmoji}</strong>
-              </span>
+              <DifficultyDisplay difficulty={recipeData.difficulty || 1} iconSize={16} />
             </div>
             {recipeData.category && (
               <div className="flex items-center bg-gray-50 dark:bg-gray-700 p-3 rounded-lg col-span-2 sm:col-span-1">

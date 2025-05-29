@@ -3,12 +3,14 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import { BUCKET_URL } from '@/constants';
-import { Recipe, DIFFICULTY_LEVELS } from '@/types/recipe';
+import { Recipe } from '@/types/recipe';
 // import { EditRecipeForm } from './EditRecipeForm'; // Old form
 import { RecipeForm } from '../../_components/RecipeForm'; // Unified form
 import { updateRecipeStatus } from '@/api/recipe';
 import { useToast } from '@/_components/ui/Toasts/useToast';
 import { CustomSelect } from '@/_components/ui/Select';
+import DifficultyDisplay from '@/_components/ui/DifficultyDisplay'; // Updated path
+import { formatTime } from '@/utils/formatters'; // Import centralized function
 
 export const RecipeListItemInManageRecipes = ({
   recipe,
@@ -24,18 +26,8 @@ export const RecipeListItemInManageRecipes = ({
   const [status, setStatus] = useState<string>(recipe.status);
   const { toast } = useToast();
 
-  // Helper function to format difficulty level
-  const formatDifficulty = (level: number) => {
-    return DIFFICULTY_LEVELS[level] || 'Unknown';
-  };
-
   // Helper function to format time
-  const formatTime = (minutes: number) => {
-    if (minutes < 60) return `${minutes}min`;
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}min` : `${hours}h`;
-  };
+  // const formatTime = (minutes: number) => { ... }; // Removed local definition
 
   useEffect(() => {
     setStatus(recipe.status);
@@ -123,7 +115,10 @@ export const RecipeListItemInManageRecipes = ({
           {/* Recipe details */}
           <div className="text-sm text-gray-500 dark:text-gray-400 space-y-1 mt-2">
             <p>Time: {formatTime(recipe.total_time)}</p>
-            <p>Difficulty: {formatDifficulty(recipe.difficulty)}</p>
+            <div className="flex items-center space-x-2">
+              <span className="text-xs font-semibold">Difficulty:</span>
+              <DifficultyDisplay difficulty={recipe.difficulty} iconSize={14} />
+            </div>
             <p>Servings: {recipe.servings}</p>
           </div>
         </div>
