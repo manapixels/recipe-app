@@ -33,7 +33,10 @@
       - Implement unit conversion (e.g., metric/imperial), potentially with an app-wide setting changeable in the header/user settings.
       - Include an "Equipment List" section.
       - Add a section for "Author's Notes/Story" to personalize recipes.
-      - Display clearer nutritional information (if data is collected).
+      - Display clearer nutritional information:
+        - Allow creators to optionally input nutritional values (e.g., calories, protein, fat, carbs per serving) in `RecipeForm.tsx`.
+        - Store this information (e.g., as `nutrition_info: jsonb`) in the `recipes` table.
+        - On the recipe page, if creator-provided data exists, display it. Otherwise, display an "estimated value based on ingredients" message and potentially use averages from a predefined dataset/database for common ingredients.
     - **Category-Specific Enhancements:**
       - Add Baker's Percentage display for bread recipes (requires authors to mark flour ingredients and use weight-based units).
     - **New Feature:** User ratings and reviews for recipes.
@@ -65,7 +68,10 @@
 
 1.  **Meal Planning**
 2.  **Shopping Lists** (generated from structured ingredients)
-3.  **Nutritional Information**
+3.  **Nutritional Information (Advanced):**
+    - Further enhancements beyond the basic display implemented in Phase 1.
+    - Could include features like automatic nutritional calculation based on ingredients if not provided by the recipe creator (potentially integrating with a third-party API or a comprehensive internal database).
+    - Detailed breakdown and visualization of micronutrients.
 4.  **Recipe Collections/Cookbooks**
 5.  **Stripe Integration:**
     - **Observation:** `src/utils/stripe` directory was not observed in the latest review. If monetization is planned, this needs to be (re-)established.
