@@ -19,7 +19,12 @@ interface SortState {
   sortDirection: SortDirectionOptions;
 }
 
-export default function RecipeList() {
+interface RecipeListProps {
+  initialCategory?: RecipeCategory;
+  initialSubcategory?: RecipeSubcategory;
+}
+
+export default function RecipeList({ initialCategory, initialSubcategory }: RecipeListProps) {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +32,11 @@ export default function RecipeList() {
 
   const { user, loading: userLoading } = useUser();
 
-  const [filters, setFilters] = useState<FiltersState>({});
+  const [filters, setFilters] = useState<FiltersState>(() => ({
+    category: initialCategory,
+    subcategory: initialSubcategory,
+    // difficulty will be initialized by RecipeFilters or default
+  }));
   const [sortParams, setSortParams] = useState<SortState>({
     sortBy: 'created_at',
     sortDirection: 'desc',

@@ -66,16 +66,23 @@ export default async function RecipeDetailsPage({
         </div>
 
         {/* Right Column: Recipe Details */}
-        <div className="flex flex-col space-y-4">
+        <div className="flex flex-col space-y-4 self-center">
           {/* Recipe Category and Subcategory Tags */}
           <div className="flex gap-2 flex-wrap">
-            <span className="h-8 inline-flex items-center rounded-md bg-gray-50 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-500/10 dark:ring-gray-600">
-              {CATEGORY_OPTIONS.find(opt => opt.value === recipe.category)?.label}
-            </span>
-            <span className="h-8 inline-flex items-center rounded-md bg-gray-50 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-500/10 dark:ring-gray-600">
-              {SUBCATEGORY_OPTIONS[recipe.category]?.find(opt => opt.value === recipe.subcategory)
-                ?.label || recipe.subcategory}
-            </span>
+            <Link href={`/recipes?category=${recipe.category}`} passHref>
+              <span className="h-8 inline-flex items-center rounded-md bg-gray-50 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-500/10 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+                {CATEGORY_OPTIONS.find(opt => opt.value === recipe.category)?.label}
+              </span>
+            </Link>
+            <Link
+              href={`/recipes?category=${recipe.category}&subcategory=${recipe.subcategory}`}
+              passHref
+            >
+              <span className="h-8 inline-flex items-center rounded-md bg-gray-50 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-500/10 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+                {SUBCATEGORY_OPTIONS[recipe.category]?.find(opt => opt.value === recipe.subcategory)
+                  ?.label || recipe.subcategory}
+              </span>
+            </Link>
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
@@ -157,14 +164,14 @@ export default async function RecipeDetailsPage({
       {/* Ingredients and Nutritional Info Section */}
       <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">食材</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Ingredients</h2>
           <RecipeIngredients recipe={recipe} />
         </div>
         <div>
           <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
             Nutritional Content{' '}
             <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Every serving
+              Per serving
             </span>
           </h2>
           <div className="space-y-2 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow">
@@ -191,7 +198,7 @@ export default async function RecipeDetailsPage({
       {/* "You might also like..." Section (Placeholder) */}
       <div className="mt-16">
         <h2 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-white">
-          您可能还喜欢...
+          You might also like...
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {/* Placeholder for related recipes - map through actual related recipe data here */}
