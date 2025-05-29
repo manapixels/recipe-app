@@ -132,6 +132,7 @@ export const ALL_INGREDIENTS = Object.values(COMMON_INGREDIENTS).flat();
 export type Instruction = {
   step: number;
   content: string;
+  image_url?: string;
 };
 
 // Ingredient type

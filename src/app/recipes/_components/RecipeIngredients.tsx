@@ -140,7 +140,7 @@ export default function RecipeIngredients({ recipe }: RecipeIngredientsProps) {
   };
 
   return (
-    <div className="mb-8 -mx-4 bg-[#f3e9cf] dark:bg-gray-800/30 rounded-lg shadow">
+    <div className="bg-[#f3e9cf] dark:bg-gray-800/30 rounded-lg shadow">
       <div className="mb-6 px-4 py-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
           <div className="flex items-center gap-2">

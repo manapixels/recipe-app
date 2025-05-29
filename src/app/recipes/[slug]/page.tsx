@@ -162,37 +162,79 @@ export default async function RecipeDetailsPage({
       </div>
 
       {/* Ingredients and Nutritional Info Section */}
-      <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div>
-          <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Ingredients</h2>
-          <RecipeIngredients recipe={recipe} />
-        </div>
-        <div>
-          <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
-            Nutritional Content{' '}
-            <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-              Per serving
-            </span>
+      <div className="mt-12 grid grid-cols-1 md:grid-cols-[65%_35%] gap-8">
+        {/* Instructions Section */}
+        <div className="mt-12">
+          <h2 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-white">
+            Instructions
           </h2>
-          <div className="space-y-2 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow">
-            {Object.entries(nutritionalInfo).map(([key, value]) => (
-              <div key={key} className="flex justify-between">
-                <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                <span>{value}</span>
-              </div>
-            ))}
+
+          {/* Method Section */}
+          {recipe.instructions && recipe.instructions.length > 0 && (
+            <div className="space-y-8">
+              {recipe.instructions.map((instruction, index) => (
+                <div
+                  key={instruction.step || index}
+                  className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start"
+                >
+                  {/* Step Number */}
+                  <div className="flex-shrink-0">
+                    <span className="text-4xl sm:text-5xl font-bold text-gray-300 dark:text-gray-600">
+                      {instruction.step}
+                    </span>
+                  </div>
+
+                  {/* Instruction Content */}
+                  <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 items-start w-full">
+                    {/* Instruction Text (always takes the first column on md+) */}
+                    <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none md:col-span-1">
+                      <p>{instruction.content}</p>
+                    </div>
+
+                    {/* Image or Placeholder (always takes the second column on md+) */}
+                    <div className="md:col-span-1 flex items-center justify-center">
+                      {instruction.image_url ? (
+                        <Image
+                          src={instruction.image_url} // Assuming this is a full URL or can be resolved
+                          alt={`Step ${instruction.step} image`}
+                          width={300} // Adjust as needed, perhaps make it responsive
+                          height={200} // Adjust as needed
+                          className="rounded-lg object-cover shadow-md w-full h-auto max-h-64"
+                        />
+                      ) : (
+                        <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center text-gray-400 dark:text-gray-500 shadow-md"></div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col gap-4 md:gap-8">
+          <div>
+            <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
+              Ingredients
+            </h2>
+            <RecipeIngredients recipe={recipe} />
+          </div>
+          <div>
+            <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
+              Nutritional Content{' '}
+              <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                Per serving
+              </span>
+            </h2>
+            <div className="space-y-2 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow">
+              {Object.entries(nutritionalInfo).map(([key, value]) => (
+                <div key={key} className="flex justify-between">
+                  <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                  <span>{value}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Instructions Section (Kept similar to original, but can be styled further) */}
-      <div className="mt-12">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Instructions</h2>
-        <ol className="list-decimal list-inside space-y-4 prose prose-sm sm:prose-base dark:prose-invert max-w-none">
-          {recipe.instructions.map((instruction, index) => (
-            <li key={index}>{instruction.content}</li>
-          ))}
-        </ol>
       </div>
 
       {/* "You might also like..." Section (Placeholder) */}
