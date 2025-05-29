@@ -9,7 +9,7 @@ import RecipeIngredients from '../_components/RecipeIngredients';
 import { FavoriteButton } from '@/_components/ui/FavoriteButton';
 import DifficultyDisplay from '@/_components/ui/DifficultyDisplay';
 import RatingDisplay from '@/_components/ui/RatingDisplay';
-import { Clock, Users, Star, Printer, UserCircle, Gauge } from 'lucide-react';
+import { Clock, Star, Printer, Gauge } from 'lucide-react';
 import { formatTime } from '@/utils/formatters';
 
 export const metadata: Metadata = {
@@ -70,7 +70,7 @@ export default async function RecipeDetailsPage({
           {/* Recipe Category and Subcategory Tags */}
           <div className="flex gap-2 flex-wrap">
             <Link href={`/recipes?category=${recipe.category}`} passHref>
-              <span className="h-8 inline-flex items-center rounded-md bg-gray-50 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-500/10 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+              <span className="h-8 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
                 {CATEGORY_OPTIONS.find(opt => opt.value === recipe.category)?.label}
               </span>
             </Link>
@@ -78,11 +78,49 @@ export default async function RecipeDetailsPage({
               href={`/recipes?category=${recipe.category}&subcategory=${recipe.subcategory}`}
               passHref
             >
-              <span className="h-8 inline-flex items-center rounded-md bg-gray-50 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-500/10 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
+              <span className="h-8 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer">
                 {SUBCATEGORY_OPTIONS[recipe.category]?.find(opt => opt.value === recipe.subcategory)
                   ?.label || recipe.subcategory}
               </span>
             </Link>
+            <span className="h-8 inline-flex items-center rounded-md px-2 py-1 text-xs text-gray-300 dark:text-gray-300">
+              |
+            </span>
+            {/* Author Info */}
+            {recipe.author?.username ? (
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <Link
+                  href={`/profiles/${recipe.author.username}`}
+                  className="h-8 inline-flex items-center rounded-md px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
+                >
+                  {recipe.author?.avatar_url ? (
+                    <Image
+                      className="h-5 w-5 rounded-full mx-1"
+                      src={`${BUCKET_URL}/avatars/${recipe.author.avatar_url}`}
+                      alt={`${recipe.author?.name || 'Author'}'s avatar`}
+                      width={20}
+                      height={20}
+                    />
+                  ) : (
+                    <div className="h-5 w-5 rounded-full mx-1 bg-gray-300 dark:bg-gray-600"></div>
+                  )}
+                  {recipe.author?.username ? (
+                    <Link
+                      href={`/profiles/${recipe.author.username}`}
+                      className="font-semibold hover:text-gray-900"
+                    >
+                      {recipe.author?.name || recipe.author?.username}
+                    </Link>
+                  ) : (
+                    <span className="font-semibold">{recipe.author?.name || 'Unknown Author'}</span>
+                  )}
+                </Link>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <span className="font-semibold">{recipe.author?.name || 'Unknown Author'}</span>
+              </div>
+            )}
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
@@ -101,61 +139,23 @@ export default async function RecipeDetailsPage({
             <span>{formatTime(recipe.total_time)}</span>
           </div>
 
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <Users className="w-5 h-5 mr-1" />
-            <span>{recipe.servings} servings</span>
-          </div>
-
-          {/* Author Info */}
-          {recipe.author?.username ? (
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-              <UserCircle className="w-5 h-5 mr-1" />
-              <Link
-                href={`/profiles/${recipe.author.username}`}
-                className="h-8 inline-flex items-center rounded-md bg-gray-50 dark:bg-gray-700 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-500/10 dark:ring-gray-600 hover:ring-base-700"
-              >
-                {recipe.author?.avatar_url ? (
-                  <Image
-                    className="h-5 w-5 rounded-full mx-1"
-                    src={`${BUCKET_URL}/avatars/${recipe.author.avatar_url}`}
-                    alt={`${recipe.author?.name || 'Author'}'s avatar`}
-                    width={20}
-                    height={20}
-                  />
-                ) : (
-                  <div className="h-5 w-5 rounded-full mx-1 bg-gray-300 dark:bg-gray-600"></div>
-                )}
-                {recipe.author?.username ? (
-                  <Link href={`/profiles/${recipe.author.username}`} className="font-semibold">
-                    {recipe.author?.name || recipe.author?.username}
-                  </Link>
-                ) : (
-                  <span className="font-semibold">{recipe.author?.name || 'Unknown Author'}</span>
-                )}
-              </Link>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-              <span className="font-semibold">{recipe.author?.name || 'Unknown Author'}</span>
-            </div>
-          )}
-
           {/* Difficulty Info */}
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <Gauge className="w-5 h-5 mr-1" />
             <DifficultyDisplay difficulty={recipe.difficulty} iconSize={20} />
           </div>
 
-          <div className="flex items-center gap-2 mt-auto">
+          <div className="w-1/2"></div>
+
+          <div className="flex items-center gap-2">
             <FavoriteButton
               recipeId={recipe.id}
               initialIsFavorited={!!recipe.is_favorited}
-              className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg text-base font-semibold"
-              size="lg"
+              className="text-black px-6 py-3 rounded-lg text-base font-semibold"
+              size="sm"
             />
-            {/* Removed text from inside FavoriteButton and className from PrintRecipeButton to fix Linter errors*/}
-            <button className="p-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-              <Printer className="w-5 h-5" />
+            <button className="p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-sm">
+              <Printer className="w-5 h-5" /> Print this recipe
             </button>
           </div>
         </div>

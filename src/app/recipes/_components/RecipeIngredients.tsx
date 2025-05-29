@@ -40,8 +40,6 @@ export default function RecipeIngredients({ recipe }: RecipeIngredientsProps) {
 
   useEffect(() => {
     if (!userLoading && profile && profile.preferred_unit_system) {
-      // Safely cast to UnitSystem, as 'original' is no longer a valid DB value for new preferences.
-      // Old 'original' values will default to metric due to initial state & lack of this condition being met.
       if (
         profile.preferred_unit_system === 'metric' ||
         profile.preferred_unit_system === 'imperial'
@@ -142,9 +140,8 @@ export default function RecipeIngredients({ recipe }: RecipeIngredientsProps) {
   };
 
   return (
-    <div className="mb-8 -mx-4 bg-base-50 dark:bg-gray-800/30">
-      <div className="mb-6 px-4">
-        <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Ingredients</h3>
+    <div className="mb-8 -mx-4 bg-[#f3e9cf] dark:bg-gray-800/30 rounded-lg shadow">
+      <div className="mb-6 px-4 py-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
           <div className="flex items-center gap-2">
             <label
@@ -159,7 +156,7 @@ export default function RecipeIngredients({ recipe }: RecipeIngredientsProps) {
               min="1"
               value={currentServings}
               onChange={e => setCurrentServings(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-20 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-base-500 focus:border-base-500"
+              className="w-20 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-gray-800 focus:border-gray-800"
             />
           </div>
           <div className="flex items-center gap-2">
@@ -171,10 +168,10 @@ export default function RecipeIngredients({ recipe }: RecipeIngredientsProps) {
                 <button
                   key={system}
                   onClick={() => setUnitSystem(system)}
-                  className={`px-3 py-1.5 text-sm font-medium capitalize focus:z-10 focus:outline-none focus:ring-2 focus:ring-base-500 focus:border-base-500 first:rounded-l-md last:rounded-r-md border-gray-300 dark:border-gray-600 -ml-px first:ml-0
+                  className={`px-3 py-1.5 text-sm font-medium capitalize focus:z-10 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800 first:rounded-l-md last:rounded-r-md border-gray-300 dark:border-gray-600 -ml-px first:ml-0
                     ${
                       unitSystem === system
-                        ? 'bg-base-500 text-white dark:bg-base-600'
+                        ? 'bg-gray-800 text-white dark:bg-base-600'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                     }`}
                 >
@@ -197,7 +194,7 @@ export default function RecipeIngredients({ recipe }: RecipeIngredientsProps) {
               <div className="px-4 py-3">
                 <Checkbox.Root
                   id={`ingredient-${index}`}
-                  className="flex items-center justify-center w-5 h-5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded data-[state=checked]:bg-base-600 data-[state=checked]:border-base-600 focus:outline-none focus:ring-2 focus:ring-base-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+                  className="flex items-center justify-center w-5 h-5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded data-[state=checked]:bg-base-600 data-[state=checked]:border-base-600 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
                 >
                   <Checkbox.Indicator className="text-white dark:text-gray-900">
                     <CheckIcon className="w-4 h-4" />
