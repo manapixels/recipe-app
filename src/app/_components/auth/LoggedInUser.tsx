@@ -32,7 +32,7 @@ export default function LoggedInUser({
   return (
     <AnimatePresence initial={false} mode="wait">
       <div>
-        <div className="relative inline-block text-left align-middle">
+        <div className="relative inline-block text-left align-middle p-1.5">
           <motion.button
             className="rounded-full bg-gray-100 flex items-center justify-center"
             style={{ width: '2.6rem', height: '2.6rem' }}

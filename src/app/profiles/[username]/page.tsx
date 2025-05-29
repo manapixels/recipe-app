@@ -87,7 +87,7 @@ export default async function ProfilePage({ params }: { params: { username: stri
   );
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 py-8">
+    <div className="w-full max-w-4xl mx-auto px-4">
       <div className="flex flex-col items-center md:flex-row md:items-start gap-6 mb-12">
         <Image
           src={

@@ -142,7 +142,7 @@ export default function RecipeIngredients({ recipe }: RecipeIngredientsProps) {
   };
 
   return (
-    <div className="mb-8 -mx-4 py-8 bg-base-50 dark:bg-gray-800/30">
+    <div className="mb-8 -mx-4 bg-base-50 dark:bg-gray-800/30">
       <div className="mb-6 px-4">
         <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Ingredients</h3>
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
