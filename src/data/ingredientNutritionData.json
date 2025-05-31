@@ -1,0 +1,143 @@
+[
+  {
+    "name": "All-Purpose Flour",
+    "baseUnit": "100g",
+    "nutrition": {
+      "@type": "NutritionInformation",
+      "servingSize": "100g",
+      "calories": { "value": 364, "unit": "kcal" },
+      "proteinContent": { "value": 10.3, "unit": "g" },
+      "carbohydrateContent": { "value": 76.3, "unit": "g" },
+      "fatContent": { "value": 1.0, "unit": "g" },
+      "fiberContent": { "value": 2.7, "unit": "g" },
+      "sugarContent": { "value": 0.3, "unit": "g" },
+      "sodiumContent": { "value": 2, "unit": "mg" }
+    }
+  },
+  {
+    "name": "Granulated Sugar",
+    "baseUnit": "100g",
+    "nutrition": {
+      "@type": "NutritionInformation",
+      "servingSize": "100g",
+      "calories": { "value": 387, "unit": "kcal" },
+      "proteinContent": { "value": 0, "unit": "g" },
+      "carbohydrateContent": { "value": 100, "unit": "g" },
+      "fatContent": { "value": 0, "unit": "g" },
+      "fiberContent": { "value": 0, "unit": "g" },
+      "sugarContent": { "value": 100, "unit": "g" },
+      "sodiumContent": { "value": 1, "unit": "mg" }
+    }
+  },
+  {
+    "name": "Butter",
+    "baseUnit": "100g",
+    "nutrition": {
+      "@type": "NutritionInformation",
+      "servingSize": "100g",
+      "calories": { "value": 717, "unit": "kcal" },
+      "proteinContent": { "value": 0.9, "unit": "g" },
+      "carbohydrateContent": { "value": 0.1, "unit": "g" },
+      "fatContent": { "value": 81.1, "unit": "g" },
+      "saturatedFatContent": { "value": 51, "unit": "g" },
+      "cholesterolContent": { "value": 215, "unit": "mg" },
+      "fiberContent": { "value": 0, "unit": "g" },
+      "sugarContent": { "value": 0.1, "unit": "g" },
+      "sodiumContent": { "value": 643, "unit": "mg" }
+    }
+  },
+  {
+    "name": "Whole Eggs",
+    "baseUnit": "100g (approx. 2 large eggs)",
+    "nutrition": {
+      "@type": "NutritionInformation",
+      "servingSize": "100g",
+      "calories": { "value": 155, "unit": "kcal" },
+      "proteinContent": { "value": 12.6, "unit": "g" },
+      "carbohydrateContent": { "value": 1.1, "unit": "g" },
+      "fatContent": { "value": 10.6, "unit": "g" },
+      "saturatedFatContent": { "value": 3.3, "unit": "g" },
+      "cholesterolContent": { "value": 373, "unit": "mg" },
+      "fiberContent": { "value": 0, "unit": "g" },
+      "sugarContent": { "value": 1.1, "unit": "g" },
+      "sodiumContent": { "value": 124, "unit": "mg" }
+    }
+  },
+  {
+    "name": "Whole Milk",
+    "baseUnit": "100ml",
+    "nutrition": {
+      "@type": "NutritionInformation",
+      "servingSize": "100ml",
+      "calories": { "value": 60, "unit": "kcal" },
+      "proteinContent": { "value": 3.4, "unit": "g" },
+      "carbohydrateContent": { "value": 4.8, "unit": "g" },
+      "fatContent": { "value": 3.3, "unit": "g" },
+      "saturatedFatContent": { "value": 1.9, "unit": "g" },
+      "cholesterolContent": { "value": 10, "unit": "mg" },
+      "fiberContent": { "value": 0, "unit": "g" },
+      "sugarContent": { "value": 5.1, "unit": "g" },
+      "sodiumContent": { "value": 44, "unit": "mg" }
+    }
+  },
+  {
+    "name": "Bread Flour",
+    "baseUnit": "100g",
+    "nutrition": {
+      "@type": "NutritionInformation",
+      "servingSize": "100g",
+      "calories": { "value": 365, "unit": "kcal" },
+      "proteinContent": { "value": 13, "unit": "g" },
+      "carbohydrateContent": { "value": 73, "unit": "g" },
+      "fatContent": { "value": 1.5, "unit": "g" },
+      "fiberContent": { "value": 2.5, "unit": "g" },
+      "sugarContent": { "value": 0.5, "unit": "g" },
+      "sodiumContent": { "value": 2, "unit": "mg" }
+    }
+  },
+  {
+    "name": "Water",
+    "baseUnit": "100g",
+    "nutrition": {
+      "@type": "NutritionInformation",
+      "servingSize": "100g",
+      "calories": { "value": 0, "unit": "kcal" },
+      "proteinContent": { "value": 0, "unit": "g" },
+      "carbohydrateContent": { "value": 0, "unit": "g" },
+      "fatContent": { "value": 0, "unit": "g" },
+      "fiberContent": { "value": 0, "unit": "g" },
+      "sugarContent": { "value": 0, "unit": "g" },
+      "sodiumContent": { "value": 0, "unit": "mg" }
+    }
+  },
+  {
+    "name": "Salt",
+    "baseUnit": "100g",
+    "nutrition": {
+      "@type": "NutritionInformation",
+      "servingSize": "100g",
+      "calories": { "value": 0, "unit": "kcal" },
+      "proteinContent": { "value": 0, "unit": "g" },
+      "carbohydrateContent": { "value": 0, "unit": "g" },
+      "fatContent": { "value": 0, "unit": "g" },
+      "fiberContent": { "value": 0, "unit": "g" },
+      "sugarContent": { "value": 0, "unit": "g" },
+      "sodiumContent": { "value": 38758, "unit": "mg" }
+    }
+  },
+  {
+    "name": "Sourdough Starter",
+    "baseUnit": "100g",
+    "nutrition": {
+      "@type": "NutritionInformation",
+      "servingSize": "100g",
+      "calories": { "value": 183, "unit": "kcal" },
+      "proteinContent": { "value": 6.5, "unit": "g" },
+      "carbohydrateContent": { "value": 36.5, "unit": "g" },
+      "fatContent": { "value": 0.75, "unit": "g" },
+      "fiberContent": { "value": 1.3, "unit": "g" },
+      "sugarContent": { "value": 0.3, "unit": "g" },
+      "sodiumContent": { "value": 1, "unit": "mg" }
+    }
+  }
+]

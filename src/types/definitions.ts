@@ -52,6 +52,7 @@ export interface Database {
           instructions: Json;
           metadata: Json | null;
           name: string;
+          nutrition_info: Json | null;
           servings: number;
           slug: string;
           status: Database['public']['Enums']['recipe_status'];
@@ -71,6 +72,7 @@ export interface Database {
           instructions?: Json;
           metadata?: Json | null;
           name: string;
+          nutrition_info?: Json | null;
           servings?: number;
           slug: string;
           status?: Database['public']['Enums']['recipe_status'];
@@ -90,6 +92,7 @@ export interface Database {
           instructions?: Json;
           metadata?: Json | null;
           name?: string;
+          nutrition_info?: Json | null;
           servings?: number;
           slug?: string;
           status?: Database['public']['Enums']['recipe_status'];

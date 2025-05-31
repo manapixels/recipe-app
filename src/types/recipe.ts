@@ -143,11 +143,35 @@ export type Ingredient = {
   image_url?: string;
 };
 
+// Value-unit pair for individual nutrient entries
+export type NutrientValue = {
+  value?: number;
+  unit?: string; // e.g., "kcal", "g", "mg"
+};
+
+// Nutritional Information type using NutrientValue objects
+// Aligned with schema.org concepts but stores numeric values and units separately
+export type NutritionalInfo = {
+  calories?: NutrientValue;
+  carbohydrateContent?: NutrientValue;
+  cholesterolContent?: NutrientValue; // Typically mg
+  fatContent?: NutrientValue;
+  fiberContent?: NutrientValue;
+  proteinContent?: NutrientValue;
+  saturatedFatContent?: NutrientValue;
+  servingSize?: string; // Serving size of the recipe itself, e.g., "1 slice", "2 cookies", "per 100g if recipe is a sauce"
+  sodiumContent?: NutrientValue; // Typically mg
+  sugarContent?: NutrientValue;
+  transFatContent?: NutrientValue;
+  unsaturatedFatContent?: NutrientValue;
+};
+
 // Recipe interface matching the database schema
 export type Recipe = Tables<'recipes'> & {
   ingredients: Ingredient[];
   instructions: Instruction[];
   is_favorited?: boolean;
+  nutrition_info?: NutritionalInfo; // Added nutritional information
 };
 
 // Represents an entry in the user_favorite_recipes table

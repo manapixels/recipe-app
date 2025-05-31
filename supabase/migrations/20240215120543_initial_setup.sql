@@ -76,6 +76,7 @@ create table public.recipes (
     jsonb_typeof(instructions) = 'array'
     and jsonb_array_length(instructions) >= 0
   ),
+  nutrition_info jsonb,
   total_time integer not null default 0,
   servings integer not null default 1,
   difficulty integer not null default 1,

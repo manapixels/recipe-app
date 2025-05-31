@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { fetchRecipe } from '@/api/recipe';
 import { BUCKET_URL } from '@/constants';
-import { CATEGORY_OPTIONS, Recipe, SUBCATEGORY_OPTIONS } from '@/types/recipe';
+import { CATEGORY_OPTIONS, Recipe, SUBCATEGORY_OPTIONS, NutritionalInfo } from '@/types/recipe';
 import { Profile } from '@/types/profile';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -11,6 +11,7 @@ import DifficultyDisplay from '@/_components/ui/DifficultyDisplay';
 import RatingDisplay from '@/_components/ui/RatingDisplay';
 import { Clock, Star, Printer, Gauge } from 'lucide-react';
 import { formatTime } from '@/utils/formatters';
+import { estimateRecipeNutrition } from '@/utils/nutritionEstimator';
 
 export const metadata: Metadata = {
   title: 'recipe-app | Recipe Details',
@@ -32,15 +33,51 @@ export default async function RecipeDetailsPage({
     return <div className="text-center py-10">Recipe not found.</div>;
   }
 
-  // Placeholder for nutritional data - you'll need to fetch or calculate this
-  const nutritionalInfo = {
-    calories: '631 kcal / 2654 kJ',
-    protein: '0.99 g',
-    fat: '0.58 g',
-    carbs: '163.04 g',
-    fiber: '0.87 g',
-    saturatedFat: '0.1 g',
-    sodium: '13.9 mg',
+  // Determine nutritional info source
+  let displayNutritionInfo: NutritionalInfo | null = null;
+  let nutritionSourceMessage = 'Details not provided';
+  const creatorNutritionInfo = recipe.nutrition_info;
+
+  // Check if creatorNutritionInfo and its nested properties are valid
+  const isCreatorNutritionInfoValid = (info?: NutritionalInfo): boolean => {
+    if (!info) return false;
+    // Check if any of the nutrient values are present and valid, or if servingSize is present
+    return (
+      !!info.servingSize ||
+      Object.values(info).some(nutrient => {
+        if (typeof nutrient === 'object' && nutrient !== null && 'value' in nutrient) {
+          return typeof (nutrient as { value?: number }).value === 'number';
+        }
+        return false;
+      })
+    );
+  };
+
+  const hasCreatorNutritionInfo = isCreatorNutritionInfoValid(creatorNutritionInfo);
+
+  if (hasCreatorNutritionInfo) {
+    displayNutritionInfo = creatorNutritionInfo!;
+    nutritionSourceMessage = 'Provided by creator';
+  } else {
+    const estimatedInfo = estimateRecipeNutrition(recipe.ingredients, recipe.servings);
+    if (estimatedInfo && Object.keys(estimatedInfo).length > 0) {
+      displayNutritionInfo = estimatedInfo;
+      nutritionSourceMessage = 'Estimated based on ingredients';
+    } else {
+      nutritionSourceMessage = 'Not available';
+    }
+  }
+
+  // Helper function to generate display labels for nutrient keys
+  const generateNutrientLabel = (key: string): string => {
+    if (key === 'calories') return 'Calories';
+    if (key === 'recipeServingSize') return 'Recipe Yield / Serving Size'; // For form input, not directly used here unless added to NutritionalInfo type
+    if (key === 'servingSize') return 'Per Serving'; // Label for the recipe's servingSize if displayed
+
+    // Improved camelCase to Title Case
+    let result = key.replace(/([A-Z])/g, ' $1');
+    result = result.charAt(0).toUpperCase() + result.slice(1);
+    return result.includes('Content') ? result.replace('Content', '').trim() : result;
   };
 
   return (
@@ -222,17 +259,46 @@ export default async function RecipeDetailsPage({
             <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
               Nutritional Content{' '}
               <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-                Per serving
+                ({nutritionSourceMessage})
               </span>
             </h2>
-            <div className="space-y-2 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow">
-              {Object.entries(nutritionalInfo).map(([key, value]) => (
-                <div key={key} className="flex justify-between">
-                  <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                  <span>{value}</span>
-                </div>
-              ))}
-            </div>
+            {displayNutritionInfo ? (
+              <div className="space-y-2 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow">
+                {displayNutritionInfo.servingSize && (
+                  <div className="flex justify-between py-1 border-b border-gray-200 dark:border-gray-700">
+                    <span className="font-medium">Serving Information:</span>
+                    <span>{displayNutritionInfo.servingSize}</span>
+                  </div>
+                )}
+                {/* Filter out servingSize (already displayed) and undefined/null nutrients */}
+                {(Object.keys(displayNutritionInfo!) as Array<keyof NutritionalInfo>)
+                  .filter(key => key !== 'servingSize' && displayNutritionInfo![key] !== undefined)
+                  .map(key => {
+                    const nutrient = displayNutritionInfo![key] as {
+                      value?: number;
+                      unit?: string;
+                    };
+                    if (typeof nutrient?.value === 'number' && nutrient?.unit) {
+                      return (
+                        <div
+                          key={key}
+                          className="flex justify-between py-1 border-b border-gray-200 dark:border-gray-700 last:border-b-0"
+                        >
+                          <span className="font-medium">{generateNutrientLabel(key)}:</span>
+                          <span>
+                            {nutrient.value} {nutrient.unit}
+                          </span>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })}
+              </div>
+            ) : (
+              <p className="text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow text-center">
+                Nutritional details are not available for this recipe.
+              </p>
+            )}
           </div>
         </div>
       </div>

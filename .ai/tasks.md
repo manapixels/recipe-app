@@ -178,7 +178,15 @@ This document outlines tasks for the Recipe App. Below are key technical details
       - [ ] Add a `nutrition_info: jsonb` field to the `recipes` table in Supabase. This field will store key-value pairs like `{"calories": "300 kcal", "protein_g": 15, "carbs_g": 30, "fat_g": 10}`.
       - [ ] Ensure `fetchRecipe` returns `nutrition_info`.
       - [ ] Modify `addRecipe` and `updateRecipe` to handle saving (optional) `nutrition_info`.
-      - [ ] _Consideration:_ Develop a system or use a pre-existing database/JSON file for average nutritional values of common ingredients if detailed recipe-specific data isn't provided by the creator, to be used for estimations.
+      - **Nutritional Value Estimation (using `src/data/ingredientNutritionData.json`):**
+        - [x] Create `src/data/ingredientNutritionData.json` with initial common ingredient nutritional values.
+        - [ ] Develop a utility function (e.g., `estimateRecipeNutrition(ingredients: Ingredient[], servings: number): NutritionalInfo`) to calculate estimated nutritional values per serving.
+          - [ ] The function should read and parse `src/data/ingredientNutritionData.json`.
+          - [ ] Implement logic to match recipe ingredients (by name) with data in the JSON file.
+          - [ ] _Complex Sub-task:_ Implement unit and quantity conversions (e.g., recipe ingredient '1 cup flour' to JSON data 'per 100g'). This may require additional data (density, standard conversions) or simplifications.
+          - [ ] Aggregate nutritional values (calories, protein, etc.) from all matched ingredients for the total recipe.
+          - [ ] Divide aggregated totals by the number of servings.
+        - [ ] Update `src/app/recipes/[slug]/page.tsx` to call the estimation utility if `recipe.nutrition_info` is not provided by the creator, and display the returned estimated values.
       - **Types:**
         - [ ] Add `nutrition_info?: { [key: string]: string | number }` (or a more structured type like `NutritionalInfo { calories?: string; protein_g?: number; ... }`) to the `Recipe` type in `src/types/recipe.ts`.
 

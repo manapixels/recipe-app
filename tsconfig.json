@@ -31,6 +31,7 @@
     ],
     "paths": {
       "@/api/*": ["./src/api/*"],
+      "@/data/*": ["./src/data/*"],
       "@/helpers/*": ["./src/helpers/*"],
       "@/types/*": ["./src/types/*"],
       "@/utils/*": ["./src/utils/*"],

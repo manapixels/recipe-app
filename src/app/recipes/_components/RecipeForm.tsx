@@ -24,6 +24,8 @@ import {
   ALL_INGREDIENTS,
   RecipeStatus,
   DifficultyLevel,
+  NutritionalInfo,
+  NutrientValue,
 } from '@/types/recipe';
 import Spinner from '@/_components/ui/Spinner';
 import { CustomSelect } from '@/_components/ui/Select';
@@ -107,6 +109,44 @@ const DraggableInstruction = ({
   );
 };
 
+// Helper function to format NutrientValue for form input
+const formatNutrientValueForInput = (nutrient?: NutrientValue): string => {
+  if (!nutrient || typeof nutrient.value === 'undefined') return '';
+  if (nutrient.unit) {
+    return `${nutrient.value} ${nutrient.unit}`;
+  }
+  return String(nutrient.value);
+};
+
+// Helper function to parse string input (e.g., "250 kcal" or "250") into NutrientValue
+const parseNutrientInput = (
+  inputString?: string,
+  defaultUnit?: string
+): NutrientValue | undefined => {
+  if (!inputString || inputString.trim() === '') return undefined;
+  const trimmedValue = inputString.trim();
+
+  // Regex to capture value and optional unit
+  // Allows: "100", "100kcal", "100 kcal", "10.5", "10.5 g", "10.5g"
+  const match = trimmedValue.match(/^(\d*\.?\d+)\s*([a-zA-Zμg]+)?$/);
+
+  if (match && match[1]) {
+    const value = parseFloat(match[1]);
+    let unit = match[2] ? match[2].toLowerCase() : defaultUnit;
+
+    if (isNaN(value)) return undefined;
+
+    // If unit is still undefined (no unit in string, no default provided), it's ambiguous
+    // For now, we will store it if a default unit is available, otherwise undefined or consider it unitless (not ideal for some nutrients)
+    if (!unit && defaultUnit) unit = defaultUnit;
+    // if (!unit) return { value }; // Store as unitless if no default and no unit in string
+    if (!unit) return undefined; // Or reject if no unit can be determined and one is expected
+
+    return { value, unit };
+  }
+  return undefined; // Could not parse
+};
+
 export type RecipeFormInputs = {
   name: string;
   category: RecipeCategory;
@@ -119,6 +159,20 @@ export type RecipeFormInputs = {
   difficulty: string;
   image_thumbnail_url: string;
   image_banner_url: string;
+  // Nutritional Information string inputs for the form
+  calories_input?: string;
+  carbohydrateContent_input?: string;
+  cholesterolContent_input?: string;
+  fatContent_input?: string;
+  fiberContent_input?: string;
+  proteinContent_input?: string;
+  saturatedFatContent_input?: string;
+  sodiumContent_input?: string;
+  sugarContent_input?: string;
+  transFatContent_input?: string;
+  unsaturatedFatContent_input?: string;
+  // Input for the recipe's overall serving size (optional)
+  recipeServingSize_input?: string;
 };
 
 interface RecipeFormProps {
@@ -165,6 +219,19 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
       difficulty: '1',
       image_thumbnail_url: '',
       image_banner_url: '',
+      // Nutritional Information defaults (string inputs)
+      calories_input: '',
+      carbohydrateContent_input: '',
+      cholesterolContent_input: '',
+      fatContent_input: '',
+      fiberContent_input: '',
+      proteinContent_input: '',
+      saturatedFatContent_input: '',
+      sodiumContent_input: '',
+      sugarContent_input: '',
+      transFatContent_input: '',
+      unsaturatedFatContent_input: '',
+      recipeServingSize_input: '',
     }),
     []
   );
@@ -196,6 +263,33 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
           difficulty: String(initialData.difficulty || '1'),
           image_thumbnail_url: initialData.image_thumbnail_url || '',
           image_banner_url: initialData.image_banner_url || '',
+          // Nutritional Information from initialData.nutrition_info (now NutrientValue objects)
+          calories_input: formatNutrientValueForInput(initialData.nutrition_info?.calories),
+          carbohydrateContent_input: formatNutrientValueForInput(
+            initialData.nutrition_info?.carbohydrateContent
+          ),
+          cholesterolContent_input: formatNutrientValueForInput(
+            initialData.nutrition_info?.cholesterolContent
+          ),
+          fatContent_input: formatNutrientValueForInput(initialData.nutrition_info?.fatContent),
+          fiberContent_input: formatNutrientValueForInput(initialData.nutrition_info?.fiberContent),
+          proteinContent_input: formatNutrientValueForInput(
+            initialData.nutrition_info?.proteinContent
+          ),
+          saturatedFatContent_input: formatNutrientValueForInput(
+            initialData.nutrition_info?.saturatedFatContent
+          ),
+          sodiumContent_input: formatNutrientValueForInput(
+            initialData.nutrition_info?.sodiumContent
+          ),
+          sugarContent_input: formatNutrientValueForInput(initialData.nutrition_info?.sugarContent),
+          transFatContent_input: formatNutrientValueForInput(
+            initialData.nutrition_info?.transFatContent
+          ),
+          unsaturatedFatContent_input: formatNutrientValueForInput(
+            initialData.nutrition_info?.unsaturatedFatContent
+          ),
+          recipeServingSize_input: initialData.nutrition_info?.servingSize || '',
         }
       : defaultFormValues,
   });
@@ -237,6 +331,31 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
         difficulty: String(initialData.difficulty || '1'),
         image_thumbnail_url: initialData.image_thumbnail_url || '',
         image_banner_url: initialData.image_banner_url || '',
+        // Nutritional Information for reset (from NutrientValue objects)
+        calories_input: formatNutrientValueForInput(initialData.nutrition_info?.calories),
+        carbohydrateContent_input: formatNutrientValueForInput(
+          initialData.nutrition_info?.carbohydrateContent
+        ),
+        cholesterolContent_input: formatNutrientValueForInput(
+          initialData.nutrition_info?.cholesterolContent
+        ),
+        fatContent_input: formatNutrientValueForInput(initialData.nutrition_info?.fatContent),
+        fiberContent_input: formatNutrientValueForInput(initialData.nutrition_info?.fiberContent),
+        proteinContent_input: formatNutrientValueForInput(
+          initialData.nutrition_info?.proteinContent
+        ),
+        saturatedFatContent_input: formatNutrientValueForInput(
+          initialData.nutrition_info?.saturatedFatContent
+        ),
+        sodiumContent_input: formatNutrientValueForInput(initialData.nutrition_info?.sodiumContent),
+        sugarContent_input: formatNutrientValueForInput(initialData.nutrition_info?.sugarContent),
+        transFatContent_input: formatNutrientValueForInput(
+          initialData.nutrition_info?.transFatContent
+        ),
+        unsaturatedFatContent_input: formatNutrientValueForInput(
+          initialData.nutrition_info?.unsaturatedFatContent
+        ),
+        recipeServingSize_input: initialData.nutrition_info?.servingSize || '',
       });
       setSelectedCategory(initialData.category);
     } else {
@@ -323,6 +442,55 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
       difficulty: Number(data.difficulty),
     };
 
+    const nutritionDataInput: NutritionalInfo = {
+      calories: parseNutrientInput(data.calories_input, 'kcal'),
+      proteinContent: parseNutrientInput(data.proteinContent_input, 'g'),
+      carbohydrateContent: parseNutrientInput(data.carbohydrateContent_input, 'g'),
+      fatContent: parseNutrientInput(data.fatContent_input, 'g'),
+      fiberContent: parseNutrientInput(data.fiberContent_input, 'g'),
+      sugarContent: parseNutrientInput(data.sugarContent_input, 'g'),
+      sodiumContent: parseNutrientInput(data.sodiumContent_input, 'mg'),
+      saturatedFatContent: parseNutrientInput(data.saturatedFatContent_input, 'g'),
+      cholesterolContent: parseNutrientInput(data.cholesterolContent_input, 'mg'),
+      transFatContent: parseNutrientInput(data.transFatContent_input, 'g'),
+      unsaturatedFatContent: parseNutrientInput(data.unsaturatedFatContent_input, 'g'),
+      servingSize: data.recipeServingSize_input?.trim() || undefined,
+    };
+
+    // Filter out undefined/empty fields from nutritionDataInput
+    const finalNutritionData: Partial<NutritionalInfo> = {}; // Use Partial for incremental build
+    let hasNutritionData = false;
+    for (const key in nutritionDataInput) {
+      if (Object.prototype.hasOwnProperty.call(nutritionDataInput, key)) {
+        const typedKey = key as keyof NutritionalInfo;
+        const value = nutritionDataInput[typedKey];
+        // For NutrientValue objects, check if value.value is defined and numeric
+        // For servingSize, check if it's a non-empty string
+        if (typedKey === 'servingSize') {
+          if (value && typeof value === 'string' && value.trim() !== '') {
+            finalNutritionData[typedKey] = value;
+            hasNutritionData = true; // Consider servingSize as making nutrition data present
+          }
+        } else if (
+          value &&
+          typeof value === 'object' &&
+          typeof (value as NutrientValue).value === 'number'
+        ) {
+          finalNutritionData[typedKey] = value as NutrientValue;
+          hasNutritionData = true;
+        }
+      }
+    }
+
+    const recipePayload = {
+      ...commonRecipeData,
+      ingredients: data.ingredients.map(ing => ({ ...ing, amount: String(ing.amount) })),
+      instructions: data.instructions.map((instr, idx) => ({ ...instr, step: idx + 1 })),
+      image_thumbnail_url: data.image_thumbnail_url,
+      image_banner_url: data.image_banner_url,
+      ...(hasNutritionData && { nutrition_info: finalNutritionData }), // Conditionally add nutrition_info
+    };
+
     try {
       let result: Recipe | Error | null = null;
 
@@ -332,15 +500,15 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
         }
         const recipeDataToUpdate = {
           id: initialData.id,
-          ...commonRecipeData,
-          difficulty: commonRecipeData.difficulty as any,
+          ...recipePayload,
+          difficulty: commonRecipeData.difficulty as DifficultyLevel,
         };
         result = await updateRecipe(recipeDataToUpdate as Parameters<typeof updateRecipe>[0]);
       } else {
         const recipeDataToAdd = {
-          ...commonRecipeData,
+          ...recipePayload,
           created_by: profile.id,
-          difficulty: commonRecipeData.difficulty as any,
+          difficulty: commonRecipeData.difficulty as DifficultyLevel,
         };
         const addRecipeResult = await addRecipe(recipeDataToAdd as Parameters<typeof addRecipe>[0]);
         if (
@@ -871,6 +1039,204 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
                   {(errors.instructions as any).message}
                 </p>
               )}
+          </div>
+
+          <hr className="h-px bg-gray-200 border-0 dark:bg-gray-700 my-8" />
+
+          {/* Nutritional Information Section (Optional) */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Nutritional Information (Optional)
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Provide nutritional values if known. These will be displayed on the recipe page.
+                Specify values per recipe serving (defined above in main recipe details).
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div>
+                <label
+                  htmlFor="recipeServingSize_input"
+                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Recipe Yield/Serving Size Info (e.g., &quot;1 slice&quot;, &quot;100g&quot;)
+                </label>
+                <input
+                  type="text"
+                  id="recipeServingSize_input"
+                  {...register('recipeServingSize_input')}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 12 cookies, 1 loaf (approx. 800g)"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="calories_input"
+                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Calories (e.g., &quot;250 kcal&quot;)
+                </label>
+                <input
+                  type="text"
+                  id="calories_input"
+                  {...register('calories_input')}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 250 kcal or 250"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="proteinContent_input"
+                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Protein (e.g., &quot;15 g&quot;)
+                </label>
+                <input
+                  type="text"
+                  id="proteinContent_input"
+                  {...register('proteinContent_input')}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 15 g or 15"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="carbohydrateContent_input"
+                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Carbohydrates (e.g., &quot;30 g&quot;)
+                </label>
+                <input
+                  type="text"
+                  id="carbohydrateContent_input"
+                  {...register('carbohydrateContent_input')}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 30 g or 30"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="fatContent_input"
+                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Fat (e.g., &quot;10 g&quot;)
+                </label>
+                <input
+                  type="text"
+                  id="fatContent_input"
+                  {...register('fatContent_input')}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 10 g or 10"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="fiberContent_input"
+                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Fiber (e.g., &quot;5 g&quot;)
+                </label>
+                <input
+                  type="text"
+                  id="fiberContent_input"
+                  {...register('fiberContent_input')}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 5 g or 5"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="sugarContent_input"
+                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Sugar (e.g., &quot;8 g&quot;)
+                </label>
+                <input
+                  type="text"
+                  id="sugarContent_input"
+                  {...register('sugarContent_input')}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 8 g or 8"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="sodiumContent_input"
+                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Sodium (e.g., &quot;500 mg&quot;)
+                </label>
+                <input
+                  type="text"
+                  id="sodiumContent_input"
+                  {...register('sodiumContent_input')}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 500 mg or 500"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="saturatedFatContent_input"
+                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Saturated Fat (e.g., &quot;2 g&quot;)
+                </label>
+                <input
+                  type="text"
+                  id="saturatedFatContent_input"
+                  {...register('saturatedFatContent_input')}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 2 g or 2"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="cholesterolContent_input"
+                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Cholesterol (e.g., &quot;0 mg&quot;)
+                </label>
+                <input
+                  type="text"
+                  id="cholesterolContent_input"
+                  {...register('cholesterolContent_input')}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 0 mg or 0"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="transFatContent_input"
+                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Trans Fat (e.g., &quot;0 g&quot;)
+                </label>
+                <input
+                  type="text"
+                  id="transFatContent_input"
+                  {...register('transFatContent_input')}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 0 g or 0"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="unsaturatedFatContent_input"
+                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Unsaturated Fat (e.g., &quot;8 g&quot;)
+                </label>
+                <input
+                  type="text"
+                  id="unsaturatedFatContent_input"
+                  {...register('unsaturatedFatContent_input')}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 8 g or 8"
+                />
+              </div>
+            </div>
           </div>
 
           <hr className="h-px bg-gray-200 border-0 dark:bg-gray-700 my-8" />

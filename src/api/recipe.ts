@@ -8,6 +8,7 @@ import {
   RecipeCategory,
   RecipeSubcategory,
   DifficultyLevel,
+  NutritionalInfo,
 } from '@/types/recipe';
 import { Profile } from '@/types/profile';
 
@@ -231,6 +232,7 @@ export const addRecipe = async ({
   image_thumbnail_url,
   image_banner_url,
   status,
+  nutrition_info,
 }: {
   name: FullRecipeType['name'];
   description: FullRecipeType['description'];
@@ -245,6 +247,7 @@ export const addRecipe = async ({
   image_thumbnail_url?: FullRecipeType['image_thumbnail_url'];
   image_banner_url?: FullRecipeType['image_banner_url'];
   status?: FullRecipeType['status'];
+  nutrition_info?: NutritionalInfo;
 }) => {
   const supabase = createClient();
   try {
@@ -257,11 +260,12 @@ export const addRecipe = async ({
       instructions,
       total_time,
       servings,
-      difficulty,
+      difficulty: Number(difficulty) as DifficultyLevel,
       created_by,
       image_thumbnail_url,
-      image_banner_url,
-      status: status || 'published',
+      image_banner_url: image_banner_url || null,
+      status: status || 'draft',
+      nutrition_info: nutrition_info || null,
     };
 
     let { data, error } = await supabase.from('recipes').insert([recipeDataToInsert]).select();
@@ -293,6 +297,7 @@ export const updateRecipe = async ({
   image_thumbnail_url,
   image_banner_url,
   status,
+  nutrition_info,
 }: {
   id: string;
   name?: FullRecipeType['name'];
@@ -307,33 +312,35 @@ export const updateRecipe = async ({
   image_thumbnail_url?: FullRecipeType['image_thumbnail_url'];
   image_banner_url?: FullRecipeType['image_banner_url'];
   status?: FullRecipeType['status'];
+  nutrition_info?: NutritionalInfo;
 }) => {
   const supabase = createClient();
   try {
-    const recipeDataToUpdate: any = {};
-    if (name !== undefined) recipeDataToUpdate.name = name;
-    if (description !== undefined) recipeDataToUpdate.description = description;
-    if (category !== undefined) recipeDataToUpdate.category = category;
-    if (subcategory !== undefined) recipeDataToUpdate.subcategory = subcategory;
-    if (ingredients !== undefined) recipeDataToUpdate.ingredients = ingredients;
-    if (instructions !== undefined) recipeDataToUpdate.instructions = instructions;
-    if (total_time !== undefined) recipeDataToUpdate.total_time = total_time;
-    if (servings !== undefined) recipeDataToUpdate.servings = servings;
-    if (difficulty !== undefined) recipeDataToUpdate.difficulty = difficulty;
-    if (image_thumbnail_url !== undefined)
-      recipeDataToUpdate.image_thumbnail_url = image_thumbnail_url;
-    if (image_banner_url !== undefined) recipeDataToUpdate.image_banner_url = image_banner_url;
-    if (status !== undefined) recipeDataToUpdate.status = status;
-
-    if (Object.keys(recipeDataToUpdate).length === 0) {
-      // Optionally, fetch and return the existing record if nothing changed,
-      // or throw an error, or return a specific message.
-      // For now, let's just proceed, Supabase might handle it or return the existing.
+    if (status && !validStatuses.includes(status)) {
+      throw new Error(`Invalid status: ${status}. Must be one of ${validStatuses.join(', ')}.`);
     }
+
+    const updateData: Partial<FullRecipeType> = {};
+    if (name !== undefined) updateData.name = name;
+    if (description !== undefined) updateData.description = description;
+    if (category !== undefined) updateData.category = category;
+    if (subcategory !== undefined) updateData.subcategory = subcategory;
+    if (ingredients !== undefined) updateData.ingredients = ingredients;
+    if (instructions !== undefined) updateData.instructions = instructions;
+    if (total_time !== undefined) updateData.total_time = Number(total_time);
+    if (servings !== undefined) updateData.servings = Number(servings);
+    if (difficulty !== undefined) updateData.difficulty = Number(difficulty) as DifficultyLevel;
+    if (image_thumbnail_url !== undefined) updateData.image_thumbnail_url = image_thumbnail_url;
+    if (image_banner_url !== undefined) updateData.image_banner_url = image_banner_url;
+    if (status !== undefined) updateData.status = status;
+    if (nutrition_info !== undefined) updateData.nutrition_info = nutrition_info;
+
+    // Prevent updating created_by and created_at
+    delete updateData.created_by;
 
     const { data, error } = await supabase
       .from('recipes')
-      .update(recipeDataToUpdate)
+      .update(updateData)
       .match({ id })
       .select('*')
       .single();
