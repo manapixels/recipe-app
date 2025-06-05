@@ -1,17 +1,16 @@
 import { Metadata } from 'next';
 import { fetchRecipe } from '@/api/recipe';
 import { BUCKET_URL } from '@/constants';
-import { CATEGORY_OPTIONS, Recipe, SUBCATEGORY_OPTIONS, NutritionalInfo } from '@/types/recipe';
+import { CATEGORY_OPTIONS, Recipe, SUBCATEGORY_OPTIONS } from '@/types/recipe';
 import { Profile } from '@/types/profile';
 import Image from 'next/image';
 import Link from 'next/link';
-import RecipeIngredients from '../_components/RecipeIngredients';
 import { FavoriteButton } from '@/_components/ui/FavoriteButton';
 import DifficultyDisplay from '@/_components/ui/DifficultyDisplay';
 import RatingDisplay from '@/_components/ui/RatingDisplay';
-import { Clock, Star, Printer, Gauge } from 'lucide-react';
+import { Clock, Printer, Gauge, Star } from 'lucide-react';
 import { formatTime } from '@/utils/formatters';
-import { estimateRecipeNutrition } from '@/utils/nutritionEstimator';
+import DynamicRecipeContent from './DynamicRecipeContent';
 
 export const metadata: Metadata = {
   title: 'recipe-app | Recipe Details',
@@ -32,53 +31,6 @@ export default async function RecipeDetailsPage({
   if (!recipe) {
     return <div className="text-center py-10">Recipe not found.</div>;
   }
-
-  // Determine nutritional info source
-  let displayNutritionInfo: NutritionalInfo | null = null;
-  let nutritionSourceMessage = 'Details not provided';
-  const creatorNutritionInfo = recipe.nutrition_info;
-
-  // Check if creatorNutritionInfo and its nested properties are valid
-  const isCreatorNutritionInfoValid = (info?: NutritionalInfo): boolean => {
-    if (!info) return false;
-    // Check if any of the nutrient values are present and valid, or if servingSize is present
-    return (
-      !!info.servingSize ||
-      Object.values(info).some(nutrient => {
-        if (typeof nutrient === 'object' && nutrient !== null && 'value' in nutrient) {
-          return typeof (nutrient as { value?: number }).value === 'number';
-        }
-        return false;
-      })
-    );
-  };
-
-  const hasCreatorNutritionInfo = isCreatorNutritionInfoValid(creatorNutritionInfo);
-
-  if (hasCreatorNutritionInfo) {
-    displayNutritionInfo = creatorNutritionInfo!;
-    nutritionSourceMessage = 'Provided by creator';
-  } else {
-    const estimatedInfo = estimateRecipeNutrition(recipe.ingredients, recipe.servings);
-    if (estimatedInfo && Object.keys(estimatedInfo).length > 0) {
-      displayNutritionInfo = estimatedInfo;
-      nutritionSourceMessage = 'Estimated based on ingredients';
-    } else {
-      nutritionSourceMessage = 'Not available';
-    }
-  }
-
-  // Helper function to generate display labels for nutrient keys
-  const generateNutrientLabel = (key: string): string => {
-    if (key === 'calories') return 'Calories';
-    if (key === 'recipeServingSize') return 'Recipe Yield / Serving Size'; // For form input, not directly used here unless added to NutritionalInfo type
-    if (key === 'servingSize') return 'Per Serving'; // Label for the recipe's servingSize if displayed
-
-    // Improved camelCase to Title Case
-    let result = key.replace(/([A-Z])/g, ' $1');
-    result = result.charAt(0).toUpperCase() + result.slice(1);
-    return result.includes('Content') ? result.replace('Content', '').trim() : result;
-  };
 
   return (
     <div className="container mx-auto px-4">
@@ -198,110 +150,8 @@ export default async function RecipeDetailsPage({
         </div>
       </div>
 
-      {/* Ingredients and Nutritional Info Section */}
-      <div className="mt-12 grid grid-cols-1 md:grid-cols-[65%_35%] gap-8">
-        {/* Instructions Section */}
-        <div className="mt-12">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-white">
-            Instructions
-          </h2>
-
-          {/* Method Section */}
-          {recipe.instructions && recipe.instructions.length > 0 && (
-            <div className="space-y-8">
-              {recipe.instructions.map((instruction, index) => (
-                <div
-                  key={instruction.step || index}
-                  className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start"
-                >
-                  {/* Step Number */}
-                  <div className="flex-shrink-0">
-                    <span className="text-4xl sm:text-5xl font-bold text-gray-300 dark:text-gray-600">
-                      {instruction.step}
-                    </span>
-                  </div>
-
-                  {/* Instruction Content */}
-                  <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 items-start w-full">
-                    {/* Instruction Text (always takes the first column on md+) */}
-                    <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none md:col-span-1">
-                      <p>{instruction.content}</p>
-                    </div>
-
-                    {/* Image or Placeholder (always takes the second column on md+) */}
-                    <div className="md:col-span-1 flex items-center justify-center">
-                      {instruction.image_url ? (
-                        <Image
-                          src={instruction.image_url} // Assuming this is a full URL or can be resolved
-                          alt={`Step ${instruction.step} image`}
-                          width={300} // Adjust as needed, perhaps make it responsive
-                          height={200} // Adjust as needed
-                          className="rounded-lg object-cover shadow-md w-full h-auto max-h-64"
-                        />
-                      ) : (
-                        <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center text-gray-400 dark:text-gray-500 shadow-md"></div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        <div className="flex flex-col gap-4 md:gap-8">
-          <div>
-            <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
-              Ingredients
-            </h2>
-            <RecipeIngredients recipe={recipe} />
-          </div>
-          <div>
-            <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
-              Nutritional Content{' '}
-              <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-                ({nutritionSourceMessage})
-              </span>
-            </h2>
-            {displayNutritionInfo ? (
-              <div className="space-y-2 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow">
-                {displayNutritionInfo.servingSize && (
-                  <div className="flex justify-between py-1 border-b border-gray-200 dark:border-gray-700">
-                    <span className="font-medium">Serving Information:</span>
-                    <span>{displayNutritionInfo.servingSize}</span>
-                  </div>
-                )}
-                {/* Filter out servingSize (already displayed) and undefined/null nutrients */}
-                {(Object.keys(displayNutritionInfo!) as Array<keyof NutritionalInfo>)
-                  .filter(key => key !== 'servingSize' && displayNutritionInfo![key] !== undefined)
-                  .map(key => {
-                    const nutrient = displayNutritionInfo![key] as {
-                      value?: number;
-                      unit?: string;
-                    };
-                    if (typeof nutrient?.value === 'number' && nutrient?.unit) {
-                      return (
-                        <div
-                          key={key}
-                          className="flex justify-between py-1 border-b border-gray-200 dark:border-gray-700 last:border-b-0"
-                        >
-                          <span className="font-medium">{generateNutrientLabel(key)}:</span>
-                          <span>
-                            {nutrient.value} {nutrient.unit}
-                          </span>
-                        </div>
-                      );
-                    }
-                    return null;
-                  })}
-              </div>
-            ) : (
-              <p className="text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow text-center">
-                Nutritional details are not available for this recipe.
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
+      {/* Dynamic content that updates with servings changes */}
+      <DynamicRecipeContent recipe={recipe} />
 
       {/* "You might also like..." Section (Placeholder) */}
       <div className="mt-16">
@@ -329,11 +179,6 @@ export default async function RecipeDetailsPage({
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Original description placement - consider if this should be moved or restyled */}
-      <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none mt-8 mb-8">
-        {recipe?.description}
       </div>
     </div>
   );

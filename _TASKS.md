@@ -171,13 +171,14 @@ This document outlines tasks for the Recipe App. Below are key technical details
   - **Feature: Clearer Nutritional Information Display**
 
     - **Frontend:**
-      - [ ] Design and implement a section/component on `src/app/recipes/[slug]/page.tsx` to display nutritional information (e.g., calories, protein, carbs, fat).
-      - [ ] If creator-provided nutritional data is missing, display "estimated value based on ingredients" text.
-      - [ ] Update `RecipeForm.tsx` to include optional fields for creators to input nutritional values (e.g., calories, protein, carbs, fat per serving).
+      - [x] Design and implement a section/component on `src/app/recipes/[slug]/page.tsx` to display nutritional information (e.g., calories, protein, carbs, fat).
+      - [x] If creator-provided nutritional data is missing, display "estimated value based on ingredients" text.
+      - [x] Update `RecipeForm.tsx` to include optional fields for creators to input nutritional values (e.g., calories, protein, carbs, fat per serving).
+      - [x] **Dynamic Nutrition Updates:** Nutritional information now updates automatically when servings are adjusted on recipe detail pages.
     - **Backend (Supabase & API):**
-      - [ ] Add a `nutrition_info: jsonb` field to the `recipes` table in Supabase. This field will store key-value pairs like `{"calories": "300 kcal", "protein_g": 15, "carbs_g": 30, "fat_g": 10}`.
-      - [ ] Ensure `fetchRecipe` returns `nutrition_info`.
-      - [ ] Modify `addRecipe` and `updateRecipe` to handle saving (optional) `nutrition_info`.
+      - [x] Add a `nutrition_info: jsonb` field to the `recipes` table in Supabase. This field will store key-value pairs like `{"calories": "300 kcal", "protein_g": 15, "carbs_g": 30, "fat_g": 10}`.
+      - [x] Ensure `fetchRecipe` returns `nutrition_info`.
+      - [x] Modify `addRecipe` and `updateRecipe` to handle saving (optional) `nutrition_info`.
       - **Nutritional Value Estimation (using `src/data/ingredientNutritionData.json`):**
         - [x] Create `src/data/ingredientNutritionData.json` with initial common ingredient nutritional values.
         - [ ] Develop a utility function (e.g., `estimateRecipeNutrition(ingredients: Ingredient[], servings: number): NutritionalInfo`) to calculate estimated nutritional values per serving.
@@ -186,9 +187,9 @@ This document outlines tasks for the Recipe App. Below are key technical details
           - [ ] _Complex Sub-task:_ Implement unit and quantity conversions (e.g., recipe ingredient '1 cup flour' to JSON data 'per 100g'). This may require additional data (density, standard conversions) or simplifications.
           - [ ] Aggregate nutritional values (calories, protein, etc.) from all matched ingredients for the total recipe.
           - [ ] Divide aggregated totals by the number of servings.
-        - [ ] Update `src/app/recipes/[slug]/page.tsx` to call the estimation utility if `recipe.nutrition_info` is not provided by the creator, and display the returned estimated values.
+        - [x] Update `src/app/recipes/[slug]/page.tsx` to call the estimation utility if `recipe.nutrition_info` is not provided by the creator, and display the returned estimated values.
       - **Types:**
-        - [ ] Add `nutrition_info?: { [key: string]: string | number }` (or a more structured type like `NutritionalInfo { calories?: string; protein_g?: number; ... }`) to the `Recipe` type in `src/types/recipe.ts`.
+        - [x] Add `nutrition_info?: { [key: string]: string | number }` (or a more structured type like `NutritionalInfo { calories?: string; protein_g?: number; ... }`) to the `Recipe` type in `src/types/recipe.ts`.
 
   - **Feature: Baker's Percentage Display for Bread Recipes (Category-Specific)**
 

@@ -18,6 +18,7 @@ import { useUser } from '@/_contexts/UserContext';
 
 interface RecipeIngredientsProps {
   recipe: Recipe;
+  onServingsChange?: (servings: number) => void;
 }
 
 type UnitSystem = 'metric' | 'imperial';
@@ -32,11 +33,22 @@ const IMPERIAL_DISPLAY_UNITS = {
   VOLUME_LARGE: 'cup',
 };
 
-export default function RecipeIngredients({ recipe }: RecipeIngredientsProps) {
+export default function RecipeIngredients({ recipe, onServingsChange }: RecipeIngredientsProps) {
   const { profile, loading: userLoading } = useUser();
   const [currentServings, setCurrentServings] = useState(recipe.servings);
   const [unitSystem, setUnitSystem] = useState<UnitSystem>('metric'); // Default to metric
   const servingsRatio = currentServings / recipe.servings;
+
+  // Update current servings when recipe.servings changes (from parent)
+  useEffect(() => {
+    setCurrentServings(recipe.servings);
+  }, [recipe.servings]);
+
+  // Handle servings change and notify parent
+  const handleServingsChange = (newServings: number) => {
+    setCurrentServings(newServings);
+    onServingsChange?.(newServings);
+  };
 
   useEffect(() => {
     if (!userLoading && profile && profile.preferred_unit_system) {
@@ -155,7 +167,7 @@ export default function RecipeIngredients({ recipe }: RecipeIngredientsProps) {
               id="servings"
               min="1"
               value={currentServings}
-              onChange={e => setCurrentServings(Math.max(1, parseInt(e.target.value) || 1))}
+              onChange={e => handleServingsChange(Math.max(1, parseInt(e.target.value) || 1))}
               className="w-20 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-gray-800 focus:border-gray-800"
             />
           </div>
