@@ -123,6 +123,11 @@ export default async function RecipeDetailsPage({
             />
           </div>
 
+          {/* Recipe description */}
+          <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none mt-8 mb-8">
+            {recipe?.description}
+          </div>
+
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <Clock className="w-5 h-5 mr-1" />
             <span>{formatTime(recipe.total_time)}</span>

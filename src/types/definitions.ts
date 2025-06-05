@@ -41,6 +41,7 @@ export interface Database {
       recipes: {
         Row: {
           category: Database['public']['Enums']['recipe_categories'];
+          components: Json;
           created_at: string;
           created_by: string;
           description: string | null;
@@ -48,7 +49,6 @@ export interface Database {
           id: string;
           image_banner_url: string | null;
           image_thumbnail_url: string | null;
-          ingredients: Json;
           instructions: Json;
           metadata: Json | null;
           name: string;
@@ -61,6 +61,7 @@ export interface Database {
         };
         Insert: {
           category?: Database['public']['Enums']['recipe_categories'];
+          components?: Json;
           created_at?: string;
           created_by: string;
           description?: string | null;
@@ -68,7 +69,6 @@ export interface Database {
           id?: string;
           image_banner_url?: string | null;
           image_thumbnail_url?: string | null;
-          ingredients?: Json;
           instructions?: Json;
           metadata?: Json | null;
           name: string;
@@ -81,6 +81,7 @@ export interface Database {
         };
         Update: {
           category?: Database['public']['Enums']['recipe_categories'];
+          components?: Json;
           created_at?: string;
           created_by?: string;
           description?: string | null;
@@ -88,7 +89,6 @@ export interface Database {
           id?: string;
           image_banner_url?: string | null;
           image_thumbnail_url?: string | null;
-          ingredients?: Json;
           instructions?: Json;
           metadata?: Json | null;
           name?: string;
@@ -154,6 +154,7 @@ export interface Database {
       recipes_with_author_data: {
         Row: {
           category: Database['public']['Enums']['recipe_categories'] | null;
+          components: Json | null;
           created_at: string | null;
           created_by: Json | null;
           description: string | null;
@@ -161,7 +162,6 @@ export interface Database {
           id: string | null;
           image_banner_url: string | null;
           image_thumbnail_url: string | null;
-          ingredients: Json | null;
           instructions: Json | null;
           name: string | null;
           servings: number | null;

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Recipe, NutritionalInfo } from '@/types/recipe';
+import { Recipe, NutritionalInfo, getAllIngredientsFromComponents } from '@/types/recipe';
 import RecipeIngredients from '../_components/RecipeIngredients';
 import { estimateRecipeNutrition } from '@/utils/nutritionEstimator';
 
@@ -64,7 +64,8 @@ export default function DynamicRecipeContent({ recipe }: DynamicRecipeContentPro
     } else {
       // Use estimation based on ingredients
       // First get per-serving nutrition based on original recipe servings
-      const perServingEstimation = estimateRecipeNutrition(recipe.ingredients, recipe.servings);
+      const allIngredients = getAllIngredientsFromComponents(recipe.components);
+      const perServingEstimation = estimateRecipeNutrition(allIngredients, recipe.servings);
 
       if (perServingEstimation && Object.keys(perServingEstimation).length > 0) {
         // Scale the per-serving nutrition to total nutrition for current servings
@@ -226,7 +227,7 @@ export default function DynamicRecipeContent({ recipe }: DynamicRecipeContentPro
                         >
                           <span className="font-medium">{generateNutrientLabel(key)}:</span>
                           <span>
-                            {nutrient.value} {nutrient.unit}
+                            {nutrient.value.toLocaleString()} {nutrient.unit}
                           </span>
                         </div>
                       );
@@ -241,11 +242,6 @@ export default function DynamicRecipeContent({ recipe }: DynamicRecipeContentPro
             )}
           </div>
         </div>
-      </div>
-
-      {/* Recipe description */}
-      <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none mt-8 mb-8">
-        {recipe?.description}
       </div>
     </>
   );

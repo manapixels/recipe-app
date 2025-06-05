@@ -194,23 +194,23 @@ This document outlines tasks for the Recipe App. Below are key technical details
 
     - **Goal:** Allow authors to mark flour ingredients for bread recipes, enabling an optional and accurate baker's percentage view for users.
     - **Frontend (`RecipeForm.tsx`):**
-      - [ ] If recipe category is 'bread' (or similar), add a checkbox for each ingredient: "Mark as flour (for Baker's Percentage calculation)". This sets `ingredient.is_flour`.
-      - [ ] Provide clear UI guidance to the recipe creator that when marking ingredients as flour, all ingredient amounts (especially flours and liquids) should be in consistent weight units (e.g., grams) for accurate percentage calculation.
+      - [x] If recipe category is 'bread' (or similar), add a checkbox for each ingredient: "Mark as flour (for Baker's Percentage calculation)". This sets `ingredient.is_flour`.
+      - [x] Provide clear UI guidance to the recipe creator that when marking ingredients as flour, all ingredient amounts (especially flours and liquids) should be in consistent weight units (e.g., grams) for accurate percentage calculation.
     - **Frontend (`/recipes/[slug]/page.tsx`):**
-      - [ ] If `recipe.category` is 'bread' (or similar) AND at least one `ingredient.is_flour === true` in `recipe.ingredients`:
-        - [ ] Display a "Show/Hide Baker's Percentages" toggle button.
-      - [ ] When toggled "on":
-        - [ ] Implement logic to calculate total flour weight: sum the `amount` of all ingredients where `ingredient.is_flour === true`. (Ensure robust handling if amounts are not purely numeric or units are inconsistent, though primary reliance is on author inputting correct data as per form guidance).
-        - [ ] For each ingredient, calculate its percentage: (`ingredient.amount` / Total Flour Weight) \* 100.
-        - [ ] Display the calculated percentage alongside the ingredient's existing amount and unit (e.g., "Water: 350g (70%)").
-        - [ ] Clearly indicate that percentages are relative to total flour weight.
+      - [x] If `recipe.category` is 'bread' (or similar) AND at least one `ingredient.is_flour === true` in `recipe.ingredients`:
+        - [x] Display a "Show/Hide Baker's Percentages" toggle button.
+      - [x] When toggled "on":
+        - [x] Implement logic to calculate total flour weight: sum the `amount` of all ingredients where `ingredient.is_flour === true`. (Ensure robust handling if amounts are not purely numeric or units are inconsistent, though primary reliance is on author inputting correct data as per form guidance).
+        - [x] For each ingredient, calculate its percentage: (`ingredient.amount` / Total Flour Weight) \* 100.
+        - [x] Display the calculated percentage alongside the ingredient's existing amount and unit (e.g., "Water: 350g (70%)").
+        - [x] Clearly indicate that percentages are relative to total flour weight.
     - **Backend (Supabase & API):**
       - (No specific new top-level fields on `recipes` table needed. `addRecipe` and `updateRecipe` already handle the `ingredients` JSONB which will now contain the optional `is_flour` flags within each ingredient object.)
     - **Types (`src/types/recipe.ts`):**
-      - [ ] Add `is_flour?: boolean` to the `Ingredient` type (nested within `Recipe`).
+      - [x] Add `is_flour?: boolean` to the `Ingredient` type (nested within `Recipe`).
     - **Data Considerations:**
 
-      - [ ] Existing bread recipes will not have `is_flour` flags; the baker's percentage toggle will not appear for them by default, which is the correct behavior.
+      - [x] Existing bread recipes will not have `is_flour` flags; the baker's percentage toggle will not appear for them by default, which is the correct behavior.
 
         - **Feature: Equipment List**
 

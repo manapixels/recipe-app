@@ -247,6 +247,14 @@ To empower home cooks of all levels to discover, create, and share delicious rec
 - **Bundle Analysis:** Next.js built-in bundle analyzer capabilities
 - **Linting:** Custom ESLint configuration with Next.js and TypeScript rules
 
+### Development Workflow Guidelines
+
+- **Development Server:** Developers typically run `npm run dev` once and keep it running throughout the development session
+- **Hot Reloading:** Next.js automatically detects changes and reloads the browser - no need to restart the dev server
+- **AI Development Assistance:** When making code changes during development sessions, **DO NOT** run `npm run dev` again as it's likely already running
+- **Testing Changes:** Changes can be verified by checking the browser since hot reloading handles updates automatically
+- **When to Restart:** Only restart the dev server if there are configuration changes (e.g., environment variables, next.config.js changes) or if there are server errors
+
 ### Deployment & Operations
 
 - **Database:** Supabase hosted PostgreSQL

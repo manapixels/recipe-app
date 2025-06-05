@@ -68,9 +68,9 @@ create table public.recipes (
   description text,
   category recipe_categories not null default 'sweets',
   subcategory recipe_subcategories not null,
-  ingredients jsonb not null default '[]'::jsonb check (
-    jsonb_typeof(ingredients) = 'array'
-    and jsonb_array_length(ingredients) >= 0
+  components jsonb not null default '[{"id": "main", "name": "Main", "description": "", "order": 1, "ingredients": []}]'::jsonb check (
+    jsonb_typeof(components) = 'array'
+    and jsonb_array_length(components) >= 1
   ),
   instructions jsonb not null default '[]'::jsonb check (
     jsonb_typeof(instructions) = 'array'
@@ -89,6 +89,8 @@ create table public.recipes (
 
 -- Comments
 comment on table public.recipes is 'Details for each recipe.';
+comment on column public.recipes.components is 'Structured recipe components with grouped ingredients (e.g., poolish, dough, sauce).';
+comment on column public.recipes.nutrition_info is 'Optional nutritional information per serving as key-value pairs.';
 
 -- RLS
 alter table recipes enable row level security;
@@ -168,7 +170,7 @@ select
   r.slug,
   r.category,
   r.description,
-  r.ingredients,
+  r.components,
   r.instructions,
   r.total_time,
   r.servings,
