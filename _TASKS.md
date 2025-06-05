@@ -181,12 +181,11 @@ This document outlines tasks for the Recipe App. Below are key technical details
       - [x] Modify `addRecipe` and `updateRecipe` to handle saving (optional) `nutrition_info`.
       - **Nutritional Value Estimation (using `src/data/ingredientNutritionData.json`):**
         - [x] Create `src/data/ingredientNutritionData.json` with initial common ingredient nutritional values.
-        - [ ] Develop a utility function (e.g., `estimateRecipeNutrition(ingredients: Ingredient[], servings: number): NutritionalInfo`) to calculate estimated nutritional values per serving.
-          - [ ] The function should read and parse `src/data/ingredientNutritionData.json`.
-          - [ ] Implement logic to match recipe ingredients (by name) with data in the JSON file.
-          - [ ] _Complex Sub-task:_ Implement unit and quantity conversions (e.g., recipe ingredient '1 cup flour' to JSON data 'per 100g'). This may require additional data (density, standard conversions) or simplifications.
-          - [ ] Aggregate nutritional values (calories, protein, etc.) from all matched ingredients for the total recipe.
-          - [ ] Divide aggregated totals by the number of servings.
+        - [x] Develop a utility function (e.g., `estimateRecipeNutrition(ingredients: Ingredient[], servings: number): NutritionalInfo`) to calculate estimated nutritional values per serving.
+          - [x] The function should read and parse `src/data/ingredientNutritionData.json`.
+          - [x] Implement logic to match recipe ingredients (by name) with data in the JSON file.
+          - [x] Aggregate nutritional values (calories, protein, etc.) from all matched ingredients for the total recipe.
+          - [x] Divide aggregated totals by the number of servings.
         - [x] Update `src/app/recipes/[slug]/page.tsx` to call the estimation utility if `recipe.nutrition_info` is not provided by the creator, and display the returned estimated values.
       - **Types:**
         - [x] Add `nutrition_info?: { [key: string]: string | number }` (or a more structured type like `NutritionalInfo { calories?: string; protein_g?: number; ... }`) to the `Recipe` type in `src/types/recipe.ts`.
