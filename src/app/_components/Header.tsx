@@ -2,17 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, UserCircle, PlusCircle } from 'lucide-react';
+import { Search, PlusCircle } from 'lucide-react';
 
 import AuthForm from '@/_components/auth/AuthForm';
 import LoggedInUser from '@/_components/auth/LoggedInUser';
 import { useUser } from '@/_contexts/UserContext';
-import { useAuthModal } from '@/_contexts/AuthContext';
 
 export default function Header() {
   const pathname = usePathname();
   const { profile, user } = useUser();
-  const { setShowModal } = useAuthModal();
 
   const navLinks = [
     { href: '/recipes', label: 'Recipes' },
@@ -72,23 +70,12 @@ export default function Header() {
               <LoggedInUser profile={profile} user={user} />
             ) : (
               <>
-                <button
-                  type="button"
-                  onClick={() => setShowModal(true)}
-                  className="p-1.5 rounded-full dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 focus:outline-none flex flex-col items-center"
-                  aria-label="Account / Register / Login"
-                >
-                  <span className="bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 rounded-sm p-1.5">
-                    <UserCircle className="h-5 w-5" />
-                  </span>
-                  <span className="hidden md:block ml-1 text-xs">Account</span>
-                </button>
+                <AuthForm />
               </>
             )}
           </div>
         </div>
       </div>
-      {!profile?.id && <AuthForm />}
     </header>
   );
 }
