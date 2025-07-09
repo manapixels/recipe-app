@@ -784,6 +784,149 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
           </div>
         </div>
 
+        {/* Nutrition Information */}
+        <div className="space-y-4">
+          <div className="border-t pt-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Nutrition Information (Optional)
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+              Add nutritional values per serving. If left blank, values will be automatically
+              estimated from ingredients.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Calories */}
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Calories
+                </label>
+                <input
+                  {...register('calories_input')}
+                  type="text"
+                  className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 250 kcal"
+                />
+              </div>
+
+              {/* Carbohydrates */}
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Carbohydrates
+                </label>
+                <input
+                  {...register('carbohydrateContent_input')}
+                  type="text"
+                  className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 30g"
+                />
+              </div>
+
+              {/* Protein */}
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Protein
+                </label>
+                <input
+                  {...register('proteinContent_input')}
+                  type="text"
+                  className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 8g"
+                />
+              </div>
+
+              {/* Total Fat */}
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Total Fat
+                </label>
+                <input
+                  {...register('fatContent_input')}
+                  type="text"
+                  className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 12g"
+                />
+              </div>
+
+              {/* Saturated Fat */}
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Saturated Fat
+                </label>
+                <input
+                  {...register('saturatedFatContent_input')}
+                  type="text"
+                  className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 3g"
+                />
+              </div>
+
+              {/* Fiber */}
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Dietary Fiber
+                </label>
+                <input
+                  {...register('fiberContent_input')}
+                  type="text"
+                  className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 4g"
+                />
+              </div>
+
+              {/* Sugar */}
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Sugar
+                </label>
+                <input
+                  {...register('sugarContent_input')}
+                  type="text"
+                  className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 15g"
+                />
+              </div>
+
+              {/* Sodium */}
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Sodium
+                </label>
+                <input
+                  {...register('sodiumContent_input')}
+                  type="text"
+                  className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 200mg"
+                />
+              </div>
+
+              {/* Cholesterol */}
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Cholesterol
+                </label>
+                <input
+                  {...register('cholesterolContent_input')}
+                  type="text"
+                  className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                  placeholder="e.g., 25mg"
+                />
+              </div>
+            </div>
+
+            <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
+                💡 Pro Tip
+              </h4>
+              <p className="text-sm text-blue-700 dark:text-blue-200">
+                Include units in your input (e.g., &ldquo;250 kcal&rdquo;, &ldquo;30g&rdquo;,
+                &ldquo;200mg&rdquo;). If no unit is specified, defaults will be used (g for most
+                nutrients, kcal for calories, mg for sodium/cholesterol).
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Form Actions */}
         <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 z-10">
           <div className="flex flex-col sm:flex-row gap-3 justify-between items-center max-w-4xl mx-auto">

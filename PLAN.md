@@ -38,36 +38,37 @@
 - **Profile Pages:** Created and favorited recipes tabs
 - **Rich UI Components:** Recipe cards, lists, forms, toasts, skeletons
 
-#### Advanced Features (Backend Ready)
+#### Advanced Features
 
 - **Unit Conversion:** Metric/Imperial utilities with user preferences
-- **Nutrition Estimation:** Automated calculation from comprehensive ingredient database
+- **✅ Nutrition System:** Complete nutrition facts display with manual input and automated estimation
 - **Print Functionality:** PrintRecipeButton component
 - **Social Sharing:** Basic postRecipeToSocial function
+- **✅ Recipe Versioning & Diary:** Git-like recipe forking with cooking diary entries
 
 ### 🚀 HIGH PRIORITY (Next Sprint)
 
-#### 1. 🔄 Recipe Versioning & Diary System (NEW PRIORITY)
+#### 1. ✅ Recipe Versioning & Diary System
 
-- **Status:** New feature - Game-changing addition
-- **Concept:** Git-like recipe versioning with cooking diary entries
-- **Tasks:**
-  - Design database schema for recipe versions and diary entries
-  - Implement recipe forking functionality
-  - Create diary entry system for cooking notes
-  - Build version tree visualization
-  - Add change tracking and comparison views
-- **Files:** New tables, `src/api/recipe-versions.ts`, `src/app/recipes/_components/VersionTree.tsx`
-- **Impact:** Transforms app from static recipes to collaborative cooking platform
+- **Status:** ✅ **COMPLETED** - Revolutionary feature fully implemented
+- **Completed:**
+  - ✅ Designed database schema for recipe versions and diary entries
+  - ✅ Implemented recipe forking functionality
+  - ✅ Created diary entry system for cooking notes
+  - ✅ Built version history visualization
+  - ✅ Added change tracking and comparison views
+- **Files:** `src/api/recipe-versioning.ts`, `src/app/recipes/_components/versioning/`, `src/types/recipe-versioning.ts`
+- **Impact:** ✨ Successfully transformed app from static recipes to collaborative cooking platform
 
-#### 2. Complete Nutrition Display
+#### 2. ✅ Complete Nutrition Display
 
-- **Status:** Backend ready, UI missing
-- **Tasks:**
-  - Add nutrition display section to recipe detail pages
-  - Implement nutrition input fields in RecipeForm
-  - Show estimated values when creator data missing
-- **Files:** `src/app/recipes/[slug]/page.tsx`, `src/app/recipes/_components/RecipeForm.tsx`
+- **Status:** ✅ **COMPLETED** - Full nutrition system implemented
+- **Completed:**
+  - ✅ Added nutrition display section to recipe detail pages
+  - ✅ Implemented nutrition input fields in RecipeForm
+  - ✅ Connected to existing estimation utilities
+  - ✅ Show estimated values when creator data missing
+- **Files:** `src/app/recipes/[slug]/page.tsx`, `src/app/recipes/_components/RecipeForm.tsx`, `src/app/_components/ui/NutritionFacts.tsx`
 
 #### 3. Unit Conversion UI
 
@@ -438,15 +439,10 @@ All core functionality is implemented:
 - ✅ Responsive design
 - ✅ Draft/publish workflow
 - ✅ Recipe preview system
+- ✅ Recipe versioning & diary system
+- ✅ Complete nutrition display system
 
 ### 🔄 IN PROGRESS TASKS
-
-#### Nutrition Display UI
-
-- [ ] Add nutrition section to recipe detail page
-- [ ] Implement nutrition input in RecipeForm
-- [ ] Connect to existing estimation utilities
-- **Files:** `src/app/recipes/[slug]/page.tsx`, `src/app/recipes/_components/RecipeForm.tsx`
 
 #### Unit Conversion UI
 
