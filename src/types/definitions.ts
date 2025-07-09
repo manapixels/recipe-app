@@ -38,6 +38,177 @@ export interface Database {
           },
         ];
       };
+      recipe_changes: {
+        Row: {
+          change_type: string;
+          created_at: string | null;
+          id: string;
+          new_value: Json | null;
+          old_value: Json | null;
+          reason: string | null;
+          recipe_version_id: string;
+        };
+        Insert: {
+          change_type: string;
+          created_at?: string | null;
+          id?: string;
+          new_value?: Json | null;
+          old_value?: Json | null;
+          reason?: string | null;
+          recipe_version_id: string;
+        };
+        Update: {
+          change_type?: string;
+          created_at?: string | null;
+          id?: string;
+          new_value?: Json | null;
+          old_value?: Json | null;
+          reason?: string | null;
+          recipe_version_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'recipe_changes_recipe_version_id_fkey';
+            columns: ['recipe_version_id'];
+            isOneToOne: false;
+            referencedRelation: 'recipe_versions';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      recipe_diary_entries: {
+        Row: {
+          content: string;
+          cooking_date: string | null;
+          created_at: string | null;
+          created_by: string;
+          entry_type: string;
+          id: string;
+          images: string[] | null;
+          recipe_version_id: string;
+        };
+        Insert: {
+          content: string;
+          cooking_date?: string | null;
+          created_at?: string | null;
+          created_by: string;
+          entry_type: string;
+          id?: string;
+          images?: string[] | null;
+          recipe_version_id: string;
+        };
+        Update: {
+          content?: string;
+          cooking_date?: string | null;
+          created_at?: string | null;
+          created_by?: string;
+          entry_type?: string;
+          id?: string;
+          images?: string[] | null;
+          recipe_version_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'recipe_diary_entries_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'recipe_diary_entries_recipe_version_id_fkey';
+            columns: ['recipe_version_id'];
+            isOneToOne: false;
+            referencedRelation: 'recipe_versions';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      recipe_versions: {
+        Row: {
+          change_summary: string | null;
+          created_at: string | null;
+          created_by: string;
+          fork_count: number | null;
+          id: string;
+          is_public: boolean | null;
+          original_recipe_id: string;
+          parent_version_id: string | null;
+          recipe_id: string;
+          success_rating: number | null;
+          version_number: string;
+        };
+        Insert: {
+          change_summary?: string | null;
+          created_at?: string | null;
+          created_by: string;
+          fork_count?: number | null;
+          id?: string;
+          is_public?: boolean | null;
+          original_recipe_id: string;
+          parent_version_id?: string | null;
+          recipe_id: string;
+          success_rating?: number | null;
+          version_number: string;
+        };
+        Update: {
+          change_summary?: string | null;
+          created_at?: string | null;
+          created_by?: string;
+          fork_count?: number | null;
+          id?: string;
+          is_public?: boolean | null;
+          original_recipe_id?: string;
+          parent_version_id?: string | null;
+          recipe_id?: string;
+          success_rating?: number | null;
+          version_number?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'recipe_versions_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'recipe_versions_original_recipe_id_fkey';
+            columns: ['original_recipe_id'];
+            isOneToOne: false;
+            referencedRelation: 'recipes';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'recipe_versions_original_recipe_id_fkey';
+            columns: ['original_recipe_id'];
+            isOneToOne: false;
+            referencedRelation: 'recipes_with_author_data';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'recipe_versions_parent_version_id_fkey';
+            columns: ['parent_version_id'];
+            isOneToOne: false;
+            referencedRelation: 'recipe_versions';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'recipe_versions_recipe_id_fkey';
+            columns: ['recipe_id'];
+            isOneToOne: false;
+            referencedRelation: 'recipes';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'recipe_versions_recipe_id_fkey';
+            columns: ['recipe_id'];
+            isOneToOne: false;
+            referencedRelation: 'recipes_with_author_data';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       recipes: {
         Row: {
           category: Database['public']['Enums']['recipe_categories'];
@@ -58,6 +229,7 @@ export interface Database {
           status: Database['public']['Enums']['recipe_status'];
           subcategory: Database['public']['Enums']['recipe_subcategories'];
           total_time: number;
+          version_id: string | null;
         };
         Insert: {
           category?: Database['public']['Enums']['recipe_categories'];
@@ -78,6 +250,7 @@ export interface Database {
           status?: Database['public']['Enums']['recipe_status'];
           subcategory: Database['public']['Enums']['recipe_subcategories'];
           total_time?: number;
+          version_id?: string | null;
         };
         Update: {
           category?: Database['public']['Enums']['recipe_categories'];
@@ -98,6 +271,7 @@ export interface Database {
           status?: Database['public']['Enums']['recipe_status'];
           subcategory?: Database['public']['Enums']['recipe_subcategories'];
           total_time?: number;
+          version_id?: string | null;
         };
         Relationships: [
           {
@@ -105,6 +279,13 @@ export interface Database {
             columns: ['created_by'];
             isOneToOne: false;
             referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'recipes_version_id_fkey';
+            columns: ['version_id'];
+            isOneToOne: false;
+            referencedRelation: 'recipe_versions';
             referencedColumns: ['id'];
           },
         ];
@@ -173,6 +354,23 @@ export interface Database {
       };
     };
     Functions: {
+      create_initial_recipe_versions: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
+      generate_version_number: {
+        Args: {
+          original_recipe_id: string;
+          parent_version_id: string;
+        };
+        Returns: string;
+      };
+      increment_fork_count: {
+        Args: {
+          original_version_id: string;
+        };
+        Returns: undefined;
+      };
       slugify: {
         Args: {
           value: string;

@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(npx supabase:*)",
+      "Bash(npm run:*)",
+      "Bash(npx tsc:*)",
+      "Bash(prettier --write ./src/types/definitions.ts)",
+      "Bash(npx prettier:*)",
+      "Bash(rm:*)",
+      "Bash(prettier:*)"
+    ],
+    "deny": []
+  }
+}

@@ -9,6 +9,7 @@ import RecipeIngredients from '../_components/RecipeIngredients';
 import { FavoriteButton } from '@/_components/ui/FavoriteButton';
 import DifficultyDisplay from '@/_components/ui/DifficultyDisplay';
 import RatingDisplay from '@/_components/ui/RatingDisplay';
+import { RecipeVersioningWrapper } from '../_components/versioning/RecipeVersioningWrapper';
 import { Clock, Star, Printer, Gauge } from 'lucide-react';
 import { formatTime } from '@/utils/formatters';
 import { estimateRecipeNutrition } from '@/utils/nutritionEstimator';
@@ -334,6 +335,17 @@ export default async function RecipeDetailsPage({
       {/* Original description placement - consider if this should be moved or restyled */}
       <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none mt-8 mb-8">
         {recipe?.description}
+      </div>
+
+      {/* Recipe Versioning & Diary Section */}
+      <div className="mt-16 border-t pt-16">
+        <h2 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-white">
+          Recipe Versions & Cooking Diary
+        </h2>
+        <RecipeVersioningWrapper
+          recipe={recipe}
+          initialVersionId={recipe.version_id || undefined}
+        />
       </div>
     </div>
   );
