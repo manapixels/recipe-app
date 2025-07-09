@@ -3,8 +3,8 @@
 import { createClient } from '@/utils/supabase/server';
 import {
   Recipe as FullRecipeType,
-  Ingredient,
   Instruction,
+  RecipeComponent,
   RecipeCategory,
   RecipeSubcategory,
   DifficultyLevel,
@@ -118,28 +118,28 @@ export const fetchRecipe = async (slug: string) => {
     // Type assertion for rawData to include potential ingredients/instructions as unknown
     const dbRecord = rawData as Omit<
       FullRecipeType,
-      'ingredients' | 'instructions' | 'is_favorited'
+      'components' | 'instructions' | 'is_favorited'
     > & {
-      ingredients: unknown;
+      components: unknown;
       instructions: unknown;
     };
 
-    let ingredients: Ingredient[] = [];
+    let components: RecipeComponent[] = [];
     let instructions: Instruction[] = [];
 
-    // Parse ingredients
+    // Parse components
     try {
-      if (dbRecord.ingredients) {
-        if (typeof dbRecord.ingredients === 'string') {
-          ingredients = JSON.parse(dbRecord.ingredients) as Ingredient[];
-        } else if (Array.isArray(dbRecord.ingredients)) {
-          ingredients = dbRecord.ingredients as Ingredient[];
+      if (dbRecord.components) {
+        if (typeof dbRecord.components === 'string') {
+          components = JSON.parse(dbRecord.components) as RecipeComponent[];
+        } else if (Array.isArray(dbRecord.components)) {
+          components = dbRecord.components as RecipeComponent[];
         } else {
-          console.warn('Ingredients field is not a string or array:', dbRecord.ingredients);
+          console.warn('Components field is not a string or array:', dbRecord.components);
         }
       }
     } catch (e) {
-      console.error('Error parsing ingredients JSON:', e);
+      console.error('Error parsing components JSON:', e);
     }
 
     // Parse instructions
@@ -176,7 +176,7 @@ export const fetchRecipe = async (slug: string) => {
 
     const finalRecipe: FullRecipeType = {
       ...(dbRecord as FullRecipeType), // Cast after parsing, ensure all fields match FullRecipeType
-      ingredients,
+      components,
       instructions,
       is_favorited: isFavorited,
     };
@@ -223,7 +223,7 @@ export const addRecipe = async ({
   description,
   category,
   subcategory,
-  ingredients,
+  components,
   instructions,
   total_time,
   servings,
@@ -238,7 +238,7 @@ export const addRecipe = async ({
   description: FullRecipeType['description'];
   category: FullRecipeType['category'];
   subcategory: FullRecipeType['subcategory'];
-  ingredients: FullRecipeType['ingredients'];
+  components: FullRecipeType['components'];
   instructions: FullRecipeType['instructions'];
   total_time: FullRecipeType['total_time'];
   servings: FullRecipeType['servings'];
@@ -256,7 +256,7 @@ export const addRecipe = async ({
       description,
       category,
       subcategory,
-      ingredients,
+      components,
       instructions,
       total_time,
       servings,
@@ -289,7 +289,7 @@ export const updateRecipe = async ({
   description,
   category,
   subcategory,
-  ingredients,
+  components,
   instructions,
   total_time,
   servings,
@@ -304,7 +304,7 @@ export const updateRecipe = async ({
   description?: FullRecipeType['description'];
   category?: FullRecipeType['category'];
   subcategory?: FullRecipeType['subcategory'];
-  ingredients?: FullRecipeType['ingredients'];
+  components?: FullRecipeType['components'];
   instructions?: FullRecipeType['instructions'];
   total_time?: FullRecipeType['total_time'];
   servings?: FullRecipeType['servings'];
@@ -325,7 +325,7 @@ export const updateRecipe = async ({
     if (description !== undefined) updateData.description = description;
     if (category !== undefined) updateData.category = category;
     if (subcategory !== undefined) updateData.subcategory = subcategory;
-    if (ingredients !== undefined) updateData.ingredients = ingredients;
+    if (components !== undefined) updateData.components = components;
     if (instructions !== undefined) updateData.instructions = instructions;
     if (total_time !== undefined) updateData.total_time = Number(total_time);
     if (servings !== undefined) updateData.servings = Number(servings);

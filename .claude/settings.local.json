@@ -11,7 +11,8 @@
       "Bash(prettier --write ./src/types/definitions.ts)",
       "Bash(npx prettier:*)",
       "Bash(rm:*)",
-      "Bash(prettier:*)"
+      "Bash(prettier:*)",
+      "Bash(rg:*)"
     ],
     "deny": []
   }

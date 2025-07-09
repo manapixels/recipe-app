@@ -1,5 +1,7 @@
 # Recipe App Development Plan
 
+**A collaborative recipe platform with Git-like versioning, cooking diaries, and community-driven recipe improvements.**
+
 ## 📊 Current Status: Feature-Complete Core App
 
 ### Tech Stack

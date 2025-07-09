@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Recipe } from '@/types/recipe';
+import { Recipe, getAllIngredientsFromComponents } from '@/types/recipe';
 import { Clock, Users, Soup, Sandwich, Cake } from 'lucide-react';
 import DifficultyDisplay from '../../_components/ui/DifficultyDisplay';
 
@@ -26,9 +26,10 @@ const CategoryIcon = ({ category }: { category?: string }) => {
 export const RecipePreview: React.FC<RecipePreviewProps> = ({ recipeData, onClose, isVisible }) => {
   if (!isVisible) return null;
 
-  // Ensure ingredients and instructions are arrays, even if undefined in partial data
-  const ingredients = Array.isArray(recipeData.ingredients) ? recipeData.ingredients : [];
+  // Ensure components and instructions are arrays, even if undefined in partial data
+  const components = Array.isArray(recipeData.components) ? recipeData.components : [];
   const instructions = Array.isArray(recipeData.instructions) ? recipeData.instructions : [];
+  const allIngredients = getAllIngredientsFromComponents(components);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex justify-center items-center z-50 p-4 overflow-y-auto">
@@ -122,9 +123,9 @@ export const RecipePreview: React.FC<RecipePreviewProps> = ({ recipeData, onClos
               <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-3 border-b pb-2">
                 Ingredients
               </h3>
-              {ingredients.length > 0 ? (
+              {allIngredients.length > 0 ? (
                 <ul className="list-disc list-inside space-y-1.5 text-gray-700 dark:text-gray-300 pl-2">
-                  {ingredients.map((ing, index) => (
+                  {allIngredients.map((ing, index) => (
                     <li key={index}>
                       {ing.amount && `${ing.amount}${ing.unit || ''} `}
                       {ing.name}

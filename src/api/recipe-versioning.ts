@@ -489,7 +489,7 @@ function generateVersionComparison(
     original,
     modified,
     changes: {
-      ingredients: compareArrays(originalRecipe.ingredients, modifiedRecipe.ingredients),
+      ingredients: compareArrays(originalRecipe.components, modifiedRecipe.components),
       instructions: compareArrays(originalRecipe.instructions, modifiedRecipe.instructions),
       general: compareGeneralInfo(originalRecipe, modifiedRecipe),
     },

@@ -3,7 +3,12 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { BUCKET_URL } from '@/constants';
-import { Recipe, Ingredient, MeasurementUnit } from '@/types/recipe';
+import {
+  Recipe,
+  Ingredient,
+  MeasurementUnit,
+  getAllIngredientsFromComponents,
+} from '@/types/recipe';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import { CheckIcon } from 'lucide-react';
 import {
@@ -18,6 +23,7 @@ import { useUser } from '@/_contexts/UserContext';
 
 interface RecipeIngredientsProps {
   recipe: Recipe;
+  onServingsChange?: (servings: number) => void;
 }
 
 type UnitSystem = 'metric' | 'imperial';
@@ -32,11 +38,23 @@ const IMPERIAL_DISPLAY_UNITS = {
   VOLUME_LARGE: 'cup',
 };
 
-export default function RecipeIngredients({ recipe }: RecipeIngredientsProps) {
+export default function RecipeIngredients({ recipe, onServingsChange }: RecipeIngredientsProps) {
   const { profile, loading: userLoading } = useUser();
   const [currentServings, setCurrentServings] = useState(recipe.servings);
   const [unitSystem, setUnitSystem] = useState<UnitSystem>('metric'); // Default to metric
+  const [showBakerPercentages, setShowBakerPercentages] = useState(false);
   const servingsRatio = currentServings / recipe.servings;
+
+  // Update current servings when recipe.servings changes (from parent)
+  useEffect(() => {
+    setCurrentServings(recipe.servings);
+  }, [recipe.servings]);
+
+  // Handle servings change and notify parent
+  const handleServingsChange = (newServings: number) => {
+    setCurrentServings(newServings);
+    onServingsChange?.(newServings);
+  };
 
   useEffect(() => {
     if (!userLoading && profile && profile.preferred_unit_system) {
@@ -50,6 +68,38 @@ export default function RecipeIngredients({ recipe }: RecipeIngredientsProps) {
       setUnitSystem('metric'); // Default to metric if no preference
     }
   }, [profile, userLoading]);
+
+  // Baker's percentage calculations
+  const isBreadRecipe = recipe.category === 'breads';
+  const allIngredients = getAllIngredientsFromComponents(recipe.components);
+  const hasFlourIngredients = allIngredients.some(ing => ing?.is_flour === true);
+  const canShowBakerPercentages = isBreadRecipe && hasFlourIngredients;
+
+  const calculateBakerPercentage = (ingredient: Ingredient): string | null => {
+    if (!showBakerPercentages || !canShowBakerPercentages) return null;
+
+    // Calculate total flour weight (scaled for current servings)
+    let totalFlourWeight = 0;
+    for (const ing of allIngredients) {
+      if (ing.is_flour === true) {
+        const amount = parseFloat(ing.amount);
+        if (!isNaN(amount)) {
+          totalFlourWeight += amount * servingsRatio;
+        }
+      }
+    }
+
+    if (totalFlourWeight === 0) return null;
+
+    // Calculate this ingredient's percentage relative to flour
+    const amount = parseFloat(ingredient.amount);
+    if (isNaN(amount)) return null;
+
+    const scaledAmount = amount * servingsRatio;
+    const percentage = (scaledAmount / totalFlourWeight) * 100;
+
+    return `${percentage.toFixed(1)}%`;
+  };
 
   const getDisplayAmountAndUnit = (ingredient: Ingredient) => {
     const originalAmountStr = ingredient.amount;
@@ -155,87 +205,127 @@ export default function RecipeIngredients({ recipe }: RecipeIngredientsProps) {
               id="servings"
               min="1"
               value={currentServings}
-              onChange={e => setCurrentServings(Math.max(1, parseInt(e.target.value) || 1))}
+              onChange={e => handleServingsChange(Math.max(1, parseInt(e.target.value) || 1))}
               className="w-20 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-gray-800 focus:border-gray-800"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">
-              Units:
-            </span>
-            <div className="flex rounded-md shadow-sm bg-white dark:bg-gray-700 ring-1 ring-gray-300 dark:ring-gray-600">
-              {(['metric', 'imperial'] as UnitSystem[]).map(system => (
-                <button
-                  key={system}
-                  onClick={() => setUnitSystem(system)}
-                  className={`px-3 py-1.5 text-sm font-medium capitalize focus:z-10 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-gray-800 first:rounded-l-md last:rounded-r-md border-gray-300 dark:border-gray-600 -ml-px first:ml-0
-                    ${
-                      unitSystem === system
-                        ? 'bg-gray-800 text-white dark:bg-base-600'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
-                    }`}
-                >
-                  {system}
-                </button>
-              ))}
+
+          {/* Baker's Percentage Toggle (only for bread recipes with flour ingredients) */}
+          {canShowBakerPercentages && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowBakerPercentages(!showBakerPercentages)}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                  showBakerPercentages
+                    ? 'bg-amber-600 text-white hover:bg-amber-700'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
+                }`}
+              >
+                {showBakerPercentages ? 'Hide' : 'Show'} Baker&apos;s %
+              </button>
+              {showBakerPercentages && (
+                <span className="text-xs text-gray-600 dark:text-gray-400">
+                  (relative to total flour weight)
+                </span>
+              )}
             </div>
-          </div>
+          )}
         </div>
       </div>
 
-      <ul className="border-t border-gray-200 dark:border-gray-700">
-        {recipe.ingredients.map((ingredient, index) => {
-          const { displayAmount, displayUnit } = getDisplayAmountAndUnit(ingredient);
-          return (
-            <li
-              key={index}
-              className="flex items-center border-b border-gray-200 dark:border-gray-700 last:border-b-0"
-            >
-              <div className="px-4 py-3">
-                <Checkbox.Root
-                  id={`ingredient-${index}`}
-                  className="flex items-center justify-center w-5 h-5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded data-[state=checked]:bg-base-600 data-[state=checked]:border-base-600 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
-                >
-                  <Checkbox.Indicator className="text-white dark:text-gray-900">
-                    <CheckIcon className="w-4 h-4" />
-                  </Checkbox.Indicator>
-                </Checkbox.Root>
+      <div className="border-t border-gray-200 dark:border-gray-700">
+        {recipe.components.map((component, componentIndex) => (
+          <div key={component.id} className="mb-6 last:mb-0">
+            {/* Component Header (only show if more than one component) */}
+            {recipe.components.length > 1 && (
+              <div className="px-4 py-3 bg-gray-100 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-600">
+                <h4 className="font-medium text-gray-900 dark:text-white">{component.name}</h4>
+                {component.description && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    {component.description}
+                  </p>
+                )}
               </div>
-              <div className="flex flex-grow items-center gap-3 px-4 py-3">
-                <label
-                  htmlFor={`ingredient-${index}`}
-                  className="flex-grow text-gray-800 dark:text-gray-200"
-                >
-                  {ingredient.name}
-                  {displayAmount && displayUnit && (
-                    <span className="text-gray-600 dark:text-gray-400 text-sm ml-2">
-                      ({displayAmount} {displayUnit})
-                    </span>
-                  )}
-                  {!displayAmount && ingredient.amount && (
-                    <span className="text-gray-600 dark:text-gray-400 text-sm ml-2">
-                      ({ingredient.amount} {ingredient.unit || ''})
-                    </span>
-                  )}
-                </label>
-                <div className="w-12 h-12 flex-shrink-0">
-                  {ingredient.image_url ? (
-                    <Image
-                      src={`${BUCKET_URL}/ingredients/${ingredient.image_url}`}
-                      alt={ingredient.name}
-                      width={48}
-                      height={48}
-                      className="rounded-lg object-cover shadow-sm"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg" />
-                  )}
-                </div>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+            )}
+
+            {/* Component Ingredients */}
+            <ul className={recipe.components.length > 1 ? '' : 'border-t-0'}>
+              {component.ingredients.map((ingredient, ingredientIndex) => {
+                const globalIndex = `${componentIndex}-${ingredientIndex}`;
+                const { displayAmount, displayUnit } = getDisplayAmountAndUnit(ingredient);
+                const bakerPercentage = calculateBakerPercentage(ingredient);
+                return (
+                  <li
+                    key={globalIndex}
+                    className="flex items-center border-b border-gray-200 dark:border-gray-700 last:border-b-0"
+                  >
+                    <div className="px-4 py-3">
+                      <Checkbox.Root
+                        id={`ingredient-${globalIndex}`}
+                        className="flex items-center justify-center w-5 h-5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded data-[state=checked]:bg-base-600 data-[state=checked]:border-base-600 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+                      >
+                        <Checkbox.Indicator className="text-white dark:text-gray-900">
+                          <CheckIcon className="w-4 h-4" />
+                        </Checkbox.Indicator>
+                      </Checkbox.Root>
+                    </div>
+                    <div className="flex flex-grow items-center gap-3 px-4 py-3">
+                      <label
+                        htmlFor={`ingredient-${globalIndex}`}
+                        className="flex-grow text-gray-800 dark:text-gray-200"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span>{ingredient.name}</span>
+                          {ingredient.is_flour && showBakerPercentages && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                              Flour
+                            </span>
+                          )}
+                          {ingredient.from_component && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                              from {ingredient.from_component}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+                          {displayAmount && displayUnit && (
+                            <span>
+                              {displayAmount} {displayUnit}
+                            </span>
+                          )}
+                          {!displayAmount && ingredient.amount && (
+                            <span>
+                              {ingredient.amount} {ingredient.unit || ''}
+                            </span>
+                          )}
+                          {bakerPercentage && (
+                            <span className="ml-2 font-medium text-amber-600 dark:text-amber-400">
+                              ({bakerPercentage})
+                            </span>
+                          )}
+                        </div>
+                      </label>
+                      <div className="w-12 h-12 flex-shrink-0">
+                        {ingredient.image_url ? (
+                          <Image
+                            src={`${BUCKET_URL}/ingredients/${ingredient.image_url}`}
+                            alt={ingredient.name}
+                            width={48}
+                            height={48}
+                            className="rounded-lg object-cover shadow-sm"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

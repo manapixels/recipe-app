@@ -18,141 +18,32 @@ import {
   RecipeSubcategory,
   CATEGORY_OPTIONS,
   SUBCATEGORY_OPTIONS,
-  DEFAULT_INGREDIENTS,
-  Ingredient,
+  DEFAULT_COMPONENTS,
+  RecipeComponent,
   MEASUREMENT_UNITS,
   ALL_INGREDIENTS,
   RecipeStatus,
-  DifficultyLevel,
   NutritionalInfo,
   NutrientValue,
 } from '@/types/recipe';
 import Spinner from '@/_components/ui/Spinner';
 import { CustomSelect } from '@/_components/ui/Select';
 import { RecipePreview } from './RecipePreview';
-import DifficultyDisplay from '../../_components/ui/DifficultyDisplay';
 
-// Type for the instruction item, used by DraggableInstruction
-type DraggableInstructionItem = {
-  id: string;
-  step?: number;
-  content: string;
-};
+// Difficulty options for UI
+const DIFFICULTY_OPTIONS = [
+  { value: '1', label: '⭐ Level 1 - Easy' },
+  { value: '2', label: '⭐⭐ Level 2 - Medium' },
+  { value: '3', label: '⭐⭐⭐ Level 3 - Hard' },
+] as const;
 
-// DraggableInstruction Component
-const DraggableInstruction = ({
-  index,
-  moveInstruction,
-  register,
-  removeInstruction,
-  errors,
-}: {
-  field: DraggableInstructionItem;
-  index: number;
-  moveInstruction: (dragIndex: number, hoverIndex: number) => void;
-  register: any;
-  removeInstruction: (index: number) => void;
-  errors: any;
-}) => {
-  const [{ isDragging }, drag] = useDrag({
-    type: 'instruction',
-    item: { index },
-    collect: monitor => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
-
-  const [, drop] = useDrop({
-    accept: 'instruction',
-    hover(item: { index: number }) {
-      if (item.index === index) return;
-      moveInstruction(item.index, index);
-      item.index = index;
-    },
-  });
-
-  return (
-    <div
-      ref={node => drag(drop(node))}
-      className={`flex gap-2 items-start bg-white p-3 rounded-lg border cursor-move ${
-        isDragging ? 'border-base-500 bg-base-200 shadow-lg' : 'border-gray-200'
-      }`}
-    >
-      <div className="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-lg shrink-0">
-        <span className="text-gray-600 font-medium">{index + 1}</span>
-      </div>
-      <div className="flex-1">
-        <textarea
-          {...register(`instructions.${index}.content` as const, {
-            required: 'Instruction content is required.',
-          })}
-          rows={2}
-          className={`block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border focus:ring-base-500 focus:border-base-500 ${
-            errors?.instructions?.[index]?.content ? 'border-red-500' : 'border-gray-300'
-          }`}
-          placeholder={`Step ${index + 1} instructions...`}
-        />
-        {errors?.instructions?.[index]?.content && (
-          <p className="mt-1 text-xs text-red-500">
-            {(errors.instructions as any)[index].content.message}
-          </p>
-        )}
-      </div>
-      <button
-        type="button"
-        onClick={() => removeInstruction(index)}
-        className="p-2 text-gray-500 hover:text-red-500 shrink-0"
-      >
-        <Trash2 className="w-5 h-5" />
-      </button>
-    </div>
-  );
-};
-
-// Helper function to format NutrientValue for form input
-const formatNutrientValueForInput = (nutrient?: NutrientValue): string => {
-  if (!nutrient || typeof nutrient.value === 'undefined') return '';
-  if (nutrient.unit) {
-    return `${nutrient.value} ${nutrient.unit}`;
-  }
-  return String(nutrient.value);
-};
-
-// Helper function to parse string input (e.g., "250 kcal" or "250") into NutrientValue
-const parseNutrientInput = (
-  inputString?: string,
-  defaultUnit?: string
-): NutrientValue | undefined => {
-  if (!inputString || inputString.trim() === '') return undefined;
-  const trimmedValue = inputString.trim();
-
-  // Regex to capture value and optional unit
-  // Allows: "100", "100kcal", "100 kcal", "10.5", "10.5 g", "10.5g"
-  const match = trimmedValue.match(/^(\d*\.?\d+)\s*([a-zA-Zμg]+)?$/);
-
-  if (match && match[1]) {
-    const value = parseFloat(match[1]);
-    let unit = match[2] ? match[2].toLowerCase() : defaultUnit;
-
-    if (isNaN(value)) return undefined;
-
-    // If unit is still undefined (no unit in string, no default provided), it's ambiguous
-    // For now, we will store it if a default unit is available, otherwise undefined or consider it unitless (not ideal for some nutrients)
-    if (!unit && defaultUnit) unit = defaultUnit;
-    // if (!unit) return { value }; // Store as unitless if no default and no unit in string
-    if (!unit) return undefined; // Or reject if no unit can be determined and one is expected
-
-    return { value, unit };
-  }
-  return undefined; // Could not parse
-};
-
+// Type for form inputs using components structure
 export type RecipeFormInputs = {
   name: string;
   category: RecipeCategory;
   subcategory: RecipeSubcategory;
   description: string;
-  ingredients: Ingredient[];
+  components: RecipeComponent[];
   instructions: { step?: number; content: string }[];
   total_time: string;
   servings: string;
@@ -182,6 +73,39 @@ interface RecipeFormProps {
   onCancel?: () => void;
 }
 
+// Helper function to format NutrientValue for form input
+const formatNutrientValueForInput = (nutrient?: NutrientValue): string => {
+  if (!nutrient || typeof nutrient.value === 'undefined') return '';
+  if (nutrient.unit) {
+    return `${nutrient.value} ${nutrient.unit}`;
+  }
+  return String(nutrient.value);
+};
+
+// Helper function to parse string input (e.g., "250 kcal" or "250") into NutrientValue
+const parseNutrientInput = (
+  inputString?: string,
+  defaultUnit?: string
+): NutrientValue | undefined => {
+  if (!inputString || inputString.trim() === '') return undefined;
+  const trimmedValue = inputString.trim();
+
+  // Regex to capture value and optional unit
+  const match = trimmedValue.match(/^(\d*\.?\d+)\s*([a-zA-Zμg]+)?$/);
+
+  if (match && match[1]) {
+    const value = parseFloat(match[1]);
+    let unit = match[2] ? match[2].toLowerCase() : defaultUnit;
+
+    if (isNaN(value)) return undefined;
+    if (!unit && defaultUnit) unit = defaultUnit;
+    if (!unit) return undefined;
+
+    return { value, unit };
+  }
+  return undefined;
+};
+
 export const RecipeForm: React.FC<RecipeFormProps> = ({
   mode,
   initialData,
@@ -197,9 +121,6 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<RecipeCategory>(
     initialData?.category || CATEGORY_OPTIONS[0].value
   );
-  const [searchTerms, setSearchTerms] = useState<Record<number, string>>({});
-  const [openDropdown, setOpenDropdown] = useState<number | null>(null);
-
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   const [previewData, setPreviewData] = useState<Partial<Recipe>>({});
 
@@ -212,14 +133,14 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
       subcategory:
         SUBCATEGORY_OPTIONS[CATEGORY_OPTIONS[0].value]?.[0]?.value || ('' as RecipeSubcategory),
       description: '',
-      ingredients: [{ name: '', amount: '', unit: 'g' }],
+      components: DEFAULT_COMPONENTS[CATEGORY_OPTIONS[0].value],
       instructions: [{ content: '' }],
       total_time: '30',
       servings: '4',
       difficulty: '1',
       image_thumbnail_url: '',
       image_banner_url: '',
-      // Nutritional Information defaults (string inputs)
+      // Nutritional Information defaults
       calories_input: '',
       carbohydrateContent_input: '',
       cholesterolContent_input: '',
@@ -242,9 +163,8 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
     control,
     watch,
     setValue,
-    reset,
     getValues,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<RecipeFormInputs>({
     defaultValues: initialData
       ? {
@@ -252,9 +172,16 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
           category: initialData.category,
           subcategory: initialData.subcategory,
           description: initialData.description || '',
-          ingredients: initialData.ingredients?.length
-            ? initialData.ingredients.map(ing => ({ ...ing, amount: String(ing.amount) }))
-            : [{ name: '', amount: '', unit: 'g' }],
+          components: initialData.components?.length
+            ? initialData.components.map(comp => ({
+                ...comp,
+                ingredients: comp.ingredients.map(ing => ({
+                  ...ing,
+                  amount: String(ing.amount),
+                  is_flour: ing.is_flour || false,
+                })),
+              }))
+            : DEFAULT_COMPONENTS[initialData.category],
           instructions: initialData.instructions?.length
             ? initialData.instructions.map(instr => ({ content: instr.content }))
             : [{ content: '' }],
@@ -263,7 +190,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
           difficulty: String(initialData.difficulty || '1'),
           image_thumbnail_url: initialData.image_thumbnail_url || '',
           image_banner_url: initialData.image_banner_url || '',
-          // Nutritional Information from initialData.nutrition_info (now NutrientValue objects)
+          // Nutritional Information from initialData
           calories_input: formatNutrientValueForInput(initialData.nutrition_info?.calories),
           carbohydrateContent_input: formatNutrientValueForInput(
             initialData.nutrition_info?.carbohydrateContent
@@ -295,12 +222,12 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
   });
 
   const {
-    fields: ingredientFields,
-    append: appendIngredient,
-    remove: removeIngredient,
+    fields: componentFields,
+    append: appendComponent,
+    remove: removeComponent,
   } = useFieldArray({
     control,
-    name: 'ingredients',
+    name: 'components',
   });
 
   const {
@@ -313,64 +240,11 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
     name: 'instructions',
   });
 
-  useEffect(() => {
-    if (initialData) {
-      reset({
-        name: initialData.name,
-        category: initialData.category,
-        subcategory: initialData.subcategory,
-        description: initialData.description || '',
-        ingredients: initialData.ingredients?.length
-          ? initialData.ingredients.map(ing => ({ ...ing, amount: String(ing.amount) }))
-          : [{ name: '', amount: '', unit: 'g' }],
-        instructions: initialData.instructions?.length
-          ? initialData.instructions.map(instr => ({ content: instr.content }))
-          : [{ content: '' }],
-        total_time: String(initialData.total_time || '0'),
-        servings: String(initialData.servings || '1'),
-        difficulty: String(initialData.difficulty || '1'),
-        image_thumbnail_url: initialData.image_thumbnail_url || '',
-        image_banner_url: initialData.image_banner_url || '',
-        // Nutritional Information for reset (from NutrientValue objects)
-        calories_input: formatNutrientValueForInput(initialData.nutrition_info?.calories),
-        carbohydrateContent_input: formatNutrientValueForInput(
-          initialData.nutrition_info?.carbohydrateContent
-        ),
-        cholesterolContent_input: formatNutrientValueForInput(
-          initialData.nutrition_info?.cholesterolContent
-        ),
-        fatContent_input: formatNutrientValueForInput(initialData.nutrition_info?.fatContent),
-        fiberContent_input: formatNutrientValueForInput(initialData.nutrition_info?.fiberContent),
-        proteinContent_input: formatNutrientValueForInput(
-          initialData.nutrition_info?.proteinContent
-        ),
-        saturatedFatContent_input: formatNutrientValueForInput(
-          initialData.nutrition_info?.saturatedFatContent
-        ),
-        sodiumContent_input: formatNutrientValueForInput(initialData.nutrition_info?.sodiumContent),
-        sugarContent_input: formatNutrientValueForInput(initialData.nutrition_info?.sugarContent),
-        transFatContent_input: formatNutrientValueForInput(
-          initialData.nutrition_info?.transFatContent
-        ),
-        unsaturatedFatContent_input: formatNutrientValueForInput(
-          initialData.nutrition_info?.unsaturatedFatContent
-        ),
-        recipeServingSize_input: initialData.nutrition_info?.servingSize || '',
-      });
-      setSelectedCategory(initialData.category);
-    } else {
-      reset(defaultFormValues);
-      setSelectedCategory(CATEGORY_OPTIONS[0].value);
-    }
-  }, [initialData, reset, defaultFormValues]);
-
-  const loadTemplateIngredients = useCallback(
+  // Load template components when category changes
+  const loadTemplateComponents = useCallback(
     (category: RecipeCategory) => {
-      if (DEFAULT_INGREDIENTS[category]) {
-        setValue(
-          'ingredients',
-          DEFAULT_INGREDIENTS[category]!.map(ing => ({ ...ing, amount: String(ing.amount) }))
-        );
+      if (DEFAULT_COMPONENTS[category]) {
+        setValue('components', DEFAULT_COMPONENTS[category]);
       }
     },
     [setValue]
@@ -388,15 +262,15 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
           setValue('subcategory', subcatOptions[0].value as RecipeSubcategory, {
             shouldValidate: true,
           });
-          loadTemplateIngredients(watchCategory);
+          loadTemplateComponents(watchCategory);
         } else {
-          loadTemplateIngredients(watchCategory);
+          loadTemplateComponents(watchCategory);
         }
       } else {
         setValue('subcategory', '' as RecipeSubcategory, { shouldValidate: true });
       }
     }
-  }, [watchCategory, setValue, loadTemplateIngredients, watch]);
+  }, [watchCategory, setValue, loadTemplateComponents, watch]);
 
   const onSubmitHandler: SubmitHandler<RecipeFormInputs> = async data => {
     if (!profile?.id) {
@@ -410,66 +284,83 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
     }
 
     const currentErrors = Object.keys(errors);
-    setShowErrorSummary(currentErrors.length > 0);
     if (currentErrors.length > 0) {
+      setShowErrorSummary(true);
       toast({
         title: 'Validation Error',
-        description: 'Please check the form for errors.',
+        description: 'Please fix the errors highlighted in red above.',
         variant: 'destructive',
       });
       console.error('Form validation errors:', errors);
+      // Scroll to the error summary
+      const errorSummary = document.querySelector('[data-error-summary]');
+      if (errorSummary) {
+        errorSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
       return;
     }
 
+    // Validate that we have at least one component with ingredients
+    const validComponents = data.components.filter(comp =>
+      comp.ingredients.some(ing => ing.name && ing.name.trim() !== '')
+    );
+    if (validComponents.length === 0) {
+      setShowErrorSummary(true);
+      toast({
+        title: 'Validation Error',
+        description: 'Please add at least one component with ingredients.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validate that we have at least one instruction
+    const validInstructions = data.instructions.filter(
+      instr => instr.content && instr.content.trim() !== ''
+    );
+    if (validInstructions.length === 0) {
+      setShowErrorSummary(true);
+      toast({
+        title: 'Validation Error',
+        description: 'Please add at least one instruction step.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Clear error summary if no errors
+    setShowErrorSummary(false);
+
     setIsLoading(true);
 
-    const commonRecipeData = {
-      name: data.name,
-      description: data.description || null,
-      category: data.category,
-      subcategory: data.subcategory,
-      ingredients: data.ingredients
-        .filter(ing => ing.name && ing.name.trim() !== '')
-        .map(ing => ({ ...ing, amount: String(ing.amount) })),
-      instructions: data.instructions
-        .filter(instr => instr.content && instr.content.trim() !== '')
-        .map((instruction, index) => ({ step: index + 1, content: instruction.content! })),
-      total_time: Number(data.total_time),
-      servings: Number(data.servings),
-      image_thumbnail_url: data.image_thumbnail_url || null,
-      image_banner_url: data.image_banner_url || null,
-      status: submitAction,
-      difficulty: Number(data.difficulty),
-    };
-
-    const nutritionDataInput: NutritionalInfo = {
+    // Build nutrition data from form inputs
+    const nutritionDataInput: Partial<NutritionalInfo> = {
       calories: parseNutrientInput(data.calories_input, 'kcal'),
-      proteinContent: parseNutrientInput(data.proteinContent_input, 'g'),
       carbohydrateContent: parseNutrientInput(data.carbohydrateContent_input, 'g'),
+      cholesterolContent: parseNutrientInput(data.cholesterolContent_input, 'mg'),
       fatContent: parseNutrientInput(data.fatContent_input, 'g'),
       fiberContent: parseNutrientInput(data.fiberContent_input, 'g'),
-      sugarContent: parseNutrientInput(data.sugarContent_input, 'g'),
-      sodiumContent: parseNutrientInput(data.sodiumContent_input, 'mg'),
+      proteinContent: parseNutrientInput(data.proteinContent_input, 'g'),
       saturatedFatContent: parseNutrientInput(data.saturatedFatContent_input, 'g'),
-      cholesterolContent: parseNutrientInput(data.cholesterolContent_input, 'mg'),
+      sodiumContent: parseNutrientInput(data.sodiumContent_input, 'mg'),
+      sugarContent: parseNutrientInput(data.sugarContent_input, 'g'),
       transFatContent: parseNutrientInput(data.transFatContent_input, 'g'),
       unsaturatedFatContent: parseNutrientInput(data.unsaturatedFatContent_input, 'g'),
       servingSize: data.recipeServingSize_input?.trim() || undefined,
     };
 
-    // Filter out undefined/empty fields from nutritionDataInput
-    const finalNutritionData: Partial<NutritionalInfo> = {}; // Use Partial for incremental build
+    // Build final nutrition info object
+    const finalNutritionData: Partial<NutritionalInfo> = {};
     let hasNutritionData = false;
+
     for (const key in nutritionDataInput) {
       if (Object.prototype.hasOwnProperty.call(nutritionDataInput, key)) {
         const typedKey = key as keyof NutritionalInfo;
         const value = nutritionDataInput[typedKey];
-        // For NutrientValue objects, check if value.value is defined and numeric
-        // For servingSize, check if it's a non-empty string
         if (typedKey === 'servingSize') {
           if (value && typeof value === 'string' && value.trim() !== '') {
             finalNutritionData[typedKey] = value;
-            hasNutritionData = true; // Consider servingSize as making nutrition data present
+            hasNutritionData = true;
           }
         } else if (
           value &&
@@ -483,62 +374,53 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
     }
 
     const recipePayload = {
-      ...commonRecipeData,
-      ingredients: data.ingredients.map(ing => ({ ...ing, amount: String(ing.amount) })),
-      instructions: data.instructions.map((instr, idx) => ({ ...instr, step: idx + 1 })),
-      image_thumbnail_url: data.image_thumbnail_url,
-      image_banner_url: data.image_banner_url,
-      ...(hasNutritionData && { nutrition_info: finalNutritionData }), // Conditionally add nutrition_info
+      name: data.name,
+      description: data.description || null,
+      category: data.category,
+      subcategory: data.subcategory,
+      components: data.components
+        .filter(comp => comp.ingredients.some(ing => ing.name && ing.name.trim() !== ''))
+        .map(comp => ({
+          ...comp,
+          ingredients: comp.ingredients
+            .filter(ing => ing.name && ing.name.trim() !== '')
+            .map(ing => ({ ...ing, amount: String(ing.amount) })),
+        })),
+      instructions: data.instructions
+        .filter(instr => instr.content && instr.content.trim() !== '')
+        .map((instruction, index) => ({ step: index + 1, content: instruction.content! })),
+      total_time: Number(data.total_time),
+      servings: Number(data.servings),
+      image_thumbnail_url: data.image_thumbnail_url || null,
+      image_banner_url: data.image_banner_url || null,
+      status: submitAction,
+      difficulty: Number(data.difficulty),
+      created_by: profile.id,
+      ...(hasNutritionData && { nutrition_info: finalNutritionData }),
     };
 
     try {
-      let result: Recipe | Error | null = null;
-
-      if (isEditMode) {
-        if (!initialData?.id) {
-          throw new Error('Recipe ID is missing for update.');
-        }
-        const recipeDataToUpdate = {
-          id: initialData.id,
-          ...recipePayload,
-          difficulty: commonRecipeData.difficulty as DifficultyLevel,
-        };
-        result = await updateRecipe(recipeDataToUpdate as Parameters<typeof updateRecipe>[0]);
+      let result: Recipe;
+      if (isEditMode && initialData?.id) {
+        result = (await updateRecipe({ id: initialData.id, ...recipePayload })) as Recipe;
+        toast({
+          title: 'Success',
+          description: 'Recipe updated successfully!',
+          variant: 'default',
+        });
       } else {
-        const recipeDataToAdd = {
-          ...recipePayload,
-          created_by: profile.id,
-          difficulty: commonRecipeData.difficulty as DifficultyLevel,
-        };
-        const addRecipeResult = await addRecipe(recipeDataToAdd as Parameters<typeof addRecipe>[0]);
-        if (
-          addRecipeResult &&
-          !(addRecipeResult instanceof Error) &&
-          Array.isArray(addRecipeResult)
-        ) {
-          result = addRecipeResult[0] || null;
-        } else if (addRecipeResult instanceof Error) {
-          result = addRecipeResult;
-        } else {
-          result = null;
-        }
+        result = (await addRecipe(recipePayload)) as Recipe;
+        toast({
+          title: 'Success',
+          description: 'Recipe created successfully!',
+          variant: 'default',
+        });
       }
 
-      if (result && !(result instanceof Error)) {
-        toast({
-          description: `Recipe ${submitAction === 'draft' ? (isEditMode ? 'draft updated' : 'saved as draft') : isEditMode ? 'updated successfully' : 'created successfully'}.`,
-          className: 'bg-green-700 text-white border-transparent',
-        });
-        if (onSuccess) {
-          onSuccess(result as Recipe);
-        } else {
-          router.push(isEditMode && result.slug ? `/recipes/${result.slug}` : '/recipes/manage');
-        }
-        reset(isEditMode ? undefined : defaultFormValues);
+      if (onSuccess) {
+        onSuccess(result);
       } else {
-        const errorMessage = result instanceof Error ? result.message : 'API operation failed';
-        console.error('API Error:', result);
-        throw new Error(errorMessage);
+        router.push(`/recipes/${result.slug}`);
       }
     } catch (error: any) {
       console.error('Form submission error:', error);
@@ -565,7 +447,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
       total_time: Number(currentValues.total_time),
       servings: Number(currentValues.servings),
       difficulty: Number(currentValues.difficulty),
-      ingredients: currentValues.ingredients.map(ing => ({ ...ing, amount: String(ing.amount) })),
+      components: currentValues.components,
       instructions: currentValues.instructions.map((instr, idx) => ({
         ...instr,
         step: instr.step || idx + 1,
@@ -583,414 +465,287 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
     setValue('image_banner_url', uploadResult, { shouldValidate: true });
   };
 
-  const handleIngredientSearch = (index: number, value: string) => {
-    setSearchTerms(prev => ({ ...prev, [index]: value }));
-    setOpenDropdown(index);
-  };
-
-  const handleIngredientSelect = (index: number, ingredientName: string) => {
-    setValue(`ingredients.${index}.name`, ingredientName, { shouldValidate: true });
-    setSearchTerms(prev => ({ ...prev, [index]: ingredientName }));
-    setOpenDropdown(null);
-  };
-
-  const moveInstructionItem = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
-      moveInstruction(dragIndex, hoverIndex);
-    },
-    [moveInstruction]
-  );
-
-  const watchDifficulty = watch('difficulty');
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (openDropdown !== null) {
-        const dropdownElement = document.getElementById(`ingredient-dropdown-${openDropdown}`);
-        if (dropdownElement && !dropdownElement.contains(event.target as Node)) {
-          const currentSearchTerm = searchTerms[openDropdown];
-          const currentFieldValue = watch(`ingredients.${openDropdown}.name`);
-          if (currentSearchTerm && currentFieldValue !== currentSearchTerm) {
-            setValue(`ingredients.${openDropdown}.name`, currentSearchTerm, {
-              shouldValidate: true,
-            });
-          }
-          setOpenDropdown(null);
-        }
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [openDropdown, searchTerms, watch, setValue]);
-
   return (
     <>
       <form onSubmit={handleSubmit(onSubmitHandler)} className="pb-24">
+        {/* Error Summary */}
+        {showErrorSummary && Object.keys(errors).length > 0 && (
+          <div
+            data-error-summary
+            className="mx-2 md:mx-4 mt-6 p-4 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/20 dark:border-red-800"
+          >
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
+                  Please fix the following errors:
+                </h3>
+                <div className="mt-2 text-sm text-red-700 dark:text-red-300">
+                  <ul className="list-disc list-inside space-y-1">
+                    {errors.name && <li>Recipe name: {errors.name.message}</li>}
+                    {errors.category && <li>Category: {errors.category.message}</li>}
+                    {errors.subcategory && <li>Subcategory: {errors.subcategory.message}</li>}
+                    {errors.total_time && <li>Total time: {errors.total_time.message}</li>}
+                    {errors.servings && <li>Servings: {errors.servings.message}</li>}
+                    {errors.difficulty && <li>Difficulty: {errors.difficulty.message}</li>}
+                    {errors.components && (
+                      <li>Components: Please check component names and ingredients</li>
+                    )}
+                    {errors.instructions && (
+                      <li>Instructions: Please fill in all instruction steps</li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="space-y-6 px-2 md:px-4 py-6">
-          {showErrorSummary && Object.keys(errors).length > 0 && (
-            <div className="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-red-900 dark:text-red-300">
-              <p className="font-medium">Please correct the following errors:</p>
-              <ul className="mt-1.5 list-disc list-inside">
-                {errors.name && <li>Recipe Name: {errors.name.message || 'is required'}</li>}
-                {errors.category && <li>Category: {errors.category.message || 'is required'}</li>}
-                {errors.subcategory && (
-                  <li>Subcategory: {errors.subcategory.message || 'is required'}</li>
-                )}
-                {errors.total_time && (
-                  <li>Total Time: {errors.total_time.message || 'is required'}</li>
-                )}
-                {errors.servings && <li>Servings: {errors.servings.message || 'is required'}</li>}
-                {errors.difficulty && (
-                  <li>Difficulty: {errors.difficulty.message || 'is required'}</li>
-                )}
-                {errors.ingredients &&
-                  (Array.isArray(errors.ingredients) && errors.ingredients.some(e => e) ? (
-                    <li>Ingredients: Some ingredient fields are invalid or missing.</li>
-                  ) : typeof errors.ingredients === 'object' &&
-                    (errors.ingredients as any).message ? (
-                    <li>Ingredients: {(errors.ingredients as any).message}</li>
-                  ) : (
-                    <li>Ingredients: Check ingredient fields.</li>
-                  ))}
-                {errors.instructions &&
-                  (Array.isArray(errors.instructions) && errors.instructions.some(e => e) ? (
-                    <li>Instructions: Some instruction fields are invalid or missing.</li>
-                  ) : typeof errors.instructions === 'object' &&
-                    (errors.instructions as any).message ? (
-                    <li>Instructions: {(errors.instructions as any).message}</li>
-                  ) : (
-                    <li>Instructions: Check instruction fields.</li>
-                  ))}
-              </ul>
-            </div>
-          )}
-
-          <div>
-            <label
-              htmlFor="name"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Recipe Name
-            </label>
-            <input
-              id="name"
-              type="text"
-              {...register('name', { required: 'Recipe name is required.' })}
-              className={`bg-gray-50 border text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
-              placeholder="Enter recipe name"
-            />
-            {errors.name && (
-              <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.name.message}</p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label
-                htmlFor="category"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >
-                Category
-              </label>
-              <Controller
-                control={control}
-                name="category"
-                rules={{ required: 'Category is required.' }}
-                render={({ field }) => (
-                  <CustomSelect
-                    options={[...CATEGORY_OPTIONS]}
-                    value={field.value}
-                    onChange={val => field.onChange(val)}
-                    error={!!errors.category}
-                    placeholder="Select category"
-                  />
-                )}
-              />
-              {errors.category && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                  {errors.category.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="subcategory"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >
-                Subcategory
-              </label>
-              <Controller
-                control={control}
-                name="subcategory"
-                rules={{ required: 'Subcategory is required.' }}
-                render={({ field }) => (
-                  <CustomSelect
-                    options={selectedCategory ? [...SUBCATEGORY_OPTIONS[selectedCategory]] : []}
-                    value={field.value}
-                    onChange={field.onChange}
-                    error={!!errors.subcategory}
-                    placeholder="Select subcategory"
-                    disabled={!selectedCategory || !SUBCATEGORY_OPTIONS[selectedCategory]?.length}
-                  />
-                )}
-              />
-              {errors.subcategory && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                  {errors.subcategory.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <label
-              htmlFor="description"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Description
-            </label>
-            <textarea
-              id="description"
-              {...register('description')}
-              rows={4}
-              className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-base-500 focus:border-base-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-              placeholder="Write your recipe description here..."
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label
-                htmlFor="total_time"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >
-                Total Time (min)
-              </label>
-              <input
-                id="total_time"
-                type="number"
-                {...register('total_time', {
-                  required: 'Total time is required.',
-                  min: { value: 0, message: 'Time must be positive' },
-                })}
-                className={`bg-gray-50 border text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white ${errors.total_time ? 'border-red-500' : 'border-gray-300'}`}
-              />
-              {errors.total_time && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                  {errors.total_time.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="servings"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >
-                Servings
-              </label>
-              <input
-                id="servings"
-                type="number"
-                {...register('servings', {
-                  required: 'Servings are required.',
-                  min: { value: 1, message: 'Must serve at least 1' },
-                })}
-                className={`bg-gray-50 border text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white ${errors.servings ? 'border-red-500' : 'border-gray-300'}`}
-              />
-              {errors.servings && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                  {errors.servings.message}
-                </p>
-              )}
-            </div>
+          {/* Basic Recipe Information */}
+          <div className="space-y-4">
             <div>
               <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                Difficulty Level
+                Recipe Name *
               </label>
-              <div className="inline-flex rounded-md shadow-sm w-full">
-                {([1, 2, 3] as DifficultyLevel[]).map((level, idx, arr) => (
-                  <label
-                    key={level}
-                    className={`
-                        relative inline-flex items-center cursor-pointer justify-center px-3 py-2 text-sm font-medium flex-1 text-center
-                        ${idx === 0 ? 'rounded-l-lg' : ''} 
-                        ${idx === arr.length - 1 ? 'rounded-r-lg' : ''}
-                        ${idx !== arr.length - 1 ? 'border-r-0' : ''}
-                        border border-gray-300 dark:border-gray-600
-                        ${
-                          String(watchDifficulty) === String(level)
-                            ? 'bg-base-600 text-white hover:bg-base-700 z-10 border-base-600 dark:border-base-500'
-                            : 'bg-white text-gray-900 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
-                        }
-                        focus-within:z-10 
-                      `}
-                  >
-                    <input
-                      type="radio"
-                      {...register('difficulty', {
-                        required: 'Difficulty level is required.',
-                      })}
-                      value={String(level)}
-                      className="sr-only"
+              <input
+                {...register('name', { required: 'Recipe name is required.' })}
+                type="text"
+                className={`bg-white border text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white ${
+                  errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-500'
+                }`}
+                placeholder="Enter recipe name"
+              />
+              {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Category *
+                </label>
+                <Controller
+                  name="category"
+                  control={control}
+                  rules={{ required: 'Category is required.' }}
+                  render={({ field }) => (
+                    <CustomSelect
+                      options={[...CATEGORY_OPTIONS]}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select category"
+                      error={!!errors.category}
                     />
-                    <DifficultyDisplay difficulty={level} iconSize={16} showText={false} />
-                  </label>
-                ))}
+                  )}
+                />
+                {errors.category && (
+                  <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>
+                )}
               </div>
-              {errors.difficulty && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                  {errors.difficulty.message}
-                </p>
-              )}
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Subcategory *
+                </label>
+                <Controller
+                  name="subcategory"
+                  control={control}
+                  rules={{ required: 'Subcategory is required.' }}
+                  render={({ field }) => (
+                    <CustomSelect
+                      options={[...(SUBCATEGORY_OPTIONS[selectedCategory] || [])]}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select subcategory"
+                      error={!!errors.subcategory}
+                    />
+                  )}
+                />
+                {errors.subcategory && (
+                  <p className="mt-1 text-sm text-red-600">{errors.subcategory.message}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Total Time (minutes) *
+                </label>
+                <input
+                  {...register('total_time', {
+                    required: 'Total time is required.',
+                    min: { value: 1, message: 'Time must be at least 1 minute' },
+                  })}
+                  type="number"
+                  min="1"
+                  className={`bg-white border text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white ${
+                    errors.total_time ? 'border-red-500' : 'border-gray-300 dark:border-gray-500'
+                  }`}
+                  placeholder="30"
+                />
+                {errors.total_time && (
+                  <p className="mt-1 text-sm text-red-600">{errors.total_time.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Servings *
+                </label>
+                <input
+                  {...register('servings', {
+                    required: 'Servings is required.',
+                    min: { value: 1, message: 'Servings must be at least 1' },
+                  })}
+                  type="number"
+                  min="1"
+                  className={`bg-white border text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white ${
+                    errors.servings ? 'border-red-500' : 'border-gray-300 dark:border-gray-500'
+                  }`}
+                  placeholder="4"
+                />
+                {errors.servings && (
+                  <p className="mt-1 text-sm text-red-600">{errors.servings.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Difficulty Level *
+                </label>
+                <Controller
+                  name="difficulty"
+                  control={control}
+                  rules={{ required: 'Difficulty level is required.' }}
+                  render={({ field }) => (
+                    <CustomSelect
+                      options={[...DIFFICULTY_OPTIONS]}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select difficulty"
+                      error={!!errors.difficulty}
+                    />
+                  )}
+                />
+                {errors.difficulty && (
+                  <p className="mt-1 text-sm text-red-600">{errors.difficulty.message}</p>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                Description
+              </label>
+              <textarea
+                {...register('description')}
+                rows={3}
+                className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                placeholder="Describe your recipe..."
+              />
+            </div>
+
+            {/* Recipe Images */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Thumbnail Image
+                </label>
+                <FileUpload
+                  className="w-full h-40"
+                  currValue={watch('image_thumbnail_url')}
+                  userId={profile?.id}
+                  bucketId="recipe_thumbnails"
+                  label="Thumbnail"
+                  onUploadComplete={handleThumbnailUpload}
+                  register={register}
+                  validationSchema={{}}
+                  name="image_thumbnail_url"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                  Banner Image
+                </label>
+                <FileUpload
+                  className="w-full h-40"
+                  currValue={watch('image_banner_url')}
+                  userId={profile?.id}
+                  bucketId="recipe_banners"
+                  label="Banner"
+                  onUploadComplete={handleBannerUpload}
+                  register={register}
+                  validationSchema={{}}
+                  name="image_banner_url"
+                />
+              </div>
             </div>
           </div>
 
           <hr className="h-px bg-gray-200 border-0 dark:bg-gray-700 my-8" />
 
+          {/* Recipe Components */}
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ingredients</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Components</h3>
               <button
                 type="button"
-                onClick={() => appendIngredient({ name: '', amount: '', unit: 'g' })}
+                onClick={() =>
+                  appendComponent({
+                    id: `component_${Date.now()}`,
+                    name: 'New Component',
+                    description: '',
+                    order: componentFields.length + 1,
+                    ingredients: [{ name: '', amount: '', unit: 'g', is_flour: false }],
+                  })
+                }
                 className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-base-600 rounded-lg hover:bg-base-700 dark:bg-base-500 dark:hover:bg-base-600"
               >
                 <Plus className="w-4 h-4 mr-1.5" />
-                Add Ingredient
+                Add Component
               </button>
             </div>
-            <div className="space-y-3">
-              {ingredientFields.map((field, index) => {
-                const searchTerm = searchTerms[index] || watch(`ingredients.${index}.name`) || '';
-                const isDropdownOpen = openDropdown === index;
-                const filteredIngredients = ALL_INGREDIENTS.filter(ing =>
-                  ing.toLowerCase().includes(searchTerm.toLowerCase())
-                ).slice(0, 10);
 
-                return (
-                  <div
-                    key={field.id}
-                    className="flex flex-col sm:flex-row gap-2 items-start p-3 bg-gray-50 rounded-lg border border-gray-200 dark:bg-gray-700 dark:border-gray-600"
-                  >
-                    <div className="flex-1 w-full sm:w-auto relative">
-                      <label htmlFor={`ingredient-name-${index}`} className="sr-only">
-                        Ingredient Name
-                      </label>
-                      <div className="flex items-center">
-                        <input
-                          id={`ingredient-name-${index}`}
-                          value={searchTerm}
-                          onChange={e => handleIngredientSearch(index, e.target.value)}
-                          onFocus={() => setOpenDropdown(index)}
-                          placeholder="Search ingredient (e.g., Flour)"
-                          className={`bg-white border text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white ${errors.ingredients?.[index]?.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-500'}`}
-                        />
-                        <Search className="w-5 h-5 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                      </div>
-                      {isDropdownOpen && searchTerm && filteredIngredients.length > 0 && (
-                        <div
-                          id={`ingredient-dropdown-${index}`}
-                          className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto dark:bg-gray-700 dark:border-gray-600"
-                        >
-                          {filteredIngredients.map((ingredientItem, i) => (
-                            <button
-                              key={`${ingredientItem}-${i}`}
-                              type="button"
-                              className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm text-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                              onClick={() => handleIngredientSelect(index, ingredientItem)}
-                            >
-                              {ingredientItem}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                      <input
-                        type="hidden"
-                        {...register(`ingredients.${index}.name` as const, {
-                          required: "Ingredient name can't be empty.",
-                        })}
-                      />
-                      {errors.ingredients?.[index]?.name && (
-                        <p className="mt-1 text-xs text-red-500 dark:text-red-400">
-                          {(errors.ingredients as any)[index].name.message}
-                        </p>
-                      )}
-                    </div>
-                    <div className="w-full sm:w-28">
-                      <label htmlFor={`ingredient-amount-${index}`} className="sr-only">
-                        Amount
-                      </label>
-                      <input
-                        id={`ingredient-amount-${index}`}
-                        {...register(`ingredients.${index}.amount` as const, {
-                          required: 'Amount required.',
-                          pattern: { value: /^[0-9]*\.?[0-9]+$/, message: 'Invalid num' },
-                        })}
-                        placeholder="Amount"
-                        type="text"
-                        inputMode="decimal"
-                        className={`bg-white border text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white ${errors.ingredients?.[index]?.amount ? 'border-red-500' : 'border-gray-300 dark:border-gray-500'}`}
-                      />
-                      {errors.ingredients?.[index]?.amount && (
-                        <p className="mt-1 text-xs text-red-500 dark:text-red-400">
-                          {(errors.ingredients as any)[index].amount.message}
-                        </p>
-                      )}
-                    </div>
-                    <div className="w-full sm:w-32">
-                      <label htmlFor={`ingredient-unit-${index}`} className="sr-only">
-                        Unit
-                      </label>
-                      <Controller
-                        name={`ingredients.${index}.unit` as const}
-                        control={control}
-                        rules={{ required: 'Unit required.' }}
-                        defaultValue="g"
-                        render={({ field }) => (
-                          <CustomSelect
-                            options={Object.entries(MEASUREMENT_UNITS).map(([value, label]) => ({
-                              value,
-                              label,
-                            }))}
-                            value={field.value}
-                            onChange={field.onChange}
-                            placeholder="Unit"
-                            error={!!errors.ingredients?.[index]?.unit}
-                          />
-                        )}
-                      />
-                      {errors.ingredients?.[index]?.unit && (
-                        <p className="mt-1 text-xs text-red-500 dark:text-red-400">
-                          {(errors.ingredients as any)[index].unit.message}
-                        </p>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeIngredient(index)}
-                      className="p-2.5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500 self-center sm:self-auto mt-2 sm:mt-0"
-                      aria-label="Remove ingredient"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-            {errors.ingredients &&
-              typeof errors.ingredients === 'object' &&
-              !Array.isArray(errors.ingredients) &&
-              (errors.ingredients as any).message && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                  {(errors.ingredients as any).message}
+            {/* Baker's Percentage Guidance for Bread Recipes */}
+            {selectedCategory === 'breads' && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg dark:bg-blue-900/20 dark:border-blue-700">
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  <strong>Baker&apos;s Percentage:</strong> For accurate percentage calculations,
+                  mark flour ingredients with &quot;Flour for %&quot; and use consistent weight
+                  units (grams recommended) for all ingredients, especially flours and liquids.
                 </p>
-              )}
+              </div>
+            )}
+
+            <div className="space-y-6">
+              {componentFields.map((componentField, componentIndex) => (
+                <ComponentEditor
+                  key={componentField.id}
+                  componentIndex={componentIndex}
+                  register={register}
+                  control={control}
+                  errors={errors}
+                  removeComponent={removeComponent}
+                  selectedCategory={selectedCategory}
+                  canRemove={componentFields.length > 1}
+                />
+              ))}
+            </div>
           </div>
 
           <hr className="h-px bg-gray-200 border-0 dark:bg-gray-700 my-8" />
 
+          {/* Instructions */}
           <div>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Instructions</h3>
@@ -1014,9 +769,11 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
                 {instructionFields.map((item, index) => (
                   <DraggableInstruction
                     key={item.id}
-                    field={item as DraggableInstructionItem}
+                    field={item as any}
                     index={index}
-                    moveInstruction={moveInstructionItem}
+                    moveInstruction={(dragIndex: number, hoverIndex: number) =>
+                      moveInstruction(dragIndex, hoverIndex)
+                    }
                     register={register}
                     removeInstruction={removeInstructionField}
                     errors={errors}
@@ -1024,334 +781,360 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({
                 ))}
               </div>
             </DndProvider>
-            {instructionFields.length === 0 && (
-              <div className="text-center py-4 px-3 bg-gray-50 rounded-lg border border-dashed border-gray-300 dark:bg-gray-700 dark:border-gray-600">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  No instructions yet. Add some steps!
-                </p>
-              </div>
-            )}
-            {errors.instructions &&
-              typeof errors.instructions === 'object' &&
-              !Array.isArray(errors.instructions) &&
-              (errors.instructions as any).message && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                  {(errors.instructions as any).message}
-                </p>
-              )}
-          </div>
-
-          <hr className="h-px bg-gray-200 border-0 dark:bg-gray-700 my-8" />
-
-          {/* Nutritional Information Section (Optional) */}
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Nutritional Information (Optional)
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Provide nutritional values if known. These will be displayed on the recipe page.
-                Specify values per recipe serving (defined above in main recipe details).
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div>
-                <label
-                  htmlFor="recipeServingSize_input"
-                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                  Recipe Yield/Serving Size Info (e.g., &quot;1 slice&quot;, &quot;100g&quot;)
-                </label>
-                <input
-                  type="text"
-                  id="recipeServingSize_input"
-                  {...register('recipeServingSize_input')}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                  placeholder="e.g., 12 cookies, 1 loaf (approx. 800g)"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="calories_input"
-                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                  Calories (e.g., &quot;250 kcal&quot;)
-                </label>
-                <input
-                  type="text"
-                  id="calories_input"
-                  {...register('calories_input')}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                  placeholder="e.g., 250 kcal or 250"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="proteinContent_input"
-                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                  Protein (e.g., &quot;15 g&quot;)
-                </label>
-                <input
-                  type="text"
-                  id="proteinContent_input"
-                  {...register('proteinContent_input')}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                  placeholder="e.g., 15 g or 15"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="carbohydrateContent_input"
-                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                  Carbohydrates (e.g., &quot;30 g&quot;)
-                </label>
-                <input
-                  type="text"
-                  id="carbohydrateContent_input"
-                  {...register('carbohydrateContent_input')}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                  placeholder="e.g., 30 g or 30"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="fatContent_input"
-                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                  Fat (e.g., &quot;10 g&quot;)
-                </label>
-                <input
-                  type="text"
-                  id="fatContent_input"
-                  {...register('fatContent_input')}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                  placeholder="e.g., 10 g or 10"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="fiberContent_input"
-                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                  Fiber (e.g., &quot;5 g&quot;)
-                </label>
-                <input
-                  type="text"
-                  id="fiberContent_input"
-                  {...register('fiberContent_input')}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                  placeholder="e.g., 5 g or 5"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="sugarContent_input"
-                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                  Sugar (e.g., &quot;8 g&quot;)
-                </label>
-                <input
-                  type="text"
-                  id="sugarContent_input"
-                  {...register('sugarContent_input')}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                  placeholder="e.g., 8 g or 8"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="sodiumContent_input"
-                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                  Sodium (e.g., &quot;500 mg&quot;)
-                </label>
-                <input
-                  type="text"
-                  id="sodiumContent_input"
-                  {...register('sodiumContent_input')}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                  placeholder="e.g., 500 mg or 500"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="saturatedFatContent_input"
-                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                  Saturated Fat (e.g., &quot;2 g&quot;)
-                </label>
-                <input
-                  type="text"
-                  id="saturatedFatContent_input"
-                  {...register('saturatedFatContent_input')}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                  placeholder="e.g., 2 g or 2"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="cholesterolContent_input"
-                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                  Cholesterol (e.g., &quot;0 mg&quot;)
-                </label>
-                <input
-                  type="text"
-                  id="cholesterolContent_input"
-                  {...register('cholesterolContent_input')}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                  placeholder="e.g., 0 mg or 0"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="transFatContent_input"
-                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                  Trans Fat (e.g., &quot;0 g&quot;)
-                </label>
-                <input
-                  type="text"
-                  id="transFatContent_input"
-                  {...register('transFatContent_input')}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                  placeholder="e.g., 0 g or 0"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="unsaturatedFatContent_input"
-                  className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                  Unsaturated Fat (e.g., &quot;8 g&quot;)
-                </label>
-                <input
-                  type="text"
-                  id="unsaturatedFatContent_input"
-                  {...register('unsaturatedFatContent_input')}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-500 focus:border-base-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                  placeholder="e.g., 8 g or 8"
-                />
-              </div>
-            </div>
-          </div>
-
-          <hr className="h-px bg-gray-200 border-0 dark:bg-gray-700 my-8" />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                Thumbnail Image (Optional)
-              </label>
-              <Controller
-                name="image_thumbnail_url"
-                control={control}
-                render={({ field }) => (
-                  <FileUpload
-                    bucketId="recipe_thumbnails"
-                    userId={profile?.id}
-                    currValue={field.value}
-                    onUploadComplete={handleThumbnailUpload}
-                    name="image_thumbnail_url"
-                    label="Recommended: 400x300px"
-                    register={() => {}}
-                    validationSchema={{}}
-                  />
-                )}
-              />
-            </div>
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                Banner Image (Optional)
-              </label>
-              <Controller
-                name="image_banner_url"
-                control={control}
-                render={({ field }) => (
-                  <FileUpload
-                    bucketId="recipe_banners"
-                    userId={profile?.id}
-                    currValue={field.value}
-                    onUploadComplete={handleBannerUpload}
-                    name="image_banner_url"
-                    label="Recommended: 1200x400px"
-                    register={() => {}}
-                    validationSchema={{}}
-                  />
-                )}
-              />
-            </div>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-end items-center gap-3 sticky bottom-0 bg-white dark:bg-gray-800 py-4 px-6 border-t border-gray-200 dark:border-gray-700 z-20">
-          {showErrorSummary && Object.keys(errors).length > 0 && (
-            <div className="text-sm text-red-600 dark:text-red-400 mr-auto">
-              <p>Please review and fix the highlighted errors.</p>
+        {/* Form Actions */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 z-10">
+          <div className="flex flex-col sm:flex-row gap-3 justify-between items-center max-w-4xl mx-auto">
+            <button
+              type="button"
+              onClick={handlePreview}
+              className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-600 dark:text-white dark:border-gray-500 dark:hover:bg-gray-700"
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              Preview
+            </button>
+
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              {onCancel && (
+                <button
+                  type="button"
+                  onClick={onCancel}
+                  className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-600 dark:text-white dark:border-gray-500 dark:hover:bg-gray-700"
+                >
+                  Cancel
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => handleFormSubmit('draft')}
+                disabled={isLoading}
+                className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 dark:bg-gray-600 dark:text-white dark:border-gray-500 dark:hover:bg-gray-700"
+              >
+                {isLoading && submitAction === 'draft' && <Spinner className="w-4 h-4 mr-2" />}
+                Save Draft
+              </button>
+              <button
+                type="button"
+                onClick={() => handleFormSubmit('published')}
+                disabled={isLoading}
+                className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-base-600 rounded-lg hover:bg-base-700 disabled:opacity-50 dark:bg-base-500 dark:hover:bg-base-600"
+              >
+                {isLoading && submitAction === 'published' && <Spinner className="w-4 h-4 mr-2" />}
+                {isEditMode ? 'Update Recipe' : 'Publish Recipe'}
+              </button>
             </div>
-          )}
-          <button
-            type="button"
-            onClick={onCancel || (() => router.back())}
-            disabled={isLoading || isSubmitting}
-            className="w-full sm:w-auto px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-base-500 disabled:opacity-50 order-last sm:order-first mt-2 sm:mt-0"
-          >
-            {isEditMode ? 'Cancel' : 'Cancel'}
-          </button>
-          <button
-            type="button"
-            onClick={handlePreview}
-            disabled={isSubmitting}
-            className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-center text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-base-500 disabled:opacity-50"
-          >
-            <Eye className="mr-2 h-4 w-4" />
-            Preview
-          </button>
-          <button
-            type="button"
-            onClick={() => handleFormSubmit('draft')}
-            disabled={isLoading || isSubmitting}
-            className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-center text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-base-500 disabled:opacity-50"
-          >
-            {isLoading && submitAction === 'draft' ? (
-              <>
-                <Spinner className="mr-2 h-4 w-4" />
-                Saving...
-              </>
-            ) : isEditMode ? (
-              'Update Draft'
-            ) : (
-              'Save Draft'
-            )}
-          </button>
-          <button
-            type="button"
-            onClick={() => handleFormSubmit('published')}
-            disabled={isLoading || isSubmitting}
-            className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-center text-white bg-base-600 rounded-lg hover:bg-base-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-base-500 disabled:opacity-50"
-          >
-            {isLoading && submitAction === 'published' ? (
-              <>
-                <Spinner className="mr-2 h-4 w-4" />
-                {isEditMode ? 'Updating Recipe...' : 'Publishing Recipe...'}
-              </>
-            ) : isEditMode ? (
-              'Update Recipe'
-            ) : (
-              'Publish Recipe'
-            )}
-          </button>
+          </div>
         </div>
       </form>
 
+      {/* Preview Modal */}
       <RecipePreview
-        isVisible={isPreviewVisible}
-        onClose={() => setIsPreviewVisible(false)}
         recipeData={previewData}
+        onClose={() => setIsPreviewVisible(false)}
+        isVisible={isPreviewVisible}
       />
     </>
+  );
+};
+
+// Component Editor Component
+const ComponentEditor: React.FC<{
+  componentIndex: number;
+  register: any;
+  control: any;
+  errors: any;
+  removeComponent: (index: number) => void;
+  selectedCategory: RecipeCategory;
+  canRemove: boolean;
+}> = ({
+  componentIndex,
+  register,
+  control,
+  errors,
+  removeComponent,
+  selectedCategory,
+  canRemove,
+}) => {
+  const {
+    fields: ingredientFields,
+    append: appendIngredient,
+    remove: removeIngredient,
+  } = useFieldArray({
+    control,
+    name: `components.${componentIndex}.ingredients` as const,
+  });
+
+  const [searchTerms, setSearchTerms] = useState<Record<number, string>>({});
+  const [openDropdown, setOpenDropdown] = useState<number | null>(null);
+
+  const handleIngredientSearch = (index: number, value: string) => {
+    setSearchTerms(prev => ({ ...prev, [index]: value }));
+    setOpenDropdown(index);
+  };
+
+  const handleIngredientSelect = (index: number, ingredientName: string) => {
+    register(`components.${componentIndex}.ingredients.${index}.name`).onChange({
+      target: {
+        value: ingredientName,
+        name: `components.${componentIndex}.ingredients.${index}.name`,
+      },
+    });
+    setSearchTerms(prev => ({ ...prev, [index]: ingredientName }));
+    setOpenDropdown(null);
+  };
+
+  return (
+    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-gray-700 dark:border-gray-600">
+      {/* Component Header */}
+      <div className="flex items-center gap-4 mb-4">
+        <div className="flex-1">
+          <input
+            {...register(`components.${componentIndex}.name`, {
+              required: 'Component name is required',
+            })}
+            type="text"
+            placeholder="Component name (e.g., Poolish, Final Dough)"
+            className={`bg-white border text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white ${
+              errors?.components?.[componentIndex]?.name ? 'border-red-500' : 'border-gray-300'
+            }`}
+          />
+          {errors?.components?.[componentIndex]?.name && (
+            <p className="mt-1 text-sm text-red-600">
+              {errors.components[componentIndex].name.message}
+            </p>
+          )}
+        </div>
+        <div className="flex-1">
+          <input
+            {...register(`components.${componentIndex}.description`)}
+            type="text"
+            placeholder="Description (optional)"
+            className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+          />
+        </div>
+        {canRemove && (
+          <button
+            type="button"
+            onClick={() => removeComponent(componentIndex)}
+            className="p-2 text-gray-500 hover:text-red-500 shrink-0"
+          >
+            <Trash2 className="w-5 h-5" />
+          </button>
+        )}
+      </div>
+
+      {/* Ingredients */}
+      <div className="space-y-3">
+        <div className="flex justify-between items-center">
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Ingredients</h4>
+          <button
+            type="button"
+            onClick={() => appendIngredient({ name: '', amount: '', unit: 'g', is_flour: false })}
+            className="inline-flex items-center px-2 py-1 text-xs font-medium text-white bg-base-600 rounded hover:bg-base-700"
+          >
+            <Plus className="w-3 h-3 mr-1" />
+            Add
+          </button>
+        </div>
+
+        {ingredientFields.map((field, ingredientIndex) => {
+          const searchTerm = searchTerms[ingredientIndex] || '';
+          const isDropdownOpen = openDropdown === ingredientIndex;
+          const filteredIngredients = ALL_INGREDIENTS.filter(ing =>
+            ing.toLowerCase().includes(searchTerm.toLowerCase())
+          ).slice(0, 10);
+
+          return (
+            <div
+              key={field.id}
+              className="flex flex-col sm:flex-row gap-2 items-start p-3 bg-white rounded-lg border border-gray-200 dark:bg-gray-600 dark:border-gray-500"
+            >
+              <div className="flex-1 w-full sm:w-auto relative">
+                <div className="flex items-center">
+                  <input
+                    value={searchTerm}
+                    onChange={e => handleIngredientSearch(ingredientIndex, e.target.value)}
+                    onFocus={() => setOpenDropdown(ingredientIndex)}
+                    placeholder="Search ingredient"
+                    className={`bg-white border text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white ${
+                      errors?.components?.[componentIndex]?.ingredients?.[ingredientIndex]?.name
+                        ? 'border-red-500'
+                        : 'border-gray-300'
+                    }`}
+                  />
+                  <Search className="w-5 h-5 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
+                {errors?.components?.[componentIndex]?.ingredients?.[ingredientIndex]?.name && (
+                  <p className="mt-1 text-xs text-red-600">
+                    {errors.components[componentIndex].ingredients[ingredientIndex].name.message}
+                  </p>
+                )}
+                {isDropdownOpen && searchTerm && filteredIngredients.length > 0 && (
+                  <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto dark:bg-gray-700 dark:border-gray-600">
+                    {filteredIngredients.map((ingredientItem, i) => (
+                      <button
+                        key={`${ingredientItem}-${i}`}
+                        type="button"
+                        className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm text-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        onClick={() => handleIngredientSelect(ingredientIndex, ingredientItem)}
+                      >
+                        {ingredientItem}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <input
+                  type="hidden"
+                  {...register(`components.${componentIndex}.ingredients.${ingredientIndex}.name`, {
+                    required: 'Ingredient name required',
+                  })}
+                />
+              </div>
+
+              <div className="w-full sm:w-28">
+                <input
+                  {...register(
+                    `components.${componentIndex}.ingredients.${ingredientIndex}.amount`,
+                    {
+                      required: 'Amount required',
+                      pattern: { value: /^[0-9]*\.?[0-9]+$/, message: 'Invalid number' },
+                    }
+                  )}
+                  placeholder="Amount"
+                  type="text"
+                  inputMode="decimal"
+                  className={`bg-white border text-gray-900 text-sm rounded-lg focus:ring-base-600 focus:border-base-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white ${
+                    errors?.components?.[componentIndex]?.ingredients?.[ingredientIndex]?.amount
+                      ? 'border-red-500'
+                      : 'border-gray-300'
+                  }`}
+                />
+                {errors?.components?.[componentIndex]?.ingredients?.[ingredientIndex]?.amount && (
+                  <p className="mt-1 text-xs text-red-600">
+                    {errors.components[componentIndex].ingredients[ingredientIndex].amount.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="w-full sm:w-32">
+                <Controller
+                  name={`components.${componentIndex}.ingredients.${ingredientIndex}.unit`}
+                  control={control}
+                  rules={{ required: 'Unit required' }}
+                  defaultValue="g"
+                  render={({ field }) => (
+                    <CustomSelect
+                      options={Object.entries(MEASUREMENT_UNITS).map(([value, label]) => ({
+                        value,
+                        label,
+                      }))}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Unit"
+                    />
+                  )}
+                />
+              </div>
+
+              {/* Baker's Percentage Checkbox (only for bread recipes) */}
+              {selectedCategory === 'breads' && (
+                <div className="flex items-center">
+                  <label className="flex items-center space-x-1 text-xs text-gray-600 dark:text-gray-400">
+                    <input
+                      type="checkbox"
+                      {...register(
+                        `components.${componentIndex}.ingredients.${ingredientIndex}.is_flour`
+                      )}
+                      className="w-4 h-4 text-base-600 bg-gray-100 border-gray-300 rounded focus:ring-base-500 dark:focus:ring-base-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                    />
+                    <span>Flour for %</span>
+                  </label>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => removeIngredient(ingredientIndex)}
+                className="p-2 text-gray-500 hover:text-red-500 shrink-0"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// DraggableInstruction Component
+const DraggableInstruction = ({
+  index,
+  moveInstruction,
+  register,
+  removeInstruction,
+  errors,
+}: {
+  field: any;
+  index: number;
+  moveInstruction: (dragIndex: number, hoverIndex: number) => void;
+  register: any;
+  removeInstruction: (index: number) => void;
+  errors: any;
+}) => {
+  const [{ isDragging }, drag] = useDrag({
+    type: 'instruction',
+    item: { index },
+    collect: monitor => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
+
+  const [, drop] = useDrop({
+    accept: 'instruction',
+    hover(item: { index: number }) {
+      if (item.index === index) return;
+      moveInstruction(item.index, index);
+      item.index = index;
+    },
+  });
+
+  return (
+    <div
+      ref={node => drag(drop(node))}
+      className={`flex gap-2 items-start bg-white p-3 rounded-lg border cursor-move ${
+        isDragging ? 'border-base-500 bg-base-200 shadow-lg' : 'border-gray-200'
+      } dark:bg-gray-700 dark:border-gray-600`}
+    >
+      <div className="flex items-center justify-center w-8 h-8 bg-gray-100 dark:bg-gray-600 rounded-lg shrink-0">
+        <span className="text-gray-600 dark:text-gray-300 font-medium">{index + 1}</span>
+      </div>
+      <div className="flex-1">
+        <textarea
+          {...register(`instructions.${index}.content`, {
+            required: 'Instruction content is required.',
+          })}
+          rows={2}
+          className={`block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border focus:ring-base-500 focus:border-base-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white ${
+            errors?.instructions?.[index]?.content ? 'border-red-500' : 'border-gray-300'
+          }`}
+          placeholder={`Step ${index + 1} instructions...`}
+        />
+        {errors?.instructions?.[index]?.content && (
+          <p className="mt-1 text-xs text-red-500">
+            {(errors.instructions as any)[index].content.message}
+          </p>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={() => removeInstruction(index)}
+        className="p-2 text-gray-500 hover:text-red-500 shrink-0 dark:text-gray-400"
+      >
+        <Trash2 className="w-5 h-5" />
+      </button>
+    </div>
   );
 };

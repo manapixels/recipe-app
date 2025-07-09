@@ -68,14 +68,14 @@ export default function AuthForm() {
   const btn = (
     <button
       type="button"
-      onClick={toggleModal}
-      className="text-white bg-black hover:bg-gray-900 font-bold md:font-medium rounded-lg text-sm md:text-md px-4 py-2 dark:bg-base-600 dark:hover:bg-base-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-base-500 dark:focus-visible:ring-offset-gray-900 dark:focus-visible:ring-base-500"
+      onClick={() => toggleModal()}
+      className="p-1.5 rounded-full dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 focus:outline-none flex flex-col items-center"
+      aria-label="Account / Register / Login"
     >
-      <span className="hidden lg:inline">Log in</span>
-      <LogIn className="w-4 h-4 lg:hidden" />
-      <span aria-hidden="true" className="hidden lg:inline">
-        &rarr;
+      <span className="bg-gray-800 dark:bg-gray-100 hover:bg-gray-700 dark:hover:bg-gray-200 rounded-sm p-1.5">
+        <LogIn className="h-5 w-5 text-white dark:text-gray-900" />
       </span>
+      <span className="hidden md:block ml-1 text-xs">Log in</span>
     </button>
   );
 

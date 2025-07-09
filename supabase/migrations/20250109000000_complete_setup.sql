@@ -69,9 +69,9 @@ CREATE TABLE public.recipes (
   description TEXT,
   category recipe_categories NOT NULL DEFAULT 'sweets',
   subcategory recipe_subcategories NOT NULL,
-  ingredients JSONB NOT NULL DEFAULT '[]'::jsonb CHECK (
-    jsonb_typeof(ingredients) = 'array'
-    AND jsonb_array_length(ingredients) >= 0
+  components JSONB NOT NULL DEFAULT '[]'::jsonb CHECK (
+    jsonb_typeof(components) = 'array'
+    AND jsonb_array_length(components) >= 0
   ),
   instructions JSONB NOT NULL DEFAULT '[]'::jsonb CHECK (
     jsonb_typeof(instructions) = 'array'
@@ -402,7 +402,7 @@ SELECT
   r.slug,
   r.category,
   r.description,
-  r.ingredients,
+  r.components,
   r.instructions,
   r.total_time,
   r.servings,
