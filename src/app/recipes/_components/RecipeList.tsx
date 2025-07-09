@@ -22,9 +22,14 @@ interface SortState {
 interface RecipeListProps {
   initialCategory?: RecipeCategory;
   initialSubcategory?: RecipeSubcategory;
+  initialSearch?: string;
 }
 
-export default function RecipeList({ initialCategory, initialSubcategory }: RecipeListProps) {
+export default function RecipeList({
+  initialCategory,
+  initialSubcategory,
+  initialSearch,
+}: RecipeListProps) {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +55,7 @@ export default function RecipeList({ initialCategory, initialSubcategory }: Reci
         ...filters,
         sortBy: sortParams.sortBy,
         sortDirection: sortParams.sortDirection,
+        search: initialSearch || undefined,
       };
       const fetchedRecipesData = await fetchRecipes(params);
 
@@ -105,6 +111,7 @@ export default function RecipeList({ initialCategory, initialSubcategory }: Reci
 
   return (
     <div className="flex w-full flex-col">
+      {/* Filters and Sort Section */}
       <div className="mb-8 flex flex-col md:flex-row gap-4">
         <RecipeFilters
           initialCategory={filters.category}
@@ -122,7 +129,14 @@ export default function RecipeList({ initialCategory, initialSubcategory }: Reci
       {isLoading && <p>Loading recipes...</p>}
       {error && <p className="text-red-500">Error loading recipes: {error}</p>}
       {!isLoading && !error && recipes.length === 0 && (
-        <p>No recipes found matching your criteria.</p>
+        <div className="text-center py-12">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            No recipes found
+          </h3>
+          <p className="text-gray-500 dark:text-gray-400">
+            No recipes found matching your criteria. Try adjusting your filters.
+          </p>
+        </div>
       )}
 
       {!isLoading && !error && recipes.length > 0 && (

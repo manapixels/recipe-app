@@ -2,15 +2,22 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import { Search, PlusCircle } from 'lucide-react';
 
 import AuthForm from '@/_components/auth/AuthForm';
 import LoggedInUser from '@/_components/auth/LoggedInUser';
+import { SearchModal } from '@/_components/ui/SearchModal';
 import { useUser } from '@/_contexts/UserContext';
 
 export default function Header() {
   const pathname = usePathname();
   const { profile, user } = useUser();
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+
+  const handleSearchClick = () => {
+    setIsSearchModalOpen(true);
+  };
 
   const navLinks = [
     { href: '/recipes', label: 'Recipes' },
@@ -47,7 +54,7 @@ export default function Header() {
               type="button"
               className="p-1.5 rounded-full dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 focus:outline-none flex flex-col items-center"
               aria-label="Search"
-              onClick={() => alert('Search clicked')}
+              onClick={handleSearchClick}
             >
               <span className="bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 rounded-sm p-1.5">
                 <Search className="h-5 w-5" />
@@ -76,6 +83,8 @@ export default function Header() {
           </div>
         </div>
       </div>
+
+      <SearchModal isOpen={isSearchModalOpen} onOpenChange={setIsSearchModalOpen} />
     </header>
   );
 }

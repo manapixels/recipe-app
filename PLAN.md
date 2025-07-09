@@ -40,7 +40,7 @@
 
 #### Advanced Features
 
-- **Unit Conversion:** Metric/Imperial utilities with user preferences
+- **✅ Unit Conversion:** Complete metric/imperial conversion with user preferences
 - **✅ Nutrition System:** Complete nutrition facts display with manual input and automated estimation
 - **Print Functionality:** PrintRecipeButton component
 - **Social Sharing:** Basic postRecipeToSocial function
@@ -70,14 +70,15 @@
   - ✅ Show estimated values when creator data missing
 - **Files:** `src/app/recipes/[slug]/page.tsx`, `src/app/recipes/_components/RecipeForm.tsx`, `src/app/_components/ui/NutritionFacts.tsx`
 
-#### 3. Unit Conversion UI
+#### 3. ✅ Unit Conversion UI
 
-- **Status:** Utilities complete, UI missing
-- **Tasks:**
-  - Add toggle/dropdown on recipe detail pages
-  - Implement header setting for global preference
-  - Connect to existing conversion utilities
-- **Files:** `src/app/recipes/[slug]/page.tsx`, `src/app/_components/Header.tsx`
+- **Status:** ✅ **COMPLETED** - Full unit conversion system implemented
+- **Completed:**
+  - ✅ Global unit preference selector in Footer
+  - ✅ Automatic unit conversion in RecipeIngredients
+  - ✅ User preference persistence in database
+  - ✅ Real-time conversion based on user preference
+- **Files:** `src/app/_components/Footer.tsx`, `src/app/recipes/_components/RecipeIngredients.tsx`, `src/utils/conversions.ts`
 
 #### 4. Recipe Search
 
@@ -441,15 +442,11 @@ All core functionality is implemented:
 - ✅ Recipe preview system
 - ✅ Recipe versioning & diary system
 - ✅ Complete nutrition display system
+- ✅ Unit conversion system
 
 ### 🔄 IN PROGRESS TASKS
 
-#### Unit Conversion UI
-
-- [ ] Add unit toggle to recipe detail pages
-- [ ] Implement global unit preference in header
-- [ ] Connect to existing conversion utilities
-- **Files:** `src/app/recipes/[slug]/page.tsx`, `src/app/_components/Header.tsx`
+_No tasks currently in progress - all high priority features completed!_
 
 ### 🚀 NEXT FEATURES
 

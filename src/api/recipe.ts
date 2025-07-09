@@ -20,6 +20,7 @@ export interface FetchRecipesParams {
   difficulty?: DifficultyLevel;
   sortBy?: 'created_at' | 'name' | 'total_time'; // Add more as needed, e.g., 'rating', 'popularity'
   sortDirection?: 'asc' | 'desc';
+  search?: string; // Search query for name, ingredients, description
 }
 
 /**
@@ -51,6 +52,13 @@ export const fetchRecipes = async (params?: FetchRecipesParams) => {
       query = query.eq('difficulty', params.difficulty);
     }
 
+    // Apply search filter
+    if (params?.search && params.search.trim()) {
+      const searchTerm = params.search.trim();
+      // Search in recipe name and description
+      query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
+    }
+
     // Apply sorting
     const sortBy = params?.sortBy || 'created_at';
     const sortDirection = params?.sortDirection || 'desc';
@@ -60,9 +68,10 @@ export const fetchRecipes = async (params?: FetchRecipesParams) => {
 
     if (error) {
       console.log('error fetching recipes:', error);
-      return error; // Or throw error, depending on desired error handling
+      return error;
     }
 
+    console.log('fetchRecipes: Retrieved data:', data);
     return data;
   } catch (error) {
     console.log('error', error);
