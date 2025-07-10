@@ -14,10 +14,12 @@ interface RecipeFiltersProps {
   initialCategory?: RecipeCategory;
   initialSubcategory?: RecipeSubcategory;
   initialDifficulty?: DifficultyLevel;
+  initialMinRating?: number;
   onFilterChange: (filters: {
     category?: RecipeCategory;
     subcategory?: RecipeSubcategory;
     difficulty?: DifficultyLevel;
+    minRating?: number;
   }) => void;
 }
 
@@ -25,6 +27,7 @@ const RecipeFilters: React.FC<RecipeFiltersProps> = ({
   initialCategory,
   initialSubcategory,
   initialDifficulty,
+  initialMinRating,
   onFilterChange,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<RecipeCategory | undefined>(
@@ -35,6 +38,9 @@ const RecipeFilters: React.FC<RecipeFiltersProps> = ({
   );
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | undefined>(
     initialDifficulty ? String(initialDifficulty) : undefined
+  );
+  const [selectedMinRating, setSelectedMinRating] = useState<string | undefined>(
+    initialMinRating ? String(initialMinRating) : undefined
   );
 
   useEffect(() => {
@@ -54,8 +60,18 @@ const RecipeFilters: React.FC<RecipeFiltersProps> = ({
         selectedDifficulty && selectedDifficulty !== ALL_FILTER_VALUE
           ? (parseInt(selectedDifficulty, 10) as DifficultyLevel)
           : undefined,
+      minRating:
+        selectedMinRating && selectedMinRating !== ALL_FILTER_VALUE
+          ? parseInt(selectedMinRating, 10)
+          : undefined,
     });
-  }, [selectedCategory, selectedSubcategory, selectedDifficulty, onFilterChange]);
+  }, [
+    selectedCategory,
+    selectedSubcategory,
+    selectedDifficulty,
+    selectedMinRating,
+    onFilterChange,
+  ]);
 
   const ALL_FILTER_VALUE = '--all--';
 
@@ -70,6 +86,10 @@ const RecipeFilters: React.FC<RecipeFiltersProps> = ({
 
   const handleDifficultyChange = (value: string) => {
     setSelectedDifficulty(value === ALL_FILTER_VALUE ? undefined : value);
+  };
+
+  const handleMinRatingChange = (value: string) => {
+    setSelectedMinRating(value === ALL_FILTER_VALUE ? undefined : value);
   };
 
   const categoryOptions = [
@@ -94,9 +114,17 @@ const RecipeFilters: React.FC<RecipeFiltersProps> = ({
     { label: 'Level 3', value: '3' },
   ];
 
+  const ratingOptions = [
+    { label: 'Any Rating', value: ALL_FILTER_VALUE },
+    { label: '4+ Stars', value: '4' },
+    { label: '3+ Stars', value: '3' },
+    { label: '2+ Stars', value: '2' },
+    { label: '1+ Stars', value: '1' },
+  ];
+
   return (
     <div className="p-4 mb-6 bg-gray-50 rounded-lg shadow dark:bg-gray-800">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Category Filter */}
         <div>
           <label
@@ -146,6 +174,23 @@ const RecipeFilters: React.FC<RecipeFiltersProps> = ({
             onChange={handleDifficultyChange}
             options={difficultyOptions}
             placeholder="All Difficulties"
+          />
+        </div>
+
+        {/* Rating Filter */}
+        <div>
+          <label
+            htmlFor="rating-filter"
+            className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300"
+          >
+            Minimum Rating
+          </label>
+          <CustomSelect
+            name="rating-filter"
+            value={selectedMinRating || ALL_FILTER_VALUE}
+            onChange={handleMinRatingChange}
+            options={ratingOptions}
+            placeholder="Any Rating"
           />
         </div>
       </div>

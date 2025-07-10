@@ -80,14 +80,16 @@
   - ✅ Real-time conversion based on user preference
 - **Files:** `src/app/_components/Footer.tsx`, `src/app/recipes/_components/RecipeIngredients.tsx`, `src/utils/conversions.ts`
 
-#### 4. Recipe Search
+#### 4. ✅ Recipe Search
 
-- **Status:** Not implemented
-- **Tasks:**
-  - Add search API endpoint
-  - Implement search UI on recipes page
-  - Search by name, ingredients, description
-- **Files:** `src/api/recipe.ts`, `src/app/recipes/page.tsx`
+- **Status:** ✅ **COMPLETED** - Full search functionality implemented
+- **Completed:**
+  - ✅ Added search functionality to fetchRecipes API
+  - ✅ Implemented SearchModal component with debounced search
+  - ✅ Integrated search with header navigation
+  - ✅ Search by name, ingredients, description using PostgreSQL text search
+  - ✅ Added search result highlighting and real-time filtering
+- **Files:** `src/api/recipe.ts`, `src/app/_components/ui/SearchModal.tsx`, `src/app/_components/Header.tsx`
 
 ### 📋 MEDIUM PRIORITY (Future Sprints)
 
@@ -450,11 +452,11 @@ _No tasks currently in progress - all high priority features completed!_
 
 ### 🚀 NEXT FEATURES
 
-#### Recipe Search
+#### ✅ Recipe Search
 
-- [ ] Implement search API endpoint
-- [ ] Add search UI to recipes page
-- [ ] Search by name, ingredients, description
+- [x] Implement search API endpoint
+- [x] Add search UI to recipes page
+- [x] Search by name, ingredients, description
 
 #### Recipe Enhancements
 

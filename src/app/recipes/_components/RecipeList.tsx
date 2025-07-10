@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { fetchRecipes, FetchRecipesParams, fetchUserFavoriteRecipes } from '@/api/recipe';
-import RecipeListItem from './RecipeListItem';
+import RecipeCardWithRating from './RecipeCardWithRating';
 import RecipeFilters from './RecipeFilters';
 import RecipeSort, { SortByOptions, SortDirectionOptions } from './RecipeSort';
 import { Recipe, RecipeCategory, RecipeSubcategory, DifficultyLevel } from '@/types/recipe';
@@ -12,6 +12,7 @@ interface FiltersState {
   category?: RecipeCategory;
   subcategory?: RecipeSubcategory;
   difficulty?: DifficultyLevel;
+  minRating?: number;
 }
 
 interface SortState {
@@ -117,6 +118,7 @@ export default function RecipeList({
           initialCategory={filters.category}
           initialSubcategory={filters.subcategory}
           initialDifficulty={filters.difficulty}
+          initialMinRating={filters.minRating}
           onFilterChange={handleFilterChange}
         />
         <RecipeSort
@@ -142,7 +144,7 @@ export default function RecipeList({
       {!isLoading && !error && recipes.length > 0 && (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
           {recipes.map(recipe => (
-            <RecipeListItem
+            <RecipeCardWithRating
               recipe={recipe}
               key={recipe.id}
               initialIsFavorited={favoriteRecipeIds.has(recipe.id)}

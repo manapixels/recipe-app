@@ -6,14 +6,22 @@ import { Recipe, SUBCATEGORY_OPTIONS } from '@/types/recipe';
 import { BUCKET_URL } from '@/constants';
 import DifficultyDisplay from '@/_components/ui/DifficultyDisplay';
 import { FavoriteButton } from '@/_components/ui/FavoriteButton';
+import RatingDisplay from '@/_components/ui/RatingDisplay';
 import { formatTime } from '@/utils/formatters';
 
 interface RecipeListItemProps {
   recipe: Recipe;
   initialIsFavorited: boolean;
+  avgRating?: number;
+  totalRatings?: number;
 }
 
-export default function RecipeListItem({ recipe, initialIsFavorited }: RecipeListItemProps) {
+export default function RecipeListItem({
+  recipe,
+  initialIsFavorited,
+  avgRating,
+  totalRatings,
+}: RecipeListItemProps) {
   const subcategoryLabel = SUBCATEGORY_OPTIONS[recipe.category]?.find(
     opt => opt.value === recipe.subcategory
   )?.label;
@@ -65,6 +73,19 @@ export default function RecipeListItem({ recipe, initialIsFavorited }: RecipeLis
             <DifficultyDisplay difficulty={recipe.difficulty} iconSize={14} />
           </div>
         </div>
+
+        {/* Rating display */}
+        {avgRating !== undefined && totalRatings !== undefined && (
+          <div className="mt-2">
+            <RatingDisplay
+              rating={avgRating}
+              reviewCount={totalRatings}
+              iconSize={14}
+              className="text-xs"
+              textClassName="text-xs text-gray-500 dark:text-gray-400 ml-1"
+            />
+          </div>
+        )}
       </div>
     </Link>
   );

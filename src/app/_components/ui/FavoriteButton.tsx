@@ -31,7 +31,10 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
     setIsFavorited(initialIsFavorited);
   }, [initialIsFavorited]);
 
-  const handleFavoriteToggle = async () => {
+  const handleFavoriteToggle = async (e: React.MouseEvent) => {
+    // Prevent the parent Link from being triggered
+    e.preventDefault();
+    e.stopPropagation();
     if (!user && !isUserLoading) {
       toast({
         title: 'Authentication Required',

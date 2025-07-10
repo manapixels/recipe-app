@@ -18,9 +18,11 @@ export interface FetchRecipesParams {
   category?: RecipeCategory;
   subcategory?: RecipeSubcategory;
   difficulty?: DifficultyLevel;
-  sortBy?: 'created_at' | 'name' | 'total_time'; // Add more as needed, e.g., 'rating', 'popularity'
+  sortBy?: 'created_at' | 'name' | 'total_time' | 'avg_rating'; // Add more as needed, e.g., 'rating', 'popularity'
   sortDirection?: 'asc' | 'desc';
   search?: string; // Search query for name, ingredients, description
+  includeRatings?: boolean; // Whether to include rating stats
+  minRating?: number; // Minimum rating filter (1-5)
 }
 
 /**
@@ -55,14 +57,52 @@ export const fetchRecipes = async (params?: FetchRecipesParams) => {
     // Apply search filter
     if (params?.search && params.search.trim()) {
       const searchTerm = params.search.trim();
-      // Search in recipe name and description
-      query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
+      console.log('fetchRecipes: Applying search filter for:', searchTerm);
+      // Search in recipe name, description, and convert components to text for searching
+      query = query.or(
+        `name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,components::text.ilike.%${searchTerm}%`
+      );
+    }
+
+    // Handle rating-based filtering and sorting
+    if (params?.minRating || params?.sortBy === 'avg_rating') {
+      // We need to use a subquery approach since we can't join with the view directly
+      // First get the recipe IDs that meet the rating criteria
+      const ratingQuery = supabase.from('recipe_ratings_stats').select('id');
+
+      if (params?.minRating) {
+        ratingQuery.gte('avg_rating', params.minRating);
+      }
+
+      const { data: ratingData, error: ratingError } = await ratingQuery;
+
+      if (ratingError) {
+        console.log('Error fetching rating data:', ratingError);
+        return ratingError;
+      }
+
+      const recipeIds = ratingData?.map(r => r.id) || [];
+      if (recipeIds.length === 0 && params?.minRating) {
+        // No recipes meet the rating criteria
+        return [];
+      }
+
+      if (recipeIds.length > 0) {
+        query = query.in('id', recipeIds);
+      }
     }
 
     // Apply sorting
     const sortBy = params?.sortBy || 'created_at';
     const sortDirection = params?.sortDirection || 'desc';
-    query = query.order(sortBy, { ascending: sortDirection === 'asc' });
+
+    if (sortBy === 'avg_rating') {
+      // For rating sorting, we'll need to fetch and sort client-side
+      // since we can't easily join with the view in the main query
+      query = query.order('created_at', { ascending: false }); // Default sort for now
+    } else {
+      query = query.order(sortBy, { ascending: sortDirection === 'asc' });
+    }
 
     const { data, error } = await query;
 
@@ -71,8 +111,34 @@ export const fetchRecipes = async (params?: FetchRecipesParams) => {
       return error;
     }
 
-    console.log('fetchRecipes: Retrieved data:', data);
-    return data;
+    let finalData = data;
+
+    // Handle client-side sorting for avg_rating
+    if (sortBy === 'avg_rating' && finalData && finalData.length > 0) {
+      // Get rating stats for sorting
+      const { data: ratingStats } = await supabase
+        .from('recipe_ratings_stats')
+        .select('id, avg_rating')
+        .in(
+          'id',
+          finalData.map(r => r.id)
+        );
+
+      if (ratingStats) {
+        // Create a map of recipe id to avg rating
+        const ratingMap = new Map(ratingStats.map(r => [r.id, r.avg_rating || 0]));
+
+        // Sort the data by rating
+        finalData = [...finalData].sort((a, b) => {
+          const aRating = ratingMap.get(a.id) || 0;
+          const bRating = ratingMap.get(b.id) || 0;
+          return sortDirection === 'asc' ? aRating - bRating : bRating - aRating;
+        });
+      }
+    }
+
+    console.log('fetchRecipes: Retrieved data:', finalData);
+    return finalData;
   } catch (error) {
     console.log('error', error);
     return error;

@@ -440,6 +440,88 @@ WHERE
 
 -- ......................
 --
+-- RECIPE RATINGS
+--
+-- ......................
+
+-- Recipe ratings table
+CREATE TABLE public.recipe_ratings (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  recipe_id UUID NOT NULL REFERENCES public.recipes(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+  CONSTRAINT recipe_ratings_unique_user_recipe UNIQUE (recipe_id, user_id)
+);
+
+-- Comments on recipe ratings table
+COMMENT ON TABLE public.recipe_ratings IS 'User ratings for recipes (1-5 stars)';
+COMMENT ON COLUMN public.recipe_ratings.rating IS 'Rating from 1 to 5 stars';
+COMMENT ON CONSTRAINT recipe_ratings_unique_user_recipe ON public.recipe_ratings IS 'Each user can only rate a recipe once';
+
+-- RLS for recipe ratings
+ALTER TABLE recipe_ratings ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can view recipe ratings." ON recipe_ratings FOR SELECT USING (true);
+CREATE POLICY "Users can insert their own ratings." ON recipe_ratings FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update their own ratings." ON recipe_ratings FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete their own ratings." ON recipe_ratings FOR DELETE USING (auth.uid() = user_id);
+
+-- Create indexes for performance
+CREATE INDEX idx_recipe_ratings_recipe_id ON recipe_ratings(recipe_id);
+CREATE INDEX idx_recipe_ratings_user_id ON recipe_ratings(user_id);
+CREATE INDEX idx_recipe_ratings_rating ON recipe_ratings(rating);
+
+-- Function to update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_recipe_ratings_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Trigger to automatically update updated_at
+CREATE TRIGGER update_recipe_ratings_updated_at
+  BEFORE UPDATE ON recipe_ratings
+  FOR EACH ROW
+  EXECUTE FUNCTION update_recipe_ratings_updated_at();
+
+-- View to get recipe ratings with statistics
+CREATE OR REPLACE VIEW recipe_ratings_stats AS
+SELECT 
+  r.id,
+  r.name,
+  r.slug,
+  COALESCE(rs.avg_rating, 0) as avg_rating,
+  COALESCE(rs.total_ratings, 0) as total_ratings,
+  COALESCE(rs.rating_5, 0) as rating_5,
+  COALESCE(rs.rating_4, 0) as rating_4,
+  COALESCE(rs.rating_3, 0) as rating_3,
+  COALESCE(rs.rating_2, 0) as rating_2,
+  COALESCE(rs.rating_1, 0) as rating_1
+FROM recipes r
+LEFT JOIN (
+  SELECT 
+    recipe_id,
+    ROUND(AVG(rating::numeric), 2) as avg_rating,
+    COUNT(*) as total_ratings,
+    COUNT(CASE WHEN rating = 5 THEN 1 END) as rating_5,
+    COUNT(CASE WHEN rating = 4 THEN 1 END) as rating_4,
+    COUNT(CASE WHEN rating = 3 THEN 1 END) as rating_3,
+    COUNT(CASE WHEN rating = 2 THEN 1 END) as rating_2,
+    COUNT(CASE WHEN rating = 1 THEN 1 END) as rating_1
+  FROM recipe_ratings
+  GROUP BY recipe_id
+) rs ON r.id = rs.recipe_id
+WHERE r.status = 'published';
+
+-- Grant access to the view
+GRANT SELECT ON recipe_ratings_stats TO anon, authenticated;
+
+-- ......................
+--
 -- STORAGE
 --
 -- ......................

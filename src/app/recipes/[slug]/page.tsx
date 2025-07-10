@@ -7,7 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FavoriteButton } from '@/_components/ui/FavoriteButton';
 import DifficultyDisplay from '@/_components/ui/DifficultyDisplay';
-import RatingDisplay from '@/_components/ui/RatingDisplay';
+import RecipeRatings, { DetailedRecipeRatings } from '../_components/RecipeRatings';
 import { RecipeVersioningWrapper } from '../_components/versioning/RecipeVersioningWrapper';
 import { NutritionFacts } from '@/_components/ui/NutritionFacts';
 import { estimateRecipeNutrition } from '@/utils/nutritionEstimator';
@@ -103,16 +103,9 @@ export default async function RecipeDetailsPage({
                   ) : (
                     <div className="h-5 w-5 rounded-full mx-1 bg-gray-300 dark:bg-gray-600"></div>
                   )}
-                  {recipe.author?.username ? (
-                    <Link
-                      href={`/profiles/${recipe.author.username}`}
-                      className="font-semibold hover:text-gray-900"
-                    >
-                      {recipe.author?.name || recipe.author?.username}
-                    </Link>
-                  ) : (
-                    <span className="font-semibold">{recipe.author?.name || 'Unknown Author'}</span>
-                  )}
+                  <span className="font-semibold">
+                    {recipe.author?.name || recipe.author?.username}
+                  </span>
                 </Link>
               </div>
             ) : (
@@ -126,12 +119,7 @@ export default async function RecipeDetailsPage({
             {recipe.name}
           </h1>
 
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <RatingDisplay
-              rating={(recipe as any).rating || 4.5}
-              reviewCount={(recipe as any).review_count || 25}
-            />
-          </div>
+          <RecipeRatings recipeId={recipe.id} />
 
           {/* Recipe description */}
           <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none mt-8 mb-8">
@@ -211,6 +199,11 @@ export default async function RecipeDetailsPage({
           </div>
         </div>
       )}
+
+      {/* Recipe Ratings Section */}
+      <div className="mt-16 border-t pt-16">
+        <DetailedRecipeRatings recipeId={recipe.id} />
+      </div>
 
       {/* "You might also like..." Section (Placeholder) */}
       <div className="mt-16">

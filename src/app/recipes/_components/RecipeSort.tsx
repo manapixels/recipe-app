@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { CustomSelect } from '@/_components/ui/Select';
 
-export type SortByOptions = 'created_at' | 'name' | 'total_time';
+export type SortByOptions = 'created_at' | 'name' | 'total_time' | 'avg_rating';
 export type SortDirectionOptions = 'asc' | 'desc';
 
 interface RecipeSortProps {
@@ -16,7 +16,7 @@ const SORT_BY_CHOICES: { value: SortByOptions; label: string }[] = [
   { value: 'created_at', label: 'Date Created' },
   { value: 'name', label: 'Name' },
   { value: 'total_time', label: 'Total Time' },
-  // Future options: 'rating', 'popularity'
+  { value: 'avg_rating', label: 'Rating' },
 ];
 
 const SORT_DIRECTION_CHOICES: { value: SortDirectionOptions; label: string }[] = [
