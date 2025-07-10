@@ -7,6 +7,7 @@ import Spinner from '@/_components/ui/Spinner';
 
 interface EmailFormInput {
   email: string;
+  currentPassword: string;
 }
 
 export default function EmailForm({ currEmail }: { currEmail: string | undefined }) {
@@ -18,17 +19,17 @@ export default function EmailForm({ currEmail }: { currEmail: string | undefined
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<EmailFormInput>({
-    defaultValues: { email: currEmail ?? '' },
+    defaultValues: { email: currEmail ?? '', currentPassword: '' },
   });
   const onSubmit: SubmitHandler<EmailFormInput> = async (data: EmailFormInput) => {
     setLoading(true);
-    await updateEmail(data.email);
+    await updateEmail(data.email, data.currentPassword);
     setLoading(false);
   };
 
   useEffect(() => {
     if (currEmail) {
-      reset({ email: currEmail });
+      reset({ email: currEmail, currentPassword: '' });
     }
   }, [currEmail, reset]);
 
@@ -55,6 +56,22 @@ export default function EmailForm({ currEmail }: { currEmail: string | undefined
       {errors.email?.type === 'pattern' && <p role="alert">Please enter a valid email</p>}
       {errors.email?.type === 'validate' && (
         <p role="alert">Email must be different from the current email</p>
+      )}
+      <div className="mb-4"></div>
+      <input
+        type="password"
+        id="currentPassword"
+        className={`bg-white border border-gray-300 text-gray-900 text-md md:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 ${loading ? 'animate-pulse bg-gray-200' : ''}`}
+        disabled={loading}
+        required
+        placeholder="Current password (required for security)"
+        {...register('currentPassword', {
+          required: true,
+        })}
+        aria-invalid={errors.currentPassword ? 'true' : 'false'}
+      />
+      {errors.currentPassword?.type === 'required' && (
+        <p role="alert">Please enter your current password</p>
       )}
       <div className="mb-2"></div>
       <div className="text-right">

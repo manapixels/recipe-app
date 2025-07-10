@@ -24,7 +24,6 @@ export default function AuthForm() {
   const [state, setState] = useState('login'); // ['login', 'register']
   const [showPassword, setShowPassword] = useState(false);
   const { showModal, setShowModal } = useAuthModal();
-  const [rememberMe, setRememberMe] = useState<boolean>(false);
   const router = useRouter();
   const { toast } = useToast();
   const { setUser } = useUser();
@@ -162,23 +161,6 @@ export default function AuthForm() {
           </div>
           {state === 'login' && (
             <div className="flex flex-col md:flex-row justify-between mb-5">
-              <div className="flex items-center order-2 md:order-1">
-                <div className="flex items-center h-5">
-                  <input
-                    id="remember"
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={e => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-base-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-base-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 accent-base-500"
-                  />
-                </div>
-                <label
-                  htmlFor="remember"
-                  className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                >
-                  Keep me logged in
-                </label>
-              </div>
               <a
                 className="text-sm text-gray-400 font-medium text-foreground mb-4 md:mb-0 md:ml-4 order-1 md:order-2"
                 href="/forgot-password"

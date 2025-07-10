@@ -2,121 +2,17 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Recipe, NutritionalInfo, getAllIngredientsFromComponents } from '@/types/recipe';
+import { Recipe, NutritionalInfo } from '@/types/recipe';
 import RecipeIngredients from '../_components/RecipeIngredients';
-import { estimateRecipeNutrition } from '@/utils/nutritionEstimator';
+import { NutritionFacts } from '@/_components/ui/NutritionFacts';
 
 interface DynamicRecipeContentProps {
   recipe: Recipe;
+  nutritionInfo?: NutritionalInfo | null;
 }
 
-export default function DynamicRecipeContent({ recipe }: DynamicRecipeContentProps) {
+export default function DynamicRecipeContent({ recipe, nutritionInfo }: DynamicRecipeContentProps) {
   const [currentServings, setCurrentServings] = useState(recipe.servings);
-
-  // Calculate nutrition based on current servings
-  const calculateNutritionForServings = (servings: number) => {
-    const creatorNutritionInfo = recipe.nutrition_info;
-
-    // Check if creatorNutritionInfo and its nested properties are valid
-    const isCreatorNutritionInfoValid = (info?: NutritionalInfo): boolean => {
-      if (!info) return false;
-      // Check if any of the nutrient values are present and valid, or if servingSize is present
-      return (
-        !!info.servingSize ||
-        Object.values(info).some(nutrient => {
-          if (typeof nutrient === 'object' && nutrient !== null && 'value' in nutrient) {
-            return typeof (nutrient as { value?: number }).value === 'number';
-          }
-          return false;
-        })
-      );
-    };
-
-    const hasCreatorNutritionInfo = isCreatorNutritionInfoValid(creatorNutritionInfo);
-
-    if (hasCreatorNutritionInfo && creatorNutritionInfo) {
-      // Creator-provided nutrition is per serving, scale it to total for current servings
-      const totalNutrition: NutritionalInfo = {};
-
-      Object.entries(creatorNutritionInfo).forEach(([key, value]) => {
-        if (key === 'servingSize' && typeof value === 'string') {
-          // Keep serving size description unchanged
-          totalNutrition.servingSize = value;
-        } else if (
-          value &&
-          typeof value === 'object' &&
-          'value' in value &&
-          typeof value.value === 'number'
-        ) {
-          // Scale nutrient values by current servings
-          const totalValue = {
-            value: Math.round(value.value * servings * 10) / 10, // Round to 1 decimal place
-            unit: value.unit,
-          };
-          (totalNutrition as any)[key] = totalValue;
-        }
-      });
-
-      return {
-        nutrition: totalNutrition,
-        source: 'Provided by creator',
-      };
-    } else {
-      // Use estimation based on ingredients
-      // First get per-serving nutrition based on original recipe servings
-      const allIngredients = getAllIngredientsFromComponents(recipe.components);
-      const perServingEstimation = estimateRecipeNutrition(allIngredients, recipe.servings);
-
-      if (perServingEstimation && Object.keys(perServingEstimation).length > 0) {
-        // Scale the per-serving nutrition to total nutrition for current servings
-        const totalNutrition: NutritionalInfo = {};
-
-        Object.entries(perServingEstimation).forEach(([key, value]) => {
-          if (key === 'servingSize' && typeof value === 'string') {
-            // Keep serving size description unchanged
-            totalNutrition.servingSize = value;
-          } else if (
-            value &&
-            typeof value === 'object' &&
-            'value' in value &&
-            typeof value.value === 'number'
-          ) {
-            // Scale nutrient values by current servings
-            const totalValue = {
-              value: Math.round(value.value * servings * 10) / 10, // Round to 1 decimal place
-              unit: value.unit,
-            };
-            (totalNutrition as any)[key] = totalValue;
-          }
-        });
-
-        return {
-          nutrition: totalNutrition,
-          source: 'Estimated based on ingredients',
-        };
-      } else {
-        return {
-          nutrition: null,
-          source: 'Not available',
-        };
-      }
-    }
-  };
-
-  const { nutrition: displayNutritionInfo, source: nutritionSourceMessage } =
-    calculateNutritionForServings(currentServings);
-
-  // Helper function to generate display labels for nutrient keys
-  const generateNutrientLabel = (key: string): string => {
-    if (key === 'calories') return 'Calories';
-    if (key === 'recipeServingSize') return 'Recipe Yield / Serving Size';
-    if (key === 'servingSize') return 'Per Serving';
-
-    // Improved camelCase to Title Case
-    let result = key.replace(/([A-Z])/g, ' $1');
-    result = result.charAt(0).toUpperCase() + result.slice(1);
-    return result.includes('Content') ? result.replace('Content', '').trim() : result;
-  };
 
   // Create a modified recipe object with current servings for RecipeIngredients
   const recipeWithCurrentServings = {
@@ -187,60 +83,40 @@ export default function DynamicRecipeContent({ recipe }: DynamicRecipeContentPro
               onServingsChange={setCurrentServings}
             />
           </div>
-          <div>
-            <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
-              Nutritional Content{' '}
-              <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-                (total for {currentServings} serving{currentServings !== 1 ? 's' : ''} •{' '}
-                {nutritionSourceMessage})
-              </span>
-            </h2>
-            {displayNutritionInfo ? (
-              <div className="space-y-2 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow">
-                {displayNutritionInfo.servingSize && (
-                  <div className="flex justify-between py-1 border-b border-gray-200 dark:border-gray-700">
-                    <span className="font-medium">Serving Information:</span>
-                    <span>{displayNutritionInfo.servingSize}</span>
-                  </div>
-                )}
-                {currentServings !== recipe.servings && (
-                  <div className="flex justify-between py-1 border-b border-gray-200 dark:border-gray-700">
-                    <span className="font-medium">Total Servings:</span>
-                    <span>
-                      {currentServings} (adjusted from {recipe.servings})
-                    </span>
-                  </div>
-                )}
-                {/* Filter out servingSize (already displayed) and undefined/null nutrients */}
-                {(Object.keys(displayNutritionInfo!) as Array<keyof NutritionalInfo>)
-                  .filter(key => key !== 'servingSize' && displayNutritionInfo![key] !== undefined)
-                  .map(key => {
-                    const nutrient = displayNutritionInfo![key] as {
-                      value?: number;
-                      unit?: string;
-                    };
-                    if (typeof nutrient?.value === 'number' && nutrient?.unit) {
-                      return (
-                        <div
-                          key={key}
-                          className="flex justify-between py-1 border-b border-gray-200 dark:border-gray-700 last:border-b-0"
-                        >
-                          <span className="font-medium">{generateNutrientLabel(key)}:</span>
-                          <span>
-                            {nutrient.value.toLocaleString()} {nutrient.unit}
-                          </span>
-                        </div>
-                      );
-                    }
-                    return null;
-                  })}
+
+          {/* Nutrition Information */}
+          {nutritionInfo && (
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">
+                Nutrition Information
+              </h3>
+              <div className="grid grid-cols-1 gap-4">
+                <NutritionFacts
+                  nutrition={nutritionInfo}
+                  servings={recipe.servings}
+                  className="max-w-md"
+                />
+                <div className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    About These Nutrition Facts
+                  </h4>
+                  <p>
+                    {recipe.nutrition_info
+                      ? 'Nutritional values provided by the recipe author.'
+                      : 'Nutritional values are automatically estimated based on the ingredients in this recipe.'}
+                  </p>
+                  <p>
+                    Values are calculated per serving based on {recipe.servings} total serving
+                    {recipe.servings !== 1 ? 's' : ''}.
+                  </p>
+                  <p className="text-xs">
+                    * Actual nutritional content may vary based on specific brands, preparation
+                    methods, and portion sizes.
+                  </p>
+                </div>
               </div>
-            ) : (
-              <p className="text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-6 rounded-lg shadow text-center">
-                Nutritional details are not available for this recipe.
-              </p>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </>

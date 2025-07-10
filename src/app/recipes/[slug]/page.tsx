@@ -9,7 +9,6 @@ import { FavoriteButton } from '@/_components/ui/FavoriteButton';
 import DifficultyDisplay from '@/_components/ui/DifficultyDisplay';
 import RecipeRatings, { DetailedRecipeRatings } from '../_components/RecipeRatings';
 import { RecipeVersioningWrapper } from '../_components/versioning/RecipeVersioningWrapper';
-import { NutritionFacts } from '@/_components/ui/NutritionFacts';
 import { estimateRecipeNutrition } from '@/utils/nutritionEstimator';
 import { Clock, Star, Printer, Gauge } from 'lucide-react';
 import { formatTime } from '@/utils/formatters';
@@ -137,16 +136,6 @@ export default async function RecipeDetailsPage({
             <DifficultyDisplay difficulty={recipe.difficulty} iconSize={20} />
           </div>
 
-          {/* Compact Nutrition Display */}
-          {nutritionInfo && (
-            <NutritionFacts
-              nutrition={nutritionInfo}
-              servings={recipe.servings}
-              compact={true}
-              className="mt-2"
-            />
-          )}
-
           <div className="w-1/2"></div>
 
           <div className="flex items-center gap-2">
@@ -164,41 +153,7 @@ export default async function RecipeDetailsPage({
       </div>
 
       {/* Dynamic content that updates with servings changes */}
-      <DynamicRecipeContent recipe={recipe} />
-
-      {/* Nutrition Facts Section */}
-      {nutritionInfo && (
-        <div className="mt-16 border-t pt-16">
-          <h2 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-white">
-            Nutrition Information
-          </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <NutritionFacts
-              nutrition={nutritionInfo}
-              servings={recipe.servings}
-              className="max-w-md"
-            />
-            <div className="text-sm text-gray-600 dark:text-gray-400 space-y-3">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                About These Nutrition Facts
-              </h3>
-              <p>
-                {recipe.nutrition_info
-                  ? 'Nutritional values provided by the recipe author.'
-                  : 'Nutritional values are automatically estimated based on the ingredients in this recipe.'}
-              </p>
-              <p>
-                Values are calculated per serving based on {recipe.servings} total serving
-                {recipe.servings !== 1 ? 's' : ''}.
-              </p>
-              <p className="text-xs">
-                * Actual nutritional content may vary based on specific brands, preparation methods,
-                and portion sizes.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      <DynamicRecipeContent recipe={recipe} nutritionInfo={nutritionInfo} />
 
       {/* Recipe Ratings Section */}
       <div className="mt-16 border-t pt-16">

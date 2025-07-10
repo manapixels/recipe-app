@@ -1,29 +1,34 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { Trash2 } from 'lucide-react';
 
 import { BUCKET_URL } from '@/constants';
 import { Recipe } from '@/types/recipe';
 // import { EditRecipeForm } from './EditRecipeForm'; // Old form
 import { RecipeForm } from '../../_components/RecipeForm'; // Unified form
-import { updateRecipeStatus } from '@/api/recipe';
+import { updateRecipeStatus, deleteRecipe } from '@/api/recipe';
 import { useToast } from '@/_components/ui/Toasts/useToast';
 import { CustomSelect } from '@/_components/ui/Select';
 import DifficultyDisplay from '@/_components/ui/DifficultyDisplay'; // Updated path
 import { formatTime } from '@/utils/formatters'; // Import centralized function
+import ConfirmationModal from '@/_components/ui/ConfirmationModal';
 
 export const RecipeListItemInManageRecipes = ({
   recipe,
   updateRecipeInList,
+  removeRecipeFromList,
   openModal,
   closeModal,
 }: {
   recipe: Recipe;
   updateRecipeInList: (recipe: Recipe) => void;
+  removeRecipeFromList: (recipeId: string) => void;
   openModal: (content: React.ReactNode) => void;
   closeModal: () => void;
 }) => {
   const [status, setStatus] = useState<string>(recipe.status);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { toast } = useToast();
 
   // Helper function to format time
@@ -66,6 +71,39 @@ export const RecipeListItemInManageRecipes = ({
       </div>
     );
     openModal(modalContent);
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      const result = await deleteRecipe(recipe.id);
+
+      if (result && typeof result === 'object' && 'message' in result) {
+        // Error occurred
+        toast({
+          title: 'Error',
+          description: (result as any).message || 'Failed to delete recipe',
+          className: 'bg-red-700 text-white border-transparent',
+        });
+      } else {
+        // Success
+        removeRecipeFromList(recipe.id);
+        toast({
+          title: 'Recipe deleted',
+          description: `"${recipe.name}" has been permanently deleted`,
+          className: 'bg-green-700 text-white border-transparent',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'An unexpected error occurred while deleting the recipe',
+        className: 'bg-red-700 text-white border-transparent',
+      });
+    }
   };
 
   return (
@@ -131,6 +169,14 @@ export const RecipeListItemInManageRecipes = ({
           >
             Edit
           </button>
+          <button
+            onClick={handleDeleteClick}
+            className="text-white bg-red-600 hover:bg-red-700 focus-visible:outline-red-600 dark:bg-red-500 dark:hover:bg-red-600 dark:focus-visible:outline-red-500 font-medium rounded-lg text-sm px-3 py-2.5 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 flex items-center gap-2"
+            title="Delete recipe permanently"
+          >
+            <Trash2 className="w-4 h-4" />
+            Delete
+          </button>
           <CustomSelect
             value={status}
             onChange={value => setStatus(value)}
@@ -142,6 +188,18 @@ export const RecipeListItemInManageRecipes = ({
           />
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Recipe"
+        description={`Are you sure you want to permanently delete "${recipe.name}"? This action cannot be undone and will remove all associated data including ratings, favorites, and version history.`}
+        confirmationText="DELETE"
+        actionButtonText="Delete Recipe"
+        isDestructive={true}
+      />
     </div>
   );
 };

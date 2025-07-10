@@ -73,7 +73,7 @@ export default function RecipeList({
       setRecipes([]);
     }
     setIsLoading(false);
-  }, [filters, sortParams]);
+  }, [filters, sortParams, initialSearch]);
 
   useEffect(() => {
     loadRecipes();

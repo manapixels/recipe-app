@@ -45,6 +45,13 @@ export default function RecipeListInManageRecipes() {
     setArchivedRecipes(currentRecipes => updateList(currentRecipes));
   };
 
+  const removeRecipeFromList = (recipeId: string) => {
+    const removeFromList = (recipes: Recipe[]) => recipes.filter(recipe => recipe.id !== recipeId);
+    setDraftRecipes(currentRecipes => removeFromList(currentRecipes));
+    setPublishedRecipes(currentRecipes => removeFromList(currentRecipes));
+    setArchivedRecipes(currentRecipes => removeFromList(currentRecipes));
+  };
+
   const openModal = (content: React.ReactNode) => {
     setModalContent(content);
     setIsModalOpen(true);
@@ -70,6 +77,7 @@ export default function RecipeListInManageRecipes() {
                 recipe={recipe}
                 key={i}
                 updateRecipeInList={updateRecipeInList}
+                removeRecipeFromList={removeRecipeFromList}
                 openModal={openModal}
                 closeModal={closeModal}
               />
@@ -89,6 +97,7 @@ export default function RecipeListInManageRecipes() {
                 recipe={recipe}
                 key={i}
                 updateRecipeInList={updateRecipeInList}
+                removeRecipeFromList={removeRecipeFromList}
                 openModal={openModal}
                 closeModal={closeModal}
               />
@@ -108,6 +117,7 @@ export default function RecipeListInManageRecipes() {
                 recipe={recipe}
                 key={i}
                 updateRecipeInList={updateRecipeInList}
+                removeRecipeFromList={removeRecipeFromList}
                 openModal={openModal}
                 closeModal={closeModal}
               />

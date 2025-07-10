@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getRecipeRatingStats } from '@/api/rating';
 import RatingDisplay, { RatingStats } from '@/_components/ui/RatingDisplay';
 import RatingInput from '@/_components/ui/RatingInput';
@@ -16,7 +16,7 @@ export default function RecipeRatings({ recipeId, className }: RecipeRatingsProp
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadRatingStats = async () => {
+  const loadRatingStats = useCallback(async () => {
     try {
       setIsLoading(true);
       const result = await getRecipeRatingStats(recipeId);
@@ -35,11 +35,11 @@ export default function RecipeRatings({ recipeId, className }: RecipeRatingsProp
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [recipeId]);
 
   useEffect(() => {
     loadRatingStats();
-  }, [recipeId]);
+  }, [recipeId, loadRatingStats]);
 
   if (isLoading) {
     return (
@@ -102,7 +102,7 @@ export function DetailedRecipeRatings({ recipeId, className }: DetailedRecipeRat
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadRatingStats = async () => {
+  const loadRatingStats = useCallback(async () => {
     try {
       setIsLoading(true);
       const result = await getRecipeRatingStats(recipeId);
@@ -121,11 +121,11 @@ export function DetailedRecipeRatings({ recipeId, className }: DetailedRecipeRat
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [recipeId]);
 
   useEffect(() => {
     loadRatingStats();
-  }, [recipeId]);
+  }, [recipeId, loadRatingStats]);
 
   const handleRatingSubmitted = () => {
     // Refresh rating stats after user submits a rating

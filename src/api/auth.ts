@@ -39,6 +39,10 @@ export const signInWithEmail = async (email, password) => {
     password,
   });
 
+  // Note: Session duration is configured in Supabase dashboard settings
+  // The rememberMe flag could be used for additional client-side behavior
+  // or stored in user preferences for future use
+
   if (error) {
     return {
       message: error.message,
@@ -64,13 +68,41 @@ export const signOut = async () => {
 /**
  * Updates the email of the current user.
  * @param {string} email - The new email to update to.
+ * @param {string} currentPassword - The current password for verification.
  * @returns The updated user data or error.
  */
-export const updateEmail = async (email: string) => {
+export const updateEmail = async (email: string, currentPassword: string) => {
   const supabase = createClient();
+
+  // First verify the current password
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.email) {
+    return {
+      message: 'No authenticated user found',
+      status: 401,
+    };
+  }
+
+  // Verify current password by attempting to sign in
+  const { error: verifyError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: currentPassword,
+  });
+
+  if (verifyError) {
+    return {
+      message: 'Current password is incorrect',
+      status: 401,
+    };
+  }
+
+  // If password verification succeeds, update the email
   const { data, error } = await supabase.auth.updateUser({
     email,
   });
+
   if (error)
     return {
       message: error.message,
@@ -82,18 +114,50 @@ export const updateEmail = async (email: string) => {
 /**
  * Updates the password of the current user.
  * @param {string} password - The new password to update to.
+ * @param {string} currentPassword - The current password for verification.
  * @returns The updated user data or error.
  */
-export const updatePassword = async (password: string) => {
+export const updatePassword = async (password: string, currentPassword: string) => {
   const supabase = createClient();
 
+  // First verify the current password
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.email) {
+    return {
+      message: 'No authenticated user found',
+      status: 401,
+    };
+  }
+
+  // Verify current password by attempting to sign in
+  const { error: verifyError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: currentPassword,
+  });
+
+  if (verifyError) {
+    return {
+      message: 'Current password is incorrect',
+      status: 401,
+    };
+  }
+
+  // If password verification succeeds, update the password
   const { data, error } = await supabase.auth.updateUser({
     password,
   });
+
   if (error)
     return {
       message: error.message,
       status: error.status || 500,
     };
+
+  // Invalidate all other sessions when password changes
+  // Note: The current session remains active, but other sessions are terminated
+  // This is handled automatically by Supabase when password is updated
+
   return data;
 };
